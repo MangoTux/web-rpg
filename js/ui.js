@@ -1,5 +1,5 @@
 function UI() {
-
+ // The object used to handle any specific gameInfo display data
 }
 
 UI.prototype.drawMap = function() {
@@ -60,8 +60,8 @@ UI.prototype.resumeDisplay = function() {
   }
 }
 
-//Print player stats
-UI.prototype.drawStats() {
+// Print player stats
+UI.prototype.drawStats = function() {
   var statList = $('<ul>');
 	statList.append($('<li>').text("Name: " + player.name));
 	statList.append($('<li>').text("Race: " + player.race.charAt(0).toUpperCase() + player.race.slice(1)));
@@ -90,7 +90,8 @@ UI.prototype.drawStats() {
 	$("#gameInfo").html("<h3>Player Stats<br><ul>"+statList.html()+"</ul></h3>");
 }
 // Display the invPage-nth page of the Player's inventory
-UI.prototype.drawInventory(invPage) {
+
+UI.prototype.drawInventory = function(invPage) {
   if (typeof invPage === "undefined") { invPage = 1; }
   var invList = $('<ul>');
 	for (var i = 0; (invPage-1)*5+i<player.inventory.length && i<6; i++)
@@ -111,7 +112,7 @@ UI.prototype.drawInventory(invPage) {
 }
 
 // Display all items the user currently has equippedd
-UI.prototype.drawEquipped() {
+UI.prototype.drawEquipped = function() {
   var equipList = $('<ul>');
   var padding = "        ";
   for (var i = 0; i<player.inventory.length; i++)
@@ -140,10 +141,10 @@ UI.prototype.drawEquipped() {
 	$("#gameInfo").html("<h3>Equipped Items</h3><ul>" + equipList.html());
 }
 
-UI.prototype.drawNpcInfo(npcData) {
+UI.prototype.drawNpcInfo = function(npcData) {
   var statList = $('<ul>');
   for (var i in npcData.list) {
-    statList.append($('<li>').text(i + ": " + npcData[i]);
+    statList.append($('<li>').text(i + ": " + npcData.list[i]));
   }
   var gameText = "Stats<br><ul>"+statList.html()+"</ul>";
   if (npcData.display !== undefined) {
@@ -152,7 +153,13 @@ UI.prototype.drawNpcInfo(npcData) {
   $("#gameInfo").html("<h3>"+gameText+"</h3>");
 }
 
-UI.prototype.drawTombstone() {
+UI.prototype.drawDefaultView = function() {
+  document.getElementById("gameInfo").innerHTML =
+	"<h3><pre>                    _   _\n _ __ _ __   __ _  | |_| |__   ___   _ __ _ __   __ _ \n| '__| '_ \\ / _` | | __| '_ \\ / _ \\ | '__| '_ \\ / _` |\n| |  | |_) | (_| | | |_| | | |  __/ | |  | |_) | (_| |\n|_|  | .__/ \\__, |  \\__|_| |_|\\___| |_|  | .__/ \\__, |\n     |_|    |___/                        |_|    |___/ \n</pre></h3>"
+	$('#gameInfo').hide().fadeIn(2000);
+}
+
+UI.prototype.drawTombstone = function() {
   document.getElementById("gameInfo").innerHTML =
   "<h3><pre>              __.....__\n            .'         ':,\n           /  __  _  __  \\\\\n           | |_)) || |_))||\n           | | \\\\ || |   ||\n           |             ||   _,\n           |             ||.-(_{}\n           |             |/    `\n           |        ,_ (\\;|/)\n         \\\\|       {}_)-,||`\n         \\\\;/,,;;;;;;;,\\\\|//,\n        .;;;;;;;;;;;;;;;;,\n       \\,;;;;;;;;;;;;;;;;,//\n      \\\\;;;;;;;;;;;;;;;;,//\n     ,\\';;;;;;;;;;;;;;;;'\n    ,;;;;;;;;;;;;;;;;''`\n</pre></h3>";
   $('#gameInfo').hide().fadeIn(2000);

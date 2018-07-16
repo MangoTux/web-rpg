@@ -20,7 +20,7 @@ function Player(name)
 	this.wielding = []; // Only wieldable items here
 	this.forcedStop = false;
 	this.gold = 250;
-    this.quests = {}; // List of quests the player has currently started
+  this.quests = {}; // List of quests the player has currently started
 
 	this.load = function(jsonObj)
 	{
@@ -132,28 +132,10 @@ function Player(name)
 	}
 }
 
-function getCritRoll(luck)
-{
-	var numCrits = 0;
-	for (var i=0; i<3; i++)
-	{
-		if (getRandomInt(0, 103-luck) < 2)
-		{
-			numCrits++;
-		}
-	}
-	return numCrits;
-}
-
 // Creates the fight scene
 function Fight(player, npc)
 {
-	// Initialize the HTML layout for the fight
-	document.getElementById("gameInfo").innerHTML = "<div id=\"leftSide\" class='col-xs-4'></div><div id=\"center\" class='col-xs-4'><div id='center-content' class='col-cs-12'></div></div><div id=\"rightSide\" class='col-xs-4'></div>";
-	document.getElementById("leftSide").innerHTML = "<h2 style=\"font-size:250%; text-decoration:underline;\">" + player.name + "</h2><div id=\"leftFight\"></div>";
-	document.getElementById("rightSide").innerHTML = "<h2 style=\"font-size:250%; text-decoration:underline;\">" + npc.name_mod + "</h2><div id=\"rightFight\"></div>";
-	document.getElementById("leftFight").innerHTML = "<h4>"+player.currentHP+"/"+player.maxHP+"</h4>";
-	document.getElementById("rightFight").innerHTML = "<h4>"+npc.currentHP+"/"+npc.maxHP+"</h4>";
+
 	//ASCII here
 	// TODO animate damage values and 'crit' marker
 	Terminal.promptActive = false;

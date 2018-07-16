@@ -311,12 +311,12 @@ allNpcs = {
 		 defense:-2},
 		"Simpleton":
 		{description:"A test NPC",
-		damageRoll:4, // A number from 1-N will be rolled
-	  damageModifier:0, // This value is added to the damage Roll
+		damageRollMax:2, // A number from 1-M will be rolled
+		damageRollQty:2, // The above number will be rolled Q times.
+	  damageModifier:1, // This value is added to the damage Roll
+		gold:0,
 	  baseXP:0,
 	  defense:0, // Reduces incoming damage by this amount (Minimum damage applied should be 1)
-		accuracy:0, // Increases the chance to hit by [some amount correlating to the stat]
-		evasion:0, // Increases chance to miss by [some amount correlating to the stat]
 	  luck:0} // Increases the chance of a critical hit
 	};
 //Overlap of npcs is intended.
@@ -550,7 +550,7 @@ function getName()
     var baseName;
 
 		if (debug) {
-			baseName = npcs.debug["Simpleton"];
+			baseName = randomChoice(npcs.debug);
 		}
     else if (map.getTile(player.X, player.Y).type=="W")
     {
@@ -587,13 +587,18 @@ function Npc()
 	this.name = "";
   this.name_mod = "%";
 	this.level = 0;
-	this.maxHP = 0;
-	this.luck = 0;
-  this.aggression = 0;
-	this.baseDamageRoll = 1;
-	this.baseDamageModifier = 0;
-	this.defense = 0;
-	this.currentHP = 0;
+	this.combat_stats = {
+		maxHP: 0,
+		luck: 0,
+		aggression: 0,
+		damageRollMax: 1,
+		damageRollQty: 1,
+		damageModifier: 0,
+		defense: 0,
+		currentHP: 0,
+		attackSpeed: 1,
+	}
+	this.inventory = [];
 	this.gold = 0;
 
 	// Creates the npc based on player info
@@ -604,7 +609,7 @@ function Npc()
 		var distance = Math.abs(player.X + player.Y);
 
     this.level = player.level;
-    if (distance > 60)
+    if (distance > 60) // Make encounters more difficult the further the Player strays
     {
       this.level += getRandomInt(-Math.sqrt(distance)/2, Math.sqrt(distance));
     }
@@ -614,40 +619,39 @@ function Npc()
 			this.level = 100;
 		if (this.level < 1)
 			this.level = 1;
-
 		this.gold = Math.floor(allNpcs[this.name].gold*Math.sqrt(this.level)/2);
 
-		this.experience = Math.floor(allNpcs[this.name].baseXP*Math.sqrt(this.level)); // TODO scale
-		this.maxHP = 30 + Math.floor(this.level*Math.sqrt(this.level+1)-getRandomInt(0, this.level+1));
-		this.currentHP = this.maxHP;
-
-		this.luck = getRandomInt(1, this.level+1);
-		//TODO improve calculations
-		this.baseDamage = Math.floor(allNpcs[this.name].damage+this.level*Math.sqrt(getRandomInt(0, this.level)));
-
-		this.defense = Math.floor(allNpcs[this.name].defense+Math.sqrt(getRandomInt(0, this.level))); // TODO scale
+		this.experience = allNpcs[this.name].baseXP
+		this.combat_stats.maxHP = 30 + Math.floor(this.level*Math.sqrt(this.level+1)-getRandomInt(0, this.level+1));
+		this.combat_stats.damageRollMax = allNpcs[this.name].damageRollMax;
+		this.combat_stats.damageRollQty = allNpcs[this.name].damageRollQty;
+		this.combat_stats.damageModifier = allNpcs[this.name].damageModifier;
+		this.combat_stats.attackSpeed = allNpcs[this.name].attackSpeed;
+		this.combat_stats.luck = getRandomInt(1, this.level+1);
+		this.combat_stats.defense = allNpcs[this.name].defense
 
     if (getRandomInt(0, 100)<5)
     {
       var mod = randomChoice(specialModifiers);
-      this.luck = Math.floor(this.luck*mod.luckMod);
+      this.combat_stats.luck = Math.floor(this.combat_stats.luck*mod.luckMod);
 
-      this.baseDamage = Math.floor(this.baseDamage*mod.damageModifier);
-      this.defense = Math.floor(this.defense*mod.defenseMod);
-      this.maxHP = Math.floor(this.maxHP*mod.hpMod);
-      this.experience = Math.floor(this.experience*mod.rewardMod);
-      this.gold = Math.floor(this.gold*mod.rewardMod);
-      this.currentHP = this.maxHP;
-      this.name_mod = mod.nameMod.replace("%", this.name);
+      this.combat_stats.baseDamage = Math.floor(this.combat_stats.baseDamage*mod.damageModifier);
+      this.combat_stats.defense = Math.floor(this.combat_stats.defense*mod.defenseModifier);
+      this.combat_stats.maxHP = Math.floor(this.combat_stats.maxHP*mod.hpModifier);
+      this.experience = Math.floor(this.experience*mod.rewardModifier);
+      this.gold = Math.floor(this.gold*mod.rewardModifier);
+      this.name_mod = mod.nameModifier.replace("%", this.name);
+			this.combat_stats.attackSpeed = this.combat_stats.attackSpeed*mod.attackSpeed;
     }
     else
     {
       this.name_mod = this.name;
     }
+		this.combat_stats.currentHP = this.combat_stats.maxHP;
 
     if (!isRandomEncounter) {
       this.name_mod = new MName().New() + " the " + this.name_mod; // Humanize questable NPCs
-      this.quest = getQuest();
+      // this.quest = getQuest();
     }
 	};
 }
