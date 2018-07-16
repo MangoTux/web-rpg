@@ -542,12 +542,12 @@ var MName = function()
 	this.chainLen = 2;
 	this.mcd = new Mdict()
 	var s;
-	for (p in nameList)
+	for (p in namingTemplate)
 	{
-		s = "  " + nameList[p];
-		for (var i = 0; i<nameList[p].length; i++)
+		s = "  " + namingTemplate[p];
+		for (var i = 0; i<namingTemplate[p].length; i++)
 			this.mcd.addKey(s.substring(i, i+this.chainLen), s.charAt(i+this.chainLen));
-		this.mcd.addKey(s.substring(nameList[p].length, nameList[p].length+this.chainLen), "\n");
+		this.mcd.addKey(s.substring(namingTemplate[p].length, namingTemplate[p].length+this.chainLen), "\n");
 	}
 
 	this.New = function()
@@ -601,7 +601,7 @@ var Item = function()
 {
 	var isWeapon = (Math.random() > .5);
 	var itemModList = []; // List of possible names for the item modifier
-	var itemNameList = []; // List of possible items
+	var itemnamingTemplate = []; // List of possible items
 	var referenceList; // List to use for item pool
 
 	if (!(typeof player === "undefined"))
@@ -626,11 +626,11 @@ var Item = function()
 		{
 			if ((referenceList[p].type == types.wield && isWeapon) || (referenceList[p].type != types.wield && !isWeapon))
 			{
-				itemNameList.push(p);
+				itemnamingTemplate.push(p);
 			}
 		}
 		var nameMod = randomChoice(itemModList);
-		var itemType = randomChoice(itemNameList);
+		var itemType = randomChoice(itemnamingTemplate);
 		var mname = new MName();
 
 		this.name = nameMod + ' ' + itemType;

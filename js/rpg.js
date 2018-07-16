@@ -7,17 +7,18 @@ function randomChoice(items)
 	return items[getRandomInt(0, items.length-1)];
 }
 
+var ui;
 currentDisplay = "TITLE"; //TITLE, MAP, STATS, SHOP, INVENTORY
-$(document).ready(function() 
+$(document).ready(function()
 {
 	Terminal.init();
 	Terminal.promptActive = false;
-	
-	$('#game').bind('cli-load', function(e) 
+	ui = new UI();
+	$('#game').bind('cli-load', function(e)
 	{
-		$('#game').one('cli-ready', function (e) 
+		$('#game').one('cli-ready', function (e)
 		{});
-	
+
 		Terminal.runCommand('start');
 	});
 });
