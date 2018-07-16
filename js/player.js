@@ -1,81 +1,11 @@
-//Special input cases
-specialCase =
-{
-	currentCase: 0,
-	
-	start:1,
-	
-	playerName:2,
-	playerRace:2.1,
-	playerClass:2.2,
-	
-	normal:3,
-	goLeft:4,
-	goRight:5,
-	goDown:6,
-	shop:7,
-	
-	fight:8,
-	dead:9,
-};
-
-//Possible races and race stats
-races =
-{
-    human: {
-        damage: 6,
-        defense: 1,
-        health: 30
-    },
-    elf: {
-        damage: 5,
-        defense: 1,
-        health: 40
-    },
-    dwarf: {
-        damage: 4,
-        defense: 2,
-        health: 50
-    },
-    goblin: {
-        damage: 5,
-        defense: 0,
-        health: 45
-    }
-};
-//Possible classes and class stats
-classes =
-{
-    warrior: {
-        damage: 2,
-        defense: 1,
-        health: 5
-    },
-    ranger: {
-        damage: 1,
-        defenese: 2,
-        health: 4
-    },
-    mage: {
-        damage: 1,
-        defense: 1,
-        health: 5
-    },
-    monk: {
-        damage: 1,
-        defense: 2,
-        health: 5
-    }
-};
-
 //Player object
 function Player(name)
 {
-	//Info 
+	//Info
 	this.name = name;
 	this.race = ""; //Human, Elf, Dwarf, Goblin
 	this.playerClass = ""; //Warrior, Ranger, Mage, Monk
-	
+
 	this.level = 1;
 	this.experience = 0;
 	this.baseDamage = 5; //TODO
@@ -91,7 +21,7 @@ function Player(name)
 	this.forcedStop = false;
 	this.gold = 250;
     this.quests = {}; // List of quests the player has currently started
-    
+
 	this.load = function(jsonObj)
 	{
 		this.name = jsonObj.name;
@@ -111,7 +41,7 @@ function Player(name)
 		this.inventory = jsonObj.inventory;
 		this.wielding = jsonObj.wielding;
 	};
-	
+
 	this.move = function(h, v)
 	{
         var moveable = map.canMove(this.X + h, this.Y + v);
@@ -137,15 +67,16 @@ function Player(name)
 			npc.createNpc(true);
 			Terminal.print("Oh no! You ran into a level " + npc.level + " " + npc.name_mod + "!");
 			Terminal.print("What will you do? [Fight/Inspect/Run]");
-			specialCase.currentCase = specialCase.fight;
+			gameState.currentCase = gameState.fight;
             player.forcedStop = true;
 		}
 		if (currentDisplay == "MAP") // Update the map while the user has it displayed
 		{
 			map.drawMap();
 		}
+		UI.handleMovement(currentDisplay);
 	};
-	
+
 	//Performs all functions related to leveling up
 	this.gainLevel = function()
 	{
@@ -157,7 +88,7 @@ function Player(name)
 		this.maxHP += classes[this.playerClass].health;
         this.gold += 50*this.level;
 	}
-	
+
 	// Returns the amount of total exp needed to get to the next level
 	this.getExpNeeded = function()
 	{
@@ -168,32 +99,32 @@ function Player(name)
 		}
 		return exp-this.experience;
 	};
-	
+
 	this.gainExperience = function(exp)
 	{
 		this.experience += exp;
 		Terminal.print("You gained " + exp + " experience.");
 		var expNeeded = this.getExpNeeded();
 		while (expNeeded < 0)
-		{ 
+		{
 			this.gainLevel();
 			Terminal.print("Congratulations! You're now level " + this.level);
             expNeeded = this.getExpNeeded();
 		}
 	}
-	
+
 	this.getInventoryDamage = function()
 	{
 		var invDamage = 0;
     	for (var I in this.wielding) { if (this.wielding[I].type != types.healing) invDamage += this.wielding[I].damage; } return invDamage;
 	}
-	
+
 	this.getInventoryDefense = function()
 	{
 		var invDefense = 0;
 		for (var I in this.wielding) { if (this.wielding[I].type != types.healing) invDefense += this.wielding[I].defense; } return invDefense;
 	}
-	
+
 	this.getInventoryLuck = function()
 	{
 		var invLuck = 0;
@@ -230,17 +161,17 @@ function Fight(player, npc)
 	var turn = 0;
 	var critString = "";
 	var numCrits;
-	
+
 	var critValues = [1, 1.5, 2, 3];
 	var critStrings = ["", "Critical Hit!", "Double Crit!", "Triple Crit!"];
-	
+
 	//Get total player stats at beginning of fight
 	var playerDamage = player.baseDamage + player.getInventoryDamage();
 	var playerDefense = player.baseDefense + player.getInventoryDefense();
 	var playerLuck = player.luck + player.getInventoryLuck();
-	
+
     //trimDown
-	var interval = window.setInterval($.proxy(function fightStep() 
+	var interval = window.setInterval($.proxy(function fightStep()
 	{
 		if (turn % 2 == 0)
 		{
@@ -249,14 +180,14 @@ function Fight(player, npc)
 				damage = playerDamage - npc.defense;
 				critString = "";
 				numCrits = getCritRoll(playerLuck);
-				
+
 				damage *= critValues[numCrits];
 				critString = "<b style=\"color:red;\">"+critStrings[numCrits]+"</b>";
 				damage = Math.floor(damage);
 				//Balance caps
 				if (damage < 1) damage = 1;
-				
-				if (getRandomInt(0, 103-npc.luck) < 2) // npc dodges 
+
+				if (getRandomInt(0, 103-npc.luck) < 2) // npc dodges
 				{
 					critString = "<b style=\"color:white;\">Miss!</b>";
 					damage = 0;
@@ -274,7 +205,7 @@ function Fight(player, npc)
 					document.getElementById("rightFight").innerHTML = "<h4>"+npc.currentHP+"/"+npc.maxHP+"</h4>";
 					$('#rightFight').effect( "shake" , { direction: "left" , distance:10, times: 3 }, 500);
 				});
-			} 
+			}
 			else // Player died, unless player possesses healing item
 			{
 				var healed = false;
@@ -302,7 +233,7 @@ function Fight(player, npc)
 					Terminal.print("You died...");
 					Terminal.drawTombstone();
 					Terminal.promptActive = true;
-					specialCase.currentCase = specialCase.dead;
+					gameState.currentCase = gameState.dead;
 				}
 			}
 		}
@@ -311,14 +242,14 @@ function Fight(player, npc)
 			if (npc.currentHP > 0) // While npc can still fight
 			{
 				damage = npc.baseDamage - playerDefense;
-				
+
 				numCrits = getCritRoll(npc.luck);
 				damage *= critValues[numCrits];
 				damage = Math.floor(damage);
 				critString = "<b style=\"color:red;\">"+critStrings[numCrits]+"</b>"
 				//Balance caps
 				if (damage < 1) damage = 1;
-				
+
 				if (getRandomInt(0, 103-playerLuck < 2)) // Player dodges
 				{
 					critString = "<b style=\"color:limegreen;\">Dodged!</b>";
@@ -353,7 +284,7 @@ function onPlayerWin(player, npc)
 {
 	Terminal.resetGameInfo();
 	Terminal.print("You won!");
-	specialCase.currentCase = specialCase.normal;
+	gameState.currentCase = gameState.normal;
 	if (npc.gold > 0)
 	{
 		Terminal.print("You gained " + npc.gold + " gold.");
