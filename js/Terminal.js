@@ -31,7 +31,7 @@ function sanitize(str)
 
 //The terminal shell
 //Contains information such as commands, filters, and processing of commands
-var TerminalShell = 
+var TerminalShell =
 {
 	commands:
 	{
@@ -41,8 +41,7 @@ var TerminalShell =
 		}
 	},
 	filters: [], //What does this mean?!?
-	
-	//What does this mean?
+
 	process: function(terminal, cmd)
 	{
 		try
@@ -57,14 +56,14 @@ var TerminalShell =
 			var cmd_name = cmd_args.shift();
 			cmd_args.unshift(terminal);
 			//Set the player name to user input
-			if (specialCase.currentCase == specialCase.playerName) 
+			if (gameState.currentCase == gameState.playerName)
 			{
 				player.name = cmd.charAt(0).toUpperCase() + cmd.slice(1);
-				specialCase.currentCase = specialCase.playerRace;
+				gameState.currentCase = gameState.playerRace;
 				terminal.print("Okay, " + player.name + ", what is your race? [Human/Elf/Dwarf/Goblin]");
 			}
 			 //Process the player's input, and if correct, advance to class query
-			else if (specialCase.currentCase == specialCase.playerRace)
+			else if (gameState.currentCase == gameState.playerRace)
 			{
 				var race = cmd.toLowerCase();
 				//If the input is in the array
@@ -76,9 +75,9 @@ var TerminalShell =
 					player.defense = races[race].defense;
 					player.maxHP = races[race].health;
 					player.currentHP = player.maxHP;
-					
+
 					terminal.print("Okay, what is your class? [Warrior/Ranger/Mage/Monk]");
-					specialCase.currentCase = specialCase.playerClass;
+					gameState.currentCase = gameState.playerClass;
 				}
 				else //Continue asking until correct input is received
 				{
@@ -86,7 +85,7 @@ var TerminalShell =
 				}
 			}
 			//Process the player's input, and if correct, start the actual gameplay
-			else if (specialCase.currentCase == specialCase.playerClass)
+			else if (gameState.currentCase == gameState.playerClass)
 			{
 				var pclass = cmd.toLowerCase();
 				//If the input is in the pclass array
@@ -100,12 +99,12 @@ var TerminalShell =
 					player.inventory.push(new HealthItem());
 					terminal.print("Welcome! View the help tab to get started, " + player.name + " the " + player.race + " " + player.playerClass + ".");
 					//Set the special case denotion to regular input
-					specialCase.currentCase = specialCase.normal;
+					gameState.currentCase = gameState.normal;
 				}
 			}
 			//If the entered command is in the elements in command
 			else if (this.commands.hasOwnProperty(cmd_name))
-			{	
+			{
 				this.commands[cmd_name].apply(this, cmd_args);
 			}
 			else
@@ -121,6 +120,7 @@ var TerminalShell =
 		{
 			//Something went horribly, horribly wrong
 			terminal.print($('<p>').addClass('error').text('Something happened: ' + e));
+			console.log(e);
 			terminal.setWorking(false);
 		}
 	}
@@ -136,9 +136,9 @@ Terminal=
 	_cursorBlinkTimeout: null,
 	spinnerIndex: 0,
 	_spinnerTimeout: null,
-	
+
 	output: TerminalShell,
-	
+
 	//Configuration for graphic interface
 	config:
 	{
@@ -153,7 +153,7 @@ Terminal=
 		spinnerSpeed: 250,
 		typingSpeed:50
 	},
-	
+
 	//Initializes the terminal object
 	init: function()
 	{
@@ -167,7 +167,7 @@ Terminal=
 				}
 			};
 		}
-		
+
 		$(document)
 			.keypress($.proxy(ifActive(function(e)
 			{
@@ -180,7 +180,7 @@ Terminal=
 				{
 					return; //Otherwise, ignore the input
 				}
-				
+
 				//If the character was legal, add it to the display
 				if (character)
 				{
@@ -198,17 +198,17 @@ Terminal=
 		.bind('keydown', 'home', ifActive(function(e) { e.preventDefault(); Terminal.setPos(0); })) //Sets cursor at beginning of line
 		.bind('keydown', 'end', ifActive(function(e) { e.preventDefault(); Terminal.setPos(Terminal.buffer.length); })) //Sets cursor at end of line
 		.bind('keydown', 'tab', function(e) { e.preventDefault(); }); //No functionality, which is actually good for this.
-		
+
 		//Handles scrolling of window to adjust where everything is placed - FIX THIS
 		$(window).resize(function(e) { $('#game').scrollTop($('#game').attr('scrollHeight')); });
-		
+
 		//Disable working until everything is initialized
 		this.setCursorState(true);
 		this.setWorking(false);
 		$('#prompt').html(this.config.prompt);
-		$('#game').hide().fadeIn('fast', function() { $('#game').triggerHandler('cli-load'); }); 
+		$('#game').hide().fadeIn('fast', function() { $('#game').triggerHandler('cli-load'); });
 	},
-		
+
 	// No cursor stuff is currently working
 	setCursorState: function(state, fromTimeout)
 	{
@@ -235,7 +235,7 @@ Terminal=
 				$('#cursor').css('textDecoration', 'none');
 			}
 		}
-		
+
 		//Schedule next blink
 		if (!fromTimeout && this._cursorBlinkTimeout)
 		{
@@ -246,7 +246,7 @@ Terminal=
 			this.setCursorState(!this.cursorBlinkState, true);
 		}, this), this.config.cursor_blink_time);
 	},
-		
+
 	// Clears the terminal
 	clear: function()
 	{
@@ -255,26 +255,21 @@ Terminal=
 			displayElement.removeChild(displayElement.firstChild);
 		}
 		this.resetGameInfo();
-	}, 
+	},
 	resetGameInfo: function()
 	{
-		document.getElementById("gameInfo").innerHTML = 
-		"<h3><pre>                    _   _\n _ __ _ __   __ _  | |_| |__   ___   _ __ _ __   __ _ \n| '__| '_ \\ / _` | | __| '_ \\ / _ \\ | '__| '_ \\ / _` |\n| |  | |_) | (_| | | |_| | | |  __/ | |  | |_) | (_| |\n|_|  | .__/ \\__, |  \\__|_| |_|\\___| |_|  | .__/ \\__, |\n     |_|    |___/                        |_|    |___/ \n</pre></h3>"
-		$('#gameInfo').hide().fadeIn(2000);
+		ui.drawDefaultView();
 	},
 	drawTombstone: function()
 	{
-	// style=\"display:none;\"
-		document.getElementById("gameInfo").innerHTML =
-		"<h3><pre>              __.....__\n            .'         ':,\n           /  __  _  __  \\\\\n           | |_)) || |_))||\n           | | \\\\ || |   ||\n           |             ||   _,\n           |             ||.-(_{}\n           |             |/    `\n           |        ,_ (\\;|/)\n         \\\\|       {}_)-,||`\n         \\\\;/,,;;;;;;;,\\\\|//,\n        .;;;;;;;;;;;;;;;;,\n       \\,;;;;;;;;;;;;;;;;,//\n      \\\\;;;;;;;;;;;;;;;;,//\n     ,\\';;;;;;;;;;;;;;;;'\n    ,;;;;;;;;;;;;;;;;''`\n</pre></h3>";
-		$('#gameInfo').hide().fadeIn(2000);
+		ui.drawTombstone();
 	},
-	
+
 	//Handles changing the input display to the updated value
 	updateInputDisplay: function()
 	{
 		var left = '', underCursor = ' ', right = '';
-		
+
 		if (this.pos < 0)
 		{
 			this.pos = 0;
@@ -295,15 +290,15 @@ Terminal=
 		{
 			right = this.buffer.substr(this.pos+1, this.buffer.length-this.pos-1);
 		}
-		
+
 		$('#lcommand').text(left);
 		$('#cursor').text(underCursor);
-		
+
 		$('#rcommand').text(right);
 		$('#prompt').text(this.config.prompt);
 		return;
 	},
-	
+
 	//Clears the input buffer - used for hitting 'enter'
 	clearInputBuffer: function()
 	{
@@ -311,7 +306,7 @@ Terminal=
 		this.pos = 0;
 		this.updateInputDisplay();
 	},
-	
+
 	//Adds a character, fixing the text to be correct
 	addCharacter: function(character)
 	{
@@ -322,7 +317,7 @@ Terminal=
 		this.updateInputDisplay();
 		this.setCursorState(true);
 	},
-	
+
 	//Deletes a character and fixes the surrounding text
 	deleteCharacter: function(forward)
 	{
@@ -337,15 +332,15 @@ Terminal=
 		}
 		this.setCursorState(true);
 	},
-	
+
 	//Deletes the entire word - Is it currently being used?
-	deleteWord: function() 
+	deleteWord: function()
 	{
-        if (this.pos > 0) 
+        if (this.pos > 0)
 		{
             var ncp = this.pos;
 			//Iterate through until a space is found
-            while (ncp > 0 && this.buffer.charAt(ncp) !== ' ') 
+            while (ncp > 0 && this.buffer.charAt(ncp) !== ' ')
 			{
                 ncp--;
             }
@@ -358,30 +353,30 @@ Terminal=
         }
         this.setCursorState(true);
     },
-        
+
 	//Moves the cursor based on arrow key values
-    moveCursor: function(val) 
+    moveCursor: function(val)
 	{
         this.setPos(this.pos + val);
     },
-       
+
 	//Sets the position of the cursor
-    setPos: function(pos) 
+    setPos: function(pos)
 	{
-        if ((pos >= 0) && (pos <= this.buffer.length)) 
+        if ((pos >= 0) && (pos <= this.buffer.length))
 		{
             this.pos = pos;
             Terminal.updateInputDisplay();
         }
         this.setCursorState(true);
     },
-	
+
 	//Jumps to the bottom of the input display - Should use this for changing anchorpoint
 	jumpToBottom: function()
 	{
 		$('#screen').animate({scrollTop: $('#screen').attr('scrollHeight')}, this.config.scrollSpeed, 'linear');
 	},
-	
+
 	removeLines: function(displayElement)
 	{
 		if (displayElement.find('*').length > 30) // Recursively removes all extra lines - While loop hangs page
@@ -392,7 +387,7 @@ Terminal=
 			});
 		}
 	},
-	
+
 	//Prints the given text to the terminal display
 	print: function(text)
 	{
@@ -433,19 +428,19 @@ Terminal=
 			return false;
 		}
 	},
-	
+
 	//Enables the input to be active
 	setPromptActive: function(active)
 	{
 		this.promptActive = active;
 		$('#inputline').toggle(this.promptActive);
 	},
-	
+
 	//Sets the terminal to allow input/output
 	setWorking: function(working)
 	{
 		if (working && !this._spinnerTimemout)
-		{	
+		{
 			$('#display .command:last-child').add('#bottomline').first().append($('#spinner'));
 			this._spinnerTimeout = window.setInterval($.proxy(function() {
 				if (!$('#spinner').is(':visible'))
@@ -467,13 +462,13 @@ Terminal=
 			$('#game').triggerHandler('cli-ready');
 		}
 	},
-	
+
 	//Manually enters the command and executes it as if the user had typed it
 	runCommand: function(text)
 	{
 		var index = 0;
 		var mine = false;
-		
+
 		//Disables prompt active for the time being
 		this.promptActive = false;
 		//Types the character sequence of text
@@ -489,6 +484,6 @@ Terminal=
 				this.promptActive = true;
 				this.processInputBuffer('');
 			}
-		}, this), this.config.typingSpeed);	
+		}, this), this.config.typingSpeed);
 	}
 }

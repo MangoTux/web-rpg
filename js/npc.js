@@ -87,12 +87,12 @@ allNpcs = {
 		 gold:0,
 		 baseXP:70,
 		 defense:0},
-        "Fish":
-        {description:"Blub.",
-         damage:5,
-         gold:1,
-         baseXP:50,
-         defense:1},
+    "Fish":
+    {description:"Blub.",
+     damage:5,
+     gold:1,
+     baseXP:50,
+     defense:1},
 		"Frog":
 		{description:"Ribbit.",
 		 damage:4,
@@ -309,6 +309,15 @@ allNpcs = {
 		 gold:15,
 		 baseXP:50,
 		 defense:-2},
+		"Simpleton":
+		{description:"A test NPC",
+		damageRoll:4, // A number from 1-N will be rolled
+	  damageModifier:0, // This value is added to the damage Roll
+	  baseXP:0,
+	  defense:0, // Reduces incoming damage by this amount (Minimum damage applied should be 1)
+		accuracy:0, // Increases the chance to hit by [some amount correlating to the stat]
+		evasion:0, // Increases chance to miss by [some amount correlating to the stat]
+	  luck:0} // Increases the chance of a critical hit
 	};
 //Overlap of npcs is intended.
 npcs =
@@ -342,7 +351,7 @@ npcs =
 		"Villager",
 		"Witch",
 		"Wizard",
-		"Zombie" 
+		"Zombie"
         /* ,
         "Monk",
         "Warrior",
@@ -445,93 +454,109 @@ npcs =
 		"Witch",
 		"Wizard",
 		"Zombie"
+	],
+	debug: [
+		"Simpleton"
 	]
 };
 
 specialModifiers = [
-    {
-        nameMod: "Giant %",
-        attackMod:4,
-        defenseMod:2,
-        luckMod:0,
-        hpMod:0.5,
-        rewardMod:6
-    },
-    {
-        nameMod: "Tiny %",
-        attackMod:0.5,
-        defenseMod:0.5,
-        luckMod:0,
-        hpMod:2,
-        rewardMod:0.25
-    },
-    {
-        nameMod: "Puny %",
-        attackMod:0.5,
-        defenseMod:2,
-        luckMod:4,
-        hpMod:1,
-        rewardMod:1
-    },
-    {
-        nameMod: "Trash %",
-        attackMod:0.5,
-        defenseMod:0.6,
-        luckMod:0,
-        hpMod:0.5,
-        rewardMod:0
-    },
-    {
-        nameMod: "Collosal %",
-        attackMod:10,
-        luckMod:0,
-        defenseMod:10,
-        hpMod:2,
-        rewardMod:100
-    },
-    {
-        nameMod: "Quick %",
-        attackMod:1,
-        luckMod:5,
-        defenseMod:2,
-        hpMod:.9,
-        rewardMod:2
-    },
-    {
-        nameMod: "Slow %",
-        attackMod:1,
-        luckMod:0,
-        defenseMod:0.5,
-        hpMod:2,
-        rewardMod:0.25
-    },
-    {
-        nameMod: "King of the %s",
-        attackMod: 4,
-        luckMod: 0,
-        defenseMod: 2,
-        hpMod:5,
-        rewardMod:100
-    },
-    {
-        nameMod: "Queen of the %s",
-        attackMod: 3,
-        luckMod:4,
-        defenseMod:0,
-        hpMod:1,
-        rewardMod:100
-    }
+  {
+    nameModifier: "Giant %",
+    damageModifier:4,
+		attackSpeed:1,
+    defenseModifier:2,
+    luckModifier:0,
+    hpModifier:0.5,
+    rewardModifier:6
+  },
+  {
+    nameModifier: "Tiny %",
+    damageModifier:0.5,
+		attackSpeed:1,
+    defenseModifier:0.5,
+    luckModifier:0,
+    hpModifier:2,
+    rewardModifier:0.25
+  },
+  {
+    nameModifier: "Puny %",
+    damageModifier:0.5,
+		attackSpeed:1,
+    defenseModifier:2,
+    luckModifier:4,
+    hpModifier:1,
+    rewardModifier:1
+  },
+  {
+    nameModifier: "Trash %",
+    damageModifier:0.5,
+		attackSpeed:1,
+    defenseModifier:0.6,
+    luckModifier:0,
+    hpModifier:0.5,
+    rewardModifier:0
+  },
+  {
+    nameModifier: "Collosal %",
+    damageModifier:10,
+		attackSpeed:1,
+    luckModifier:0,
+    defenseModifier:10,
+    hpModifier:2,
+    rewardModifier:100
+  },
+  {
+    nameModifier: "Quick %",
+    damageModifier:.3,
+		attackSpeed:3,
+    luckModifier:5,
+    defenseModifier:2,
+    hpModifier:.9,
+    rewardModifier:2
+  },
+  {
+    nameModifier: "Slow %",
+    damageModifier:1,
+		attackSpeed:0.5,
+    luckModifier:0,
+    defenseModifier:0.5,
+    hpModifier:2,
+    rewardModifier:0.25
+  },
+  {
+    nameModifier: "King of the %s",
+    damageModifier: 4,
+		attackSpeed:2,
+    luckModifier: 0,
+    defenseModifier: 2,
+    hpModifier:5,
+    rewardModifier:100
+  },
+  {
+    nameModifier: "Queen of the %s",
+    damageModifier: 3,
+		attackSpeed:2,
+    luckModifier:4,
+    defenseModifier:0,
+    hpModifier:1,
+    rewardModifier:100
+  }
 ];
 
+var debug = true;
 function getName()
 {
-    // TODO change this based on getClimate()
     var baseName;
-    if (map.getTile(player.X, player.Y).type=="W")
+
+		if (debug) {
+			baseName = npcs.debug["Simpleton"];
+		}
+    else if (map.getTile(player.X, player.Y).type=="W")
     {
         baseName = randomChoice(npcs.waterNpcs);
     }
-    
+
     // Extreme north or south; create arctic npcs
     else if (player.Y > 70 || player.Y < -70)
     {
@@ -557,88 +582,85 @@ function getName()
     return baseName;
 }
 
-function Npc() 
+function Npc()
 {
 	this.name = "";
-    this.name_mod = "%";
+  this.name_mod = "%";
 	this.level = 0;
 	this.maxHP = 0;
 	this.luck = 0;
-    this.aggression = 0;
-	this.baseDamage = 0;
+  this.aggression = 0;
+	this.baseDamageRoll = 1;
+	this.baseDamageModifier = 0;
 	this.defense = 0;
 	this.currentHP = 0;
 	this.gold = 0;
-    
+
 	// Creates the npc based on player info
 	this.createNpc = function(isRandomEncounter)
 	{
-        this.name = getName();
-        
+    this.name = getName();
+
 		var distance = Math.abs(player.X + player.Y);
-        
-        this.level = player.level;
-        if (distance > 60)
-        {
-            this.level += getRandomInt(-Math.sqrt(distance)/2, Math.sqrt(distance));
-        }
-        this.level += getRandomInt(-1-(player.level/5), (player.level/5));
-        this.level = Math.floor(this.level);
+
+    this.level = player.level;
+    if (distance > 60)
+    {
+      this.level += getRandomInt(-Math.sqrt(distance)/2, Math.sqrt(distance));
+    }
+    this.level += getRandomInt(-1-(player.level/5), (player.level/5));
+    this.level = Math.floor(this.level);
 		if (this.level > 100)
 			this.level = 100;
 		if (this.level < 1)
-			this.level = 1;	
-        
+			this.level = 1;
+
 		this.gold = Math.floor(allNpcs[this.name].gold*Math.sqrt(this.level)/2);
-        
+
 		this.experience = Math.floor(allNpcs[this.name].baseXP*Math.sqrt(this.level)); // TODO scale
 		this.maxHP = 30 + Math.floor(this.level*Math.sqrt(this.level+1)-getRandomInt(0, this.level+1));
 		this.currentHP = this.maxHP;
-				
+
 		this.luck = getRandomInt(1, this.level+1);
 		//TODO improve calculations
 		this.baseDamage = Math.floor(allNpcs[this.name].damage+this.level*Math.sqrt(getRandomInt(0, this.level)));
-					
+
 		this.defense = Math.floor(allNpcs[this.name].defense+Math.sqrt(getRandomInt(0, this.level))); // TODO scale
-        
-        if (getRandomInt(0, 100)<5)
-        {
-            var mod = randomChoice(specialModifiers);
-            
-            this.luck = Math.floor(this.luck*mod.luckMod);
-            
-            this.baseDamage = Math.floor(this.baseDamage*mod.attackMod);
-            
-            this.defense = Math.floor(this.defense*mod.defenseMod);
-            
-            this.maxHP = Math.floor(this.maxHP*mod.hpMod);
-            
-            this.experience = Math.floor(this.experience*mod.rewardMod);
-            this.gold = Math.floor(this.gold*mod.rewardMod);
-            this.currentHP = this.maxHP;
-            this.name_mod = mod.nameMod.replace("%", this.name);
-        }
-        else
-        {
-            this.name_mod = this.name;
-        }
-        
-        if (!isRandomEncounter) {
-            this.name_mod = new MName().New() + " the " + this.name_mod; // Humanize questable NPCs
-            this.quest = getQuest();
-        }
+
+    if (getRandomInt(0, 100)<5)
+    {
+      var mod = randomChoice(specialModifiers);
+      this.luck = Math.floor(this.luck*mod.luckMod);
+
+      this.baseDamage = Math.floor(this.baseDamage*mod.damageModifier);
+      this.defense = Math.floor(this.defense*mod.defenseMod);
+      this.maxHP = Math.floor(this.maxHP*mod.hpMod);
+      this.experience = Math.floor(this.experience*mod.rewardMod);
+      this.gold = Math.floor(this.gold*mod.rewardMod);
+      this.currentHP = this.maxHP;
+      this.name_mod = mod.nameMod.replace("%", this.name);
+    }
+    else
+    {
+      this.name_mod = this.name;
+    }
+
+    if (!isRandomEncounter) {
+      this.name_mod = new MName().New() + " the " + this.name_mod; // Humanize questable NPCs
+      this.quest = getQuest();
+    }
 	};
 }
 
 function isNpcOnTile(x, y) {
-    for (var i in npcList) {
-        if (npcList[i].x == x && npcList[i].y == y) {
-            currentNpcIndex = i;
-            return true;
-        }
+  for (var i in npcList) {
+    if (npcList[i].x == x && npcList[i].y == y) {
+      currentNpcIndex = i;
+      return true;
     }
-    currentNpcIndex = null;
-    return false;
+  }
+  currentNpcIndex = null;
+  return false;
 }
 
 var npcList = [];

@@ -1,80 +1,12 @@
-
 /*Names that start the Markov naming*/
-nameList = 
-[
-	'Amaryll',
-	'Ancient', 
-	'Arendall', 
-	'Arenia', 
-	'Asaru', 
-	'Aura', //aura aura aura aura aura aura aura
-    'Aule',
-	'Avian',
-	'Berenthos', 
-	'Bragi', 
-	'Brakas', 
-	'Chelisern', 
-	'Ciel', 
-	'Daggard', 
-	'Erenthar', 
-	'Farzen', 
-    'Feanor',
-	'Fiend', 
-	'Fyre', 
-	'Garoa', 
-	'Gary',
-	'Ghazeer', 
-	'Goelleniar',
-	'Halberd',, 
-	'Hemdallr', 
-	'Ifris', 
-	'Igneous',
-	'Iruzia', 
-	'Javon', 
-	'Javallyne', 
-	'Jormust', 
-	'Kazahn', 
-	'Krennemoor',
-	'Lavallyam', 
-	'Luminous',
-    'Manwe',
-	'Mahuta', 
-	'Meadow', 
-	'Nallander', 
-	'Orian', 
-	'Paladin',
-	'Petreuve', 
-	'Quixor', 
-	'Ragnarok',
-	'Rallian', 
-	'Starchaser', 
-	'Tanfanna', 
-	'Tempest',
-	'Trallos', 
-	'Samarik', 
-	'Sanctuary',
-	'Saria',
-	'Solaris',
-	'Ugori', 
-	'Ulyntos',
-	'Valor',
-	'Vastorn', 
-	'Wind', 
-	'Wynd',
-	'Wrath', 
-	'Xaradyne', 
-    'Yavanna',
-	'Zerefoss', 
-	'Zatall'];
-		  
-types = 
+types =
 {
 	//Descriptors
 	armor:'Armor',
 	weapon:'Weapon',
 	both:'Both',
 	healing:'Healing',
-    tool:'Tool',
+  tool:'Tool',
 	//Equip location
 	head:'Head',
 	hat:'Head',
@@ -85,8 +17,8 @@ types =
 	feet:'Feet',
 	wield:'Wield',
 }
-/*Item modifiers*/		  
-modifier = 
+/*Item modifiers*/
+modifier =
 {
 	'Holy':
 	{
@@ -102,32 +34,32 @@ modifier =
 	{
 		type:types.both,
 		multiplier:3
-	}, 
+	},
 	'Great':
 	{
 		type:types.both,
 		multiplier:4
-	}, 
+	},
 	'Leather':
 	{
 		type:types.armor,
 		multiplier:0.8//player.playerClass=="ranger"?2.5:0.8
-	}, 
+	},
 	'Steel':
 	{
 		type:types.both,
 		multiplier:1.15
-	},  
+	},
 	'Iron':
 	{
 		type:types.both,
 		multiplier:1.1
-	}, 
+	},
 	'Bronze':
 	{
 		type:types.both,
 		multiplier:1.05
-	}, 
+	},
 	'Silk':
 	{
 		type:types.armor,
@@ -137,22 +69,22 @@ modifier =
 	{
 		type:types.weapon,
 		multiplier:2.5
-	}, 
+	},
 	'Fire':
 	{
 		type:types.weapon,
 		multiplier:2
-	}, 
+	},
 	'Freezing':
 	{
 		type:types.weapon,
 		multiplier:2.5
-	}, 
+	},
 	'Ice':
 	{
 		type:types.weapon,
 		multiplier:2
-	}, 
+	},
 	'Stone':
 	{
 		type:types.weapon,
@@ -165,20 +97,20 @@ modifier =
 	}
 };
 /*Items that can be used by anyone*/
-allItems = 
+allItems =
 {   //TODO make some items apply stat modifiers
 	'Bread':
 	{
 		HP:30
-	}, 
+	},
 	'Potato':
 	{
 		HP:15
-	}, 
+	},
 	'Cabbage':
 	{
 		HP:10
-	}, 
+	},
 	'Soup':
 	{
 		HP:40
@@ -193,7 +125,7 @@ toolItems =
     'Boat':
     {
         type:"waterTravel",
-        purpose:"Travel on Water"   
+        purpose:"Travel on Water"
     },
     'Raft':
     {
@@ -202,7 +134,7 @@ toolItems =
     }
 }
 /*All items occupy Head/Neck/Chest/Arms/Legs/(Waist)/Feet/Wield, and person can carry 2 of each*/
-warriorItems = 
+warriorItems =
 {
 	'Sword':
 	{
@@ -210,7 +142,7 @@ warriorItems =
 		damage:5,
 		defense:0,
 		luck:0
-	}, 
+	},
 	'Shield':
 	{
 		type: types.wield,
@@ -295,7 +227,7 @@ warriorItems =
 		defense:1.2,
 		luck:0
 	},
-	'Boots': 
+	'Boots':
 	{
 		type: types.feet,
 		damage:0,
@@ -303,7 +235,7 @@ warriorItems =
 		luck:0
 	}
 };
-rangerItems = 
+rangerItems =
 {
 	'Shortbow':
 	{
@@ -397,7 +329,7 @@ rangerItems =
 		luck:2
 	}
 };
-mageItems = 
+mageItems =
 {
 	'Staff':
 	{
@@ -405,21 +337,21 @@ mageItems =
 		damage:5,
 		defense:0,
 		luck:1
-	}, 
+	},
 	'Wand':
 	{
 		type: types.wield,
 		damage:3,
 		defense:0,
 		luck:1
-	}, 
+	},
 	'Rod':
 	{
 		type: types.wield,
 		damage:4,
 		defense:0,
 		luck:2
-	}, 
+	},
 	'Scepter':
 	{
 		type: types.wield,
@@ -433,14 +365,14 @@ mageItems =
 		damage:5,
 		defense:0,
 		luck:3
-	}, 
+	},
 	'Runes':
 	{
 		type: types.wield,
 		damage:4,
 		defense:0,
 		luck:2
-	}, 
+	},
 	'Wizard Hat':
 	{
 		type: types.hat,
@@ -461,14 +393,14 @@ mageItems =
 		damage:0,
 		defense:-1,
 		luck:5
-	}, 
+	},
 	'Amulet':
 	{
 		type: types.neck,
 		damage:0,
 		defense:1,
 		luck:3
-	}, 
+	},
 	'Wizard Robe':
 	{
 		type: types.chest,
@@ -498,7 +430,7 @@ mageItems =
 		luck:0
 	}
 };
-monkItems = 
+monkItems =
 {
 	'Chakram':
 	{
@@ -513,7 +445,7 @@ monkItems =
 		damage:5,
 		defense:0,
 		luck:1
-	}, 
+	},
 	'Fist':
 	{
 		type: types.wield,
@@ -527,14 +459,14 @@ monkItems =
 		damage:3,
 		defense:1,
 		luck:1
-	},  
+	},
 	'Talisman':
 	{
 		type: types.wield,
 		damage:2,
 		defense:2,
 		luck:3
-	}, 
+	},
 	'Cowl':
 	{
 		type: types.hat,
@@ -548,7 +480,7 @@ monkItems =
 		damage:0,
 		defense:0,
 		luck:3
-	}, 
+	},
 	'Robe':
 	{
 		type: types.chest,
@@ -562,14 +494,14 @@ monkItems =
 		damage:0,
 		defense:3,
 		luck:4
-	}, 
+	},
 	'Ring':
 	{
 		type: types.arms,
 		damage:0,
 		defense:0,
 		luck:3
-	}, 
+	},
 	'Shackle':
 	{
 		type: types.legs,
@@ -592,16 +524,16 @@ monkItems =
 		luck:2
 	}
 };
-	
+
 //Used for generating random names
 var Mdict = function()
 {
 	this.d = [];
-	
+
 	this.getItem = function(key) { if (key in this.d) { return this.d[key]; } }
 	// Adds or appends the given suffix to the prefix in the list
 	this.addKey = function(pref, suff) { if (pref in this.d) { this.d[pref].push(suff); } else { this.d[pref] = [suff]; } }
-	
+
 	this.getSuffix = function(prefix) { return randomChoice(this.d[prefix]); }
 }
 //Used for generating random names
@@ -610,14 +542,14 @@ var MName = function()
 	this.chainLen = 2;
 	this.mcd = new Mdict()
 	var s;
-	for (p in nameList) 
+	for (p in nameList)
 	{
 		s = "  " + nameList[p];
 		for (var i = 0; i<nameList[p].length; i++)
 			this.mcd.addKey(s.substring(i, i+this.chainLen), s.charAt(i+this.chainLen));
 		this.mcd.addKey(s.substring(nameList[p].length, nameList[p].length+this.chainLen), "\n");
 	}
-	
+
 	this.New = function()
 	{
 		var prefix = "  ";
@@ -646,7 +578,7 @@ function randomKey(obj) {
     return ret;
 }
 
-//Is there much more to this? 
+//Is there much more to this?
 var HealthItem = function()
 {
 	this.type = types.healing;
@@ -671,8 +603,8 @@ var Item = function()
 	var itemModList = []; // List of possible names for the item modifier
 	var itemNameList = []; // List of possible items
 	var referenceList; // List to use for item pool
-	
-	if (!(typeof player === 'undefined'))
+
+	if (!(typeof player === "undefined"))
 	{
 		switch (player.playerClass)
 		{
@@ -682,7 +614,7 @@ var Item = function()
 			case "monk": referenceList = monkItems; break;
 			default: referenceList = allItems; break;
 		}
-	
+
 		for (var p in modifier)
 		{
 			if ((modifier[p].type == types.both) || (isWeapon && modifier[p].type == types.weapon) || (!isWeapon && modifier[p].type == types.armor))
@@ -700,9 +632,9 @@ var Item = function()
 		var nameMod = randomChoice(itemModList);
 		var itemType = randomChoice(itemNameList);
 		var mname = new MName();
-	
+
 		this.name = nameMod + ' ' + itemType;
-	
+
 		if (referenceList[itemType].damage < 0)
 			this.damage = Math.floor(referenceList[itemType].damage*modifier[nameMod].multiplier);
 		else
@@ -716,7 +648,7 @@ var Item = function()
 		else
 			this.luck = Math.floor(modifier[nameMod].multiplier*Math.sqrt(referenceList[itemType].luck*player.level));
 		this.type = referenceList[itemType].type;
-		this.cost = Math.floor((getRandomInt(30, 200)+this.luck+this.defense+this.damage)*modifier[nameMod].multiplier); 
+		this.cost = Math.floor((getRandomInt(30, 200)+this.luck+this.defense+this.damage)*modifier[nameMod].multiplier);
         if (getRandomInt(0, 100)<10)
         {
             this.name += ' of ' + mname.New();
