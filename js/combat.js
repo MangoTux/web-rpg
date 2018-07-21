@@ -67,8 +67,23 @@ Combat.prototype.initializeDisplay = function() {
   document.getElementById("rightFight").innerHTML = "<h4>"+this.defender.combat_stats.currentHP+"/"+this.defender.combat_stats.maxHP+"</h4>";
 }
 
-Combat.prototype.animateTurn = function() {
+Combat.prototype.animateAttack = function(damage, critString, side, character) {
+  document.getElementById("center-content").innerHTML = "<br><br>"+critString+"<br><br><b class='combat__damage' style='color:red;'>-" + damage + "</b><br>";
+  $("#center-content").show().effect("puff", 1000, function() {
+    document.getElementById(side + "Fight").innerHTML = "<h4>"+character.combat_stats.currentHP + "/" + character.combat_stats.maxHP + "</h4>";
+    $("#"+side+"Fight").effect("shake", { direction: "left", distance: 10, times: 3}, 500);
+  });
+}
 
+Combat.prototype.animateHealing = function(restored, side, character) {
+  var healingText = "<b class='combat__healing' style='color:limegreen'>Healed!</b>";
+  document.getElementById("center-content").innerHTML = "<br><br>"+healingText+"<br><b class='combat__healing' style='color:green;'>+" + restored + "</b><br>";
+  $("#center-content").show().effect("puff", 1000, function() {
+    document.getElementById(side + "Fight").innerHTML = "<h4>" + character.combat_stats.currentHP + "/" + character.combat_stats.maxHP + "</h4>";
+    $("#" + side + "Fight").effect("shake", { direction: "up", distance: 10, times: 1 }, 500);
+  });
 }
 
 var npcLeft = new Npc(); npcLeft.createNpc(); var npcRight = new Npc(); npcRight.createNpc(); var combat = new Combat(); combat.setUpEncounter(npcLeft, npcRight); combat.initializeDisplay();
+//combat.animateAttack(10, "<b style='color:red'>Double Critical!</b>", "right", npcRight);
+combat.animateHealing(30, "left", npcLeft);
