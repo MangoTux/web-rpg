@@ -314,6 +314,7 @@ allNpcs = {
 		damageRollMax:2, // A number from 1-M will be rolled
 		damageRollQty:2, // The above number will be rolled Q times.
 	  damageModifier:1, // This value is added to the damage Roll
+		attackSpeed:0.5,
 		gold:0,
 	  baseXP:0,
 	  defense:0, // Reduces incoming damage by this amount (Minimum damage applied should be 1)

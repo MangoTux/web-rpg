@@ -34,6 +34,30 @@ function Combat() {
   }
 }
 
+Combat.prototype.combatTurn = function(attacker, defender) {
+  if (attacker.combat_stats.currentHP == 0) {
+    // Check inventory for healing. Health restoration uses an entire turn
+    return;
+  }
+  var numCrits, damage, critString;
+  numCrits = this.getCritRoll(attacker.combat_stats.luck);
+  damage = Math.floor((this.getDamage(attacker)) * this.critValues[numCrits] - defender.combat_stats.defense);
+
+  if (damage < this.minimumDamage) { damage = this.minimumDamage; }
+
+  if (getRandomInt(0, 103-defender.combat_stats.luckModifier) < 2) {
+    critString = "<b class='combat__dodge'>Dodged!</b>";
+    damage = 0;
+  } else if (getRandomInt(0, 100) < 1) {
+    critString = "<b class='combat__miss'>Missed!</b>";
+    damage = 0;
+  } else {
+    critString = "<b class='combat__damage'>"+this.critStrings[numCrits]+"</b>";
+  }
+  defender.combat_stats.currentHP -= damage;
+  if (defender.combat_stats.currentHP < 0) { defender.combat_stats.currentHP = 0; }
+  this.animateAttack(damage, critString, defender);
+}
 // Notes:
 /*
 Possibility for items to increase minimum damage
@@ -41,21 +65,45 @@ Have base damage, factor in inventory
 Run test setup with Simpleton
 */
 Combat.prototype.fight = function() {
-  var numCrits, damage;
-  console.log("Simulating attacker: ");
-  numCrits = this.getCritRoll(this.attacker.combat_stats.luck);
-  damage = this.getDamage(this.attacker);
-  damage *= this.critValues[numCrits];
-  damage -= this.defender.combat_stats.defense;
-  if (damage < this.minimumDamage) { damage = this.minimumDamage; }
-  console.log("Attacker deals " + damage + " damage");
-  console.log("Simulating defender: ");
-  numCrits = this.getCritRoll(this.defender.combat_stats.luck);
-  damage = this.getDamage(this.defender);
-  damage *= this.critValues[numCrits];
-  damage -= this.attacker.combat_stats.defense;
-  if (damage < this.minimumDamage) { damage = this.minimumDamage; }
-  console.log("Defender deals " + damage + " damage");
+  // The attacker shoud reliably go first.
+  this.attacker.combatState = {
+    turn: 0, //this.attacker.combat_stats.attackSpeed,
+    currentAttackThreshold: 0, //Math.floor(this.attacker.combat_stats.attackSpeed),
+    nextAttackThreshold: 0,
+    side: "left"
+  };
+  this.defender.combatState = {
+    turn: 0,
+    currentAttackThreshold: 0,
+    nextAttackThreshold: 0,
+    side: "right"
+  }
+  var combatants = [
+    this.attacker, this.defender
+  ];
+  var index = 0;
+  var hasIncrementedTurn = false;
+  var interval = window.setInterval($.proxy(function combatRound() {
+    // while is used instead of if to skip past 'empty' turns
+    while (combatants[index].combatState.turn < combatants[index].combatState.nextAttackThreshold) {
+      // This line in conjunction with hasIncrementedTurn check is doubling expected attack speeds. TODO
+      combatants[index].combatState.turn += combatants[index].combat_stats.attackSpeed;
+      index = (index+1)%(combatants.length);
+      hasIncrementedTurn = false;
+    }
+    this.combatTurn(combatants[index], combatants[(index+1)%combatants.length]);
+    /* After an attack, increment the requirement for attacks */
+    combatants[index].combatState.nextAttackThreshold++; // FP: 1 SP:
+    if (!hasIncrementedTurn) {
+      combatants[index].combatState.turn += combatants[index].combat_stats.attackSpeed;
+      hasIncrementedTurn = true;
+    }
+
+    // Final victory check: TODO implement healing
+    if (combatants[(index+1)%combatants.length].combat_stats.currentHP == 0) {
+      clearInterval(interval);
+    }
+  }, this), 1650);
 }
 
 Combat.prototype.initializeDisplay = function() {
@@ -67,23 +115,23 @@ Combat.prototype.initializeDisplay = function() {
   document.getElementById("rightFight").innerHTML = "<h4>"+this.defender.combat_stats.currentHP+"/"+this.defender.combat_stats.maxHP+"</h4>";
 }
 
-Combat.prototype.animateAttack = function(damage, critString, side, character) {
-  document.getElementById("center-content").innerHTML = "<br><br>"+critString+"<br><br><b class='combat__damage' style='color:red;'>-" + damage + "</b><br>";
+Combat.prototype.animateAttack = function(damage, critString, character) {
+  document.getElementById("center-content").innerHTML = "<br><br>"+critString+"<br><br><b class='combat__damage'>-" + damage + "</b><br>";
   $("#center-content").show().effect("puff", 1000, function() {
-    document.getElementById(side + "Fight").innerHTML = "<h4>"+character.combat_stats.currentHP + "/" + character.combat_stats.maxHP + "</h4>";
-    $("#"+side+"Fight").effect("shake", { direction: "left", distance: 10, times: 3}, 500);
+    document.getElementById(character.combatState.side + "Fight").innerHTML = "<h4>"+character.combat_stats.currentHP + "/" + character.combat_stats.maxHP + "</h4>";
+    $("#"+character.combatState.side+"Fight").effect("shake", { direction: "left", distance: 10, times: 3}, 500);
   });
 }
 
-Combat.prototype.animateHealing = function(restored, side, character) {
-  var healingText = "<b class='combat__healing' style='color:limegreen'>Healed!</b>";
-  document.getElementById("center-content").innerHTML = "<br><br>"+healingText+"<br><b class='combat__healing' style='color:green;'>+" + restored + "</b><br>";
+Combat.prototype.animateHealing = function(restored, character) {
+  var healingText = "<b class='combat__healing'>Healed!</b>";
+  document.getElementById("center-content").innerHTML = "<br><br>"+healingText+"<br><b class='combat__healing'>+" + restored + "</b><br>";
   $("#center-content").show().effect("puff", 1000, function() {
-    document.getElementById(side + "Fight").innerHTML = "<h4>" + character.combat_stats.currentHP + "/" + character.combat_stats.maxHP + "</h4>";
-    $("#" + side + "Fight").effect("shake", { direction: "up", distance: 10, times: 1 }, 500);
+    document.getElementById(character.combatState.side + "Fight").innerHTML = "<h4>" + character.combat_stats.currentHP + "/" + character.combat_stats.maxHP + "</h4>";
+    $("#" + character.combatState.side + "Fight").effect("shake", { direction: "up", distance: 10, times: 1 }, 500);
   });
 }
 
 var npcLeft = new Npc(); npcLeft.createNpc(); var npcRight = new Npc(); npcRight.createNpc(); var combat = new Combat(); combat.setUpEncounter(npcLeft, npcRight); combat.initializeDisplay();
-//combat.animateAttack(10, "<b style='color:red'>Double Critical!</b>", "right", npcRight);
-combat.animateHealing(30, "left", npcLeft);
+npcLeft.combat_stats.attackSpeed = 1;
+combat.fight();
