@@ -4,308 +4,461 @@ var npc;
 allNpcs = {
 		"Alligator":
 		{description:"Or is it a crocodile?",
-		 damage:12,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:0,
 		 baseXP:300,
 		 defense:2},
 		"Bat":
 		{description:"Not the baseball kind.",
-		 damage:1,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:0,
 		 baseXP:25,
 		 defense:1},
 		"Basilisk":
 		{description:"Don't look at it!",
-		 damage:18,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:0,
 		 baseXP:1000,
 		 defense:2},
 		"Bumblebee":
 		{description:"Just a humble bumblebee.",
-		 damage:4,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:0,
 		 baseXP:50,
 		 defense:2,
 		 defense:-4},
 		"Camel":
 		{description:"Humps Don't Lie",
-		 damage:5,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:0,
 		 baseXP:50,
 		 defense:0},
 		"Chicken":
 		{description:"Why *did* it cross the road?",
-		 damage:4,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:0,
 		 baseXP:50,
 		 defense:0},
 		"Cow":
 		{description:"Moo.",
-		 damage:4,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:0,
 		 baseXP:50,
 		 defense:0},
 		"Coyote":
 		{description:"Looks a little beaten-up and hungry.",
-		 damage:7,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:0,
 		 baseXP:100,
 		 defense:-1},
 		"Crab":
 		{description:"I bet it has a firm handshake.",
-		 damage:6,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:0,
 		 baseXP:150,
 		 defense:6},
 		"Crocodile":
 		{description:"Or is it an alligator?",
-		 damage:12,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:0,
 		 baseXP:300,
 		 defense:2},
 		"Demon":
 		{description:"The often-malevolent beings of lore.",
-		 damage:30,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:100,
 		 baseXP:100,
 		 defense:-5},
 		"Dragon": // Here be dragons.
 		{description:"Here be dragons.",
-		 damage:75,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:0,
 		 baseXP:10000,
 		 defense:50},
 		"Duck":
 		{description:"Quack quack.",
-		 damage:4,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:0,
 		 baseXP:50,
 		 defense:0},
 		"Electric Eel":
 		{description:"Shockingly, these aren't actually eels.",
-		 damage:8,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:0,
 		 baseXP:70,
 		 defense:0},
     "Fish":
     {description:"Blub.",
-     damage:5,
+     damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
      gold:1,
      baseXP:50,
      defense:1},
 		"Frog":
 		{description:"Ribbit.",
-		 damage:4,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:0,
 		 baseXP:50,
 		 defense:1},
 		"Goldfish":
 		{description:"Shiny!",
-		 damage:1,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:1,
 		 baseXP:1,
 		 defense:1},
 		"Golem":
 		{description:"An animated pile o' stuff.",
-		 damage:10,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:0,
 		 baseXP:15000,
 		 defense:100},
 		"Grizzly Bear":
 		{description:"Proof that fuzzy =/= friendly. Don't try to hug it.",
-		 damage:40,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:0,
 		 baseXP:200,
 		 defense:2},
 		"Imp":
 		{description:"Practical jokers just looking for a friend.",
-		 damage:7,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:5,
 		 baseXP:100,
 		 defense:-1},
 		"Kraken":
 		{description:"A gigantic octopus and the bane of sailors.",
-		 damage:4,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:0,
 		 baseXP:50,
 		 defense:1},
 		"Lizard":
 		{description:"Mostly harmless, preferring to spend its time basking in the sun",
-		 damage:4,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:0,
 		 baseXP:50,
 		 defense:1},
 		"Mammoth":
 		{description:"",
-		 damage:4,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:0,
 		 baseXP:50,
 		 defense:1},
 		"Mermaid":
 		{description:"Half human, half fish. Thankfully, the human half is on top.",
-		 damage:4,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:70,
 		 baseXP:50,
 		 defense:1},
 		"Nomad":
 		{description:"I wonder where they'll wander next.",
-		 damage:4,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:5,
 		 baseXP:50,
 		 defense:1},
 		"Penguin":
 		{description:"Formal, Flightless and Flippered.",
-		 damage:5,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:10,
 		 baseXP:50,
 		 defense:1},
 		"Pig":
 		{description:"Oink!",
-		 damage:4,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:0,
 		 baseXP:50,
 		 defense:1},
 		"Pirate":
 		{description:"Pegleg, eyepatch, hook and parrot. Not the other kind.",
-		 damage:8,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:120,
 		 baseXP:100,
 		 defense:-1},
 		"Polar Bear":
 		{description:"The apex predator of the arctic. Don't try to hug it.",
-		 damage:7,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:0,
 		 baseXP:150,
 		 defense:3},
 		"Roadrunner":
 		{description:"Gotta go fast!",
-		 damage:4,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:0,
 		 baseXP:50,
 		 defense:1},
 		"Scorpion":
 		{description:"Mother nature's favorite child.",
-		 damage:6,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:0,
 		 baseXP:50,
 		 defense:-1},
 		"Seagull":
 		{description:"They lived by the bay until people started making fun of them.",
-		 damage:4,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:0,
 		 baseXP:50,
 		 defense:1},
 		"Seal":
 		{description:"Cute and cuddly. Don't even think about fighting it.",
-		 damage:1,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:0,
 		 baseXP:0,
 		 defense:-4},
 		"Shark":
 		{description:"~~~~~^~~~~",
-		 damage:6,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:0,
 		 baseXP:100,
 		 defense:0},
 		"Sheep":
 		{description:"If there were any more, you'd probably be asleep by now.",
-		 damage:4,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:0,
 		 baseXP:50,
 		 defense:1},
 		"Skeleton":
 		{description:"How is it moving if it doesn't have muscles?",
-		 damage:4,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:0,
 		 baseXP:50,
 		 defense:1},
 		"Snake":
 		{description:"Named after the dot-collection game featured on the original Nokia phones.",
-		 damage:4,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:0,
 		 baseXP:50,
 		 defense:1},
 		"Snowman":
 		{description:"Do you want to kill a snowman?",
-		 damage:4,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:0,
 		 baseXP:50,
 		 defense:1},
 		"Spider":
 		{description:"Cute widdle friends!",
-		 damage:4,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:8,
 		 baseXP:88,
 		 defense:1},
 		"Squid":
 		{description:"Super intelligent and a lot of legs.",
-		 damage:4,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:0,
 		 baseXP:50,
 		 defense:1},
 		"Squirrel":
 		{description:"Little rodents that can be big pests.",
-		 damage:3,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:5,
 		 baseXP:50,
 		 defense:1},
 		"Troll":
 		{description:"Ugly, dimwitted, and afraid of sunlight. Who let them use the internet?",
-		 damage:7,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:15,
 		 baseXP:87,
 		 defense:-1},
 		"Turtle":
 		{description:"",
-		 damage:4,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:0,
 		 baseXP:50,
 		 defense:1},
 		"Venus Flytrap":
 		{description:"The opposite of vegetarian",
-		 damage:4,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:0,
 		 baseXP:50,
 		 defense:1},
 		"Villager":
 		{description:"Just a peaceful citizen",
-		 damage:4,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:25,
 		 baseXP:65,
 		 defense:1},
 		"Whale":
 		{description:"AWOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOGGGGGGAAAAAAAA",
-		 damage:4,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:0,
 		 baseXP:50,
 		 defense:12},
 		"Witch":
 		{description:"Double, double, toil and trouble;<br>    Fire burn, and cauldron bubble.",
-		 damage:6,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:60,
 		 baseXP:90,
 		 defense:1},
 		"Wolf":
 		{description:"Hey look, a dog! Hi Doggy!",
-		 damage:4,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:0,
 		 baseXP:60,
 		 defense:1},
 		"Wizard":
 		{description:"A wise, old man with a penchant for sorcery",
-		 damage:7,
+		 damageRollMax:2, // A number from 1-M will be rolled
+     damageRollQty:2, // The above number will be rolled Q times.
+     damageModifier:1, // This value is added to the damage Roll
+     attackSpeed:1,
 		 gold:45,
 		 baseXP:1000,
 		 defense:2},
 		"Yeti":
 		{description:"I think \"abominable\" is a bit harsh...",
-		 damage:7,
+		 damageRollMax:2, // A number from 1-M will be rolled
+		 damageRollQty:2, // The above number will be rolled Q times.
+		 damageModifier:1, // This value is added to the damage Roll
+		 attackSpeed:1,
 		 gold:0,
 		 baseXP:120,
 		 defense:3},
 		"Zombie":
 		{description:"If it only had a brain...",
-		 damage:4,
+		 damageRollMax:2, // A number from 1-M will be rolled
+		 damageRollQty:2, // The above number will be rolled Q times.
+	 	 damageModifier:1, // This value is added to the damage Roll
+	 	 attackSpeed:1,
 		 gold:15,
 		 baseXP:50,
 		 defense:-2},
@@ -314,7 +467,7 @@ allNpcs = {
 		damageRollMax:2, // A number from 1-M will be rolled
 		damageRollQty:2, // The above number will be rolled Q times.
 	  damageModifier:1, // This value is added to the damage Roll
-		attackSpeed:0.5,
+		attackSpeed:1,
 		gold:0,
 	  baseXP:0,
 	  defense:0, // Reduces incoming damage by this amount (Minimum damage applied should be 1)
@@ -510,7 +663,7 @@ specialModifiers = [
   {
     nameModifier: "Quick %",
     damageModifier:.3,
-		attackSpeed:3,
+		attackSpeed:2,
     luckModifier:5,
     defenseModifier:2,
     hpModifier:.9,
@@ -528,7 +681,7 @@ specialModifiers = [
   {
     nameModifier: "King of the %s",
     damageModifier: 4,
-		attackSpeed:2,
+		attackSpeed:1,
     luckModifier: 0,
     defenseModifier: 2,
     hpModifier:5,
@@ -537,7 +690,7 @@ specialModifiers = [
   {
     nameModifier: "Queen of the %s",
     damageModifier: 3,
-		attackSpeed:2,
+		attackSpeed:1,
     luckModifier:4,
     defenseModifier:0,
     hpModifier:1,

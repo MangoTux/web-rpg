@@ -67,14 +67,14 @@ var TerminalShell =
 			{
 				var race = cmd.toLowerCase();
 				//If the input is in the array
-				if (races[race] != undefined)
+				if (playerRaces[race] != undefined)
 				{
 					//Update character information based on selected values
 					player.race = race;
-					player.baseDamage = races[race].damage;
-					player.defense = races[race].defense;
-					player.maxHP = races[race].health;
-					player.currentHP = player.maxHP;
+					player.base_combat_stats.damageModifier = playerRaces[race].damageModifier;
+					player.base_combat_stats.luck = playerRaces[race].damageModifier;
+					player.base_combat_stats.defense = playerRaces[race].defense;
+					player.base_combat_stats.maxHP = playerRaces[race].health;
 
 					terminal.print("Okay, what is your class? [Warrior/Ranger/Mage/Monk]");
 					gameState.currentCase = gameState.playerClass;
@@ -89,14 +89,18 @@ var TerminalShell =
 			{
 				var pclass = cmd.toLowerCase();
 				//If the input is in the pclass array
-				if (classes[pclass] != undefined)
+				if (playerClasses[pclass] != undefined)
 				{
 					//Update character information based on selected values
 					player.playerClass = pclass;
-					player.damage += classes[pclass].damage;
-					player.defense += classes[pclass].defense;
-					player.health += classes[pclass].health;
+					player.base_combat_stats.damageRollMax = playerClasses[pclass].damageRollMax;
+					player.base_combat_stats.damageRollQty = playerClasses[pclass].damageRollQty;
+					player.base_combat_stats.damageModifier += playerClasses[pclass].damageModifier;
+					player.base_combat_stats.attackSpeed = playerClasses[pclass].attackSpeed;
+					player.base_combat_stats.defense += playerClasses[pclass].defense;
+					player.base_combat_stats.maxHP += playerClasses[pclass].health;
 					player.inventory.push(new HealthItem());
+					player.base_combat_stats.currentHP = player.combat_stats.maxHP;
 					terminal.print("Welcome! View the help tab to get started, " + player.name + " the " + player.race + " " + player.playerClass + ".");
 					//Set the special case denotion to regular input
 					gameState.currentCase = gameState.normal;
