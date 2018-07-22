@@ -31,11 +31,27 @@ function Combat() {
   this.setUpEncounter = function(attacker, defender) {
     this.attacker = attacker;
     this.defender = defender;
+
+    this.initializeDisplay();
+    this.fight();
   }
 }
 
 Combat.prototype.combatTurn = function(attacker, defender) {
+  // If the attacker starts a round at zero HP,
+  console.log((attacker == player));
   if (attacker.combat_stats.currentHP == 0) {
+    for (var i in attacker.inventory) {
+      if (attacker.inventory[i].type == types.healing) {
+        var healAmount = (attacker.inventory[i].HP>0)?attacker.inventory[i].HP:attacker.combat_stats.maxHP;
+        attacker.combat_stats.currentHP = Math.max(attacker.combat_stats.maxHP, attacker.combat_stats.currentHP+healAmount);
+        animateHealing(healAmount, attacker);
+        Terminal.print(randomChoice([
+          "On the brink of death, the " + attacker.inventory.splice(i, 1)[0].name + " was consumed and " + attacker.nameMod + " HP was restored."
+        ]));
+        break;
+      }
+    }
     // Check inventory for healing. Health restoration uses an entire turn
     return;
   }
@@ -68,13 +84,11 @@ Combat.prototype.fight = function() {
   // The attacker shoud reliably go first.
   this.attacker.combatState = {
     turn: 0, //this.attacker.combat_stats.attackSpeed,
-    currentAttackThreshold: 0, //Math.floor(this.attacker.combat_stats.attackSpeed),
     nextAttackThreshold: 0,
     side: "left"
   };
   this.defender.combatState = {
     turn: 0,
-    currentAttackThreshold: 0,
     nextAttackThreshold: 0,
     side: "right"
   }
@@ -86,22 +100,26 @@ Combat.prototype.fight = function() {
   var interval = window.setInterval($.proxy(function combatRound() {
     // while is used instead of if to skip past 'empty' turns
     while (combatants[index].combatState.turn < combatants[index].combatState.nextAttackThreshold) {
-      // This line in conjunction with hasIncrementedTurn check is doubling expected attack speeds. TODO
       combatants[index].combatState.turn += combatants[index].combat_stats.attackSpeed;
       index = (index+1)%(combatants.length);
       hasIncrementedTurn = false;
     }
     this.combatTurn(combatants[index], combatants[(index+1)%combatants.length]);
+
+    if (combatants[index].combat_stats.currentHP == 0) {
+      clearInterval(interval);
+      this.processVictory(combatants[(index+1)%combatants.length], combatants[index]);
+    }
     /* After an attack, increment the requirement for attacks */
-    combatants[index].combatState.nextAttackThreshold++; // FP: 1 SP:
+    combatants[index].combatState.nextAttackThreshold++;
     if (!hasIncrementedTurn) {
       combatants[index].combatState.turn += combatants[index].combat_stats.attackSpeed;
       hasIncrementedTurn = true;
     }
 
-    // Final victory check: TODO implement healing
-    if (combatants[(index+1)%combatants.length].combat_stats.currentHP == 0) {
-      clearInterval(interval);
+    if (combatants[index].combatState.turn <= combatants[index].combatState.nextAttackThreshold) {
+      index = (index+1)%combatants.length;
+      hasIncrementedTurn = false;
     }
   }, this), 1650);
 }
@@ -109,8 +127,8 @@ Combat.prototype.fight = function() {
 Combat.prototype.initializeDisplay = function() {
   // Initialize the HTML layout for the fight
   document.getElementById("gameInfo").innerHTML = "<div id=\"leftSide\" class='col-xs-4'></div><div id=\"center\" class='col-xs-4'><div id='center-content' class='col-cs-12'></div></div><div id=\"rightSide\" class='col-xs-4'></div>";
-  document.getElementById("leftSide").innerHTML = "<h2 style=\"font-size:250%; text-decoration:underline;\">" + this.attacker.name_mod + "</h2><div id=\"leftFight\"></div>";
-  document.getElementById("rightSide").innerHTML = "<h2 style=\"font-size:250%; text-decoration:underline;\">" + this.defender.name_mod + "</h2><div id=\"rightFight\"></div>";
+  document.getElementById("leftSide").innerHTML = "<h2 style=\"font-size:250%; text-decoration:underline;\">" + ((this.attacker.name_mod===undefined)?this.attacker.name:this.attacker.name_mod) + "</h2><div id=\"leftFight\"></div>";
+  document.getElementById("rightSide").innerHTML = "<h2 style=\"font-size:250%; text-decoration:underline;\">" + ((this.defender.name_mod===undefined)?this.defender.name:this.defender.name_mod) + "</h2><div id=\"rightFight\"></div>";
   document.getElementById("leftFight").innerHTML = "<h4>"+this.attacker.combat_stats.currentHP+"/"+this.attacker.combat_stats.maxHP+"</h4>";
   document.getElementById("rightFight").innerHTML = "<h4>"+this.defender.combat_stats.currentHP+"/"+this.defender.combat_stats.maxHP+"</h4>";
 }
@@ -132,6 +150,29 @@ Combat.prototype.animateHealing = function(restored, character) {
   });
 }
 
-var npcLeft = new Npc(); npcLeft.createNpc(); var npcRight = new Npc(); npcRight.createNpc(); var combat = new Combat(); combat.setUpEncounter(npcLeft, npcRight); combat.initializeDisplay();
-npcLeft.combat_stats.attackSpeed = 1;
-combat.fight();
+Combat.prototype.processVictory = function(winner, loser) {
+  Terminal.print("Winner: " + winner.nameMod);
+  if (winner == player) { // Time Being: If player is winner
+    Terminal.resetGameInfo();
+    Terminal.print("You won!");
+    gameState.currentCase = gameState.normal;
+    if (loser.gold > 0) {
+      player.gold += loser.gold;
+      Terminal.print("You gained " + loser.gold + " gold.");
+    }
+    for (var i in loser.inventory) {
+      Terminal.print("You found: " + loser.inventory[i].name);
+      player.inventory.push(loser.inventory[i]);
+    }
+    player.gainExperience(loser.experience);
+    updateQuest(loser);
+    if (currentNpcIndex != null) {
+      Terminal.print("After killing " + npcList[currentNpcIndex].npc.name_mod + ", it feels like a weight has been lifted off of your shoulders.");
+      npcList.splice(currentNpcIndex, 1);
+      delete player.quests[currentNpcIndex];
+      currentNpcIndex = null;
+    }
+  } else { // If player is loser
+
+  }
+}

@@ -2,7 +2,7 @@ function UI() {
  // The object used to handle any specific gameInfo display data
 }
 
-UI.prototype.drawMap = function() {
+UI.prototype.drawMap = function(map) {
   var isShop, isNPC;
   var table = $("<table>");
   table.css("line-height", "4px");
@@ -14,7 +14,7 @@ UI.prototype.drawMap = function() {
     {
       if (x == 0 && y == 0)
       {
-        var player_tile = $('<td>').text(this.customTiles.player.symbol).css("color", this.customTiles.player.style);
+        var player_tile = $('<td>').text(map.customTiles.player.symbol).css("color", map.customTiles.player.style);
         row.append(player_tile);
       } else {
         isShop = false;
@@ -23,7 +23,7 @@ UI.prototype.drawMap = function() {
         {
           if (shopList[i].x == x+player.X && shopList[i].y == y+player.Y)
           {
-            row.append($('<td>').text(this.customTiles.shop.symbol).css("color", this.customTiles.shop.style));
+            row.append($('<td>').text(map.customTiles.shop.symbol).css("color", map.customTiles.shop.style));
             isShop = true;
             continue;
           }
@@ -32,14 +32,14 @@ UI.prototype.drawMap = function() {
         {
           if (npcList[i].x == x+player.X && npcList[i].y == y+player.Y)
           {
-            row.append($('<td>').text(this.customTiles.npc.symbol).css("color", this.customTiles.npc.color));
+            row.append($('<td>').text(map.customTiles.npc.symbol).css("color", map.customTiles.npc.color));
             isNPC = true;
             continue;
           }
         }
         if (!isShop && !isNPC)
         {
-          var tile = this.getTile(x+player.X, y+player.Y);
+          var tile = map.getTile(x+player.X, y+player.Y);
           row.append($('<td>').text(tile.symbol).css("color", tile.style));
         }
       }
@@ -53,25 +53,34 @@ UI.prototype.drawMap = function() {
 // Return
 UI.prototype.resumeDisplay = function() {
   switch (currentDisplay) {
-    case "MAP": this.drawMap(); break;
-    case "STATS": this.drawStats(); break;
-    case "INVENTORY": this.drawInventory(); break;
+    case "MAP": this.drawMap(map); break;
+    case "STATS": this.drawStatsWindow(); break;
+    case "INVENTORY": this.drawInventoryWindow(); break;
     default: Terminal.resetGameInfo();
   }
 }
 
 // Print player stats
-UI.prototype.drawStats = function() {
+UI.prototype.drawStatsWindow = function() {
   var statList = $('<ul>');
+  var player_damage = player.combat_stats.damageRollQty+"d"+player.combat_stats.damageRollMax;
+  if (player.combat_stats.damageModifier > 0) {
+    player_damage += "+"+player.combat_stats.damageModifier;
+  } else if (player.combat_stats.damageModifier < 0) {
+    player_damage += "-"+player.combat_stats.damageModifier;
+  }
+  if (player.combat_stats.attackSpeed != 1) {
+    player_damage += " x " + player.combat_stats.attackSpeed;
+  }
 	statList.append($('<li>').text("Name: " + player.name));
 	statList.append($('<li>').text("Race: " + player.race.charAt(0).toUpperCase() + player.race.slice(1)));
 	statList.append($('<li>').text("Class: " + player.playerClass.charAt(0).toUpperCase() + player.playerClass.slice(1)));
 	statList.append($('<li>').text("Level: " + player.level));
 	statList.append($('<li>').text("Exp Needed: " + player.getExpNeeded()));
 	statList.append($('<li>').text("Gold: " + player.gold));
-	statList.append($('<li>').text("Health: " + player.currentHP + "/" + player.maxHP));
-	statList.append($('<li>').text("Damage: " + (player.baseDamage + player.getInventoryDamage())));
-	statList.append($('<li>').text("Defense: " + (player.baseDefense + player.getInventoryDefense())));
+	statList.append($('<li>').text("Health: " + player.combat_stats.currentHP + "/" + player.combat_stats.maxHP));
+	statList.append($('<li>').text("Damage: " + player_damage));
+	statList.append($('<li>').text("Defense: " + (player.combat_stats.defense)));
 	var coord;
 	if (player.Y > 0)
 		coord = player.Y + "S";
@@ -91,7 +100,7 @@ UI.prototype.drawStats = function() {
 }
 // Display the invPage-nth page of the Player's inventory
 
-UI.prototype.drawInventory = function(invPage) {
+UI.prototype.drawInventoryWindow = function(invPage) {
   if (typeof invPage === "undefined") { invPage = 1; }
   var invList = $('<ul>');
 	for (var i = 0; (invPage-1)*5+i<player.inventory.length && i<6; i++)
@@ -112,7 +121,7 @@ UI.prototype.drawInventory = function(invPage) {
 }
 
 // Display all items the user currently has equippedd
-UI.prototype.drawEquipped = function() {
+UI.prototype.drawEquippedWindow = function() {
   var equipList = $('<ul>');
   var padding = "        ";
   for (var i = 0; i<player.inventory.length; i++)
