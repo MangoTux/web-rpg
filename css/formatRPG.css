@@ -18,11 +18,11 @@ a, a:visited
 }
 #cursor
 {
-	font-weight:normal; 
-	background-color:#FFF; 
-	color:#000; 
-	margin:0; 
-	padding:0; 
+	font-weight:normal;
+	background-color:#FFF;
+	color:#000;
+	margin:0;
+	padding:0;
 	position:absolute;
 	text-align:center; width:auto;
     text-decoration:underline;
@@ -37,7 +37,7 @@ a, a:visited
 	border:5px;
 	margin:0px;
 	height:95%;
-	background-color:#000; 
+	background-color:#000;
 	overflow:hidden;
 }
 p
@@ -52,7 +52,7 @@ p
 	font-weight:bold;
 	line-height:0px;
 }
-#rightColContainer 
+#rightColContainer
 {
 	float: right;
 	height:95vh;
@@ -73,7 +73,7 @@ p
 	font-size:150%;
 }
 #gameInfo #center
-{ 
+{
 	text-align:center;
 	font-size:200%;
 }
@@ -84,4 +84,17 @@ p
 #gameInfo #rightSide #rightFight
 {
 	font-size:150%;
+}
+
+.combat__healing {
+	color:limegreen;
+}
+.combat__damage {
+	color:red;
+}
+.combat__dodge {
+	color:limegreen;
+}
+.combat__miss {
+	color:white;
 }
