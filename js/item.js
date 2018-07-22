@@ -139,98 +139,98 @@ warriorItems =
 	'Sword':
 	{
 		type: types.wield,
-		damage:5,
+		damageModifier:5,
 		defense:0,
 		luck:0
 	},
 	'Shield':
 	{
 		type: types.wield,
-		damage:1,
+		damageModifier:1,
 		defense:5,
 		luck:1
 	},
 	'Axe':
 	{
 		type: types.wield,
-		damage:7,
+		damageModifier:7,
 		defense:-2,
 		luck:0
 	},
 	'Polearm':
 	{
 		type: types.wield,
-		damage:5,
+		damageModifier:5,
 		defense:-1,
 		luck:1
 	},
 	'Hammer':
 	{
 		type: types.wield,
-		damage:7,
+		damageModifier:7,
 		defense:-2,
 		luck:0
 	},
 	'Cutlass':
 	{
 		type: types.wield,
-		damage:4,
+		damageModifier:4,
 		defense:0,
 		luck:0
 	},
 	'Rapier':
 	{
 		type: types.wield,
-		damage:4,
+		damageModifier:4,
 		defense:0,
 		luck:0
 	},
 	'Scimitar':
 	{
 		type: types.wield,
-		damage:4,
+		damageModifier:4,
 		defense:0,
 		luck:0
 	},
 	'Helm':
 	{
 		type: types.head,
-		damage:0,
+		damageModifier:0,
 		defense:2,
 		luck:0
 	},
 	'Brooch':
 	{
 		type: types.neck,
-		damage:0,
+		damageModifier:0,
 		defense:1,
 		luck:3
 	},
 	'Breastplate':
 	{
 		type: types.chest,
-		damage:0,
+		damageModifier:0,
 		defense:3,
 		luck:0
 	},
 	'Vambraces':
 	{
 		type: types.arms,
-		damage:0,
+		damageModifier:0,
 		defense:1.2,
 		luck:0
 	},
 	'Greaves':
 	{
 		type: types.legs,
-		damage:0,
+		damageModifier:0,
 		defense:1.2,
 		luck:0
 	},
 	'Boots':
 	{
 		type: types.feet,
-		damage:0,
+		damageModifier:0,
 		defense:1,
 		luck:0
 	}
@@ -240,91 +240,91 @@ rangerItems =
 	'Shortbow':
 	{
 		type: types.wield,
-		damage:5,
+		damageModifier:5,
 		defense:0,
 		luck:2
 	},
 	'Longbow':
 	{
 		type: types.wield,
-		damage:4,
+		damageModifier:4,
 		defense:0,
 		luck:2
 	},
 	'Crossbow':
 	{
 		type: types.wield,
-		damage:6,
+		damageModifier:6,
 		defense:-1,
 		luck:2
 	},
 	'Spear':
 	{
 		type: types.wield,
-		damage:5,
+		damageModifier:5,
 		defense:0,
 		luck:2
 	},
 	'Boomerang':
 	{
 		type: types.wield,
-		damage:4,
+		damageModifier:4,
 		defense:-1,
 		luck:4
 	},
 	'Shuriken':
 	{
 		type: types.wield,
-		damage:4,
+		damageModifier:4,
 		defense:-1,
 		luck:4
 	},
 	'Cowl':
 	{
 		type: types.head,
-		damage:0,
+		damageModifier:0,
 		defense:2,
 		luck:2
 	},
 	'Cloak':
 	{
 		type: types.neck,
-		damage:0,
+		damageModifier:0,
 		defense:1.5,
 		luck:2
 	},
 	'Jerkin':
 	{
 		type: types.chest,
-		damage:0,
+		damageModifier:0,
 		defense:2.5,
 		luck:2
 	},
 	'Tunic':
 	{
 		type: types.chest,
-		damage:0,
+		damageModifier:0,
 		defense:2,
 		luck:2
 	},
 	'Vambraces':
 	{
 		types: types.arms,
-		damage:0,
+		damageModifier:0,
 		defense:1.2,
 		luck:2
 	},
 	'Breeches':
 	{
 		type: types.legs,
-		damage:0,
+		damageModifier:0,
 		defense:1.2,
 		luck:2
 	},
 	'Boots':
 	{
 		type: types.feet,
-		damage:0,
+		damageModifier:0,
 		defense:1,
 		luck:2
 	}
@@ -334,98 +334,98 @@ mageItems =
 	'Staff':
 	{
 		type: types.wield,
-		damage:5,
+		damageModifier:5,
 		defense:0,
 		luck:1
 	},
 	'Wand':
 	{
 		type: types.wield,
-		damage:3,
+		damageModifier:3,
 		defense:0,
 		luck:1
 	},
 	'Rod':
 	{
 		type: types.wield,
-		damage:4,
+		damageModifier:4,
 		defense:0,
 		luck:2
 	},
 	'Scepter':
 	{
 		type: types.wield,
-		damage:5,
+		damageModifier:5,
 		defense:0,
 		luck:1
 	},
 	'Tome':
 	{
 		type: types.wield,
-		damage:5,
+		damageModifier:5,
 		defense:0,
 		luck:3
 	},
 	'Runes':
 	{
 		type: types.wield,
-		damage:4,
+		damageModifier:4,
 		defense:0,
 		luck:2
 	},
 	'Wizard Hat':
 	{
 		type: types.hat,
-		damage:0,
+		damageModifier:0,
 		defense:1,
 		luck:1
 	},
 	'Tiara':
 	{
 		type: types.hat,
-		damage:0,
+		damageModifier:0,
 		defense:-3, // Not a good use of a hat, really.
 		luck:20 // You're a pretty princess!
 	},
 	'Eye':
 	{
 		type: types.neck,
-		damage:0,
+		damageModifier:0,
 		defense:-1,
 		luck:5
 	},
 	'Amulet':
 	{
 		type: types.neck,
-		damage:0,
+		damageModifier:0,
 		defense:1,
 		luck:3
 	},
 	'Wizard Robe':
 	{
 		type: types.chest,
-		damage:0,
+		damageModifier:0,
 		defense:3,
 		luck:0
 	},
 	'Ring':
 	{
 		type: types.arms,
-		damage:0,
+		damageModifier:0,
 		defense:0,
 		luck:5
 	},
 	'Wizard Robe': //Yes, two
 	{
 		type: types.legs,
-		damage:0,
+		damageModifier:0,
 		defense:2,
 		luck:0
 	},
 	'Boots':
 	{
 		type: types.feet,
-		damage:0,
+		damageModifier:0,
 		defense:1,
 		luck:0
 	}
@@ -435,91 +435,91 @@ monkItems =
 	'Chakram':
 	{
 		type: types.wield,
-		damage:5,
+		damageModifier:5,
 		defense:0,
 		luck:1
 	},
 	'Claw':
 	{
 		type: types.wield,
-		damage:5,
+		damageModifier:5,
 		defense:0,
 		luck:1
 	},
 	'Fist':
 	{
 		type: types.wield,
-		damage:4,
+		damageModifier:4,
 		defense:1,
 		luck:0
 	},
 	'Gloves':
 	{
 		type: types.wield,
-		damage:3,
+		damageModifier:3,
 		defense:1,
 		luck:1
 	},
 	'Talisman':
 	{
 		type: types.wield,
-		damage:2,
+		damageModifier:2,
 		defense:2,
 		luck:3
 	},
 	'Cowl':
 	{
 		type: types.hat,
-		damage:0,
+		damageModifier:0,
 		defense:2,
 		luck:1
 	},
 	'Pendant':
 	{
 		type: types.neck,
-		damage:0,
+		damageModifier:0,
 		defense:0,
 		luck:3
 	},
 	'Robe':
 	{
 		type: types.chest,
-		damage:0,
+		damageModifier:0,
 		defense:4,
 		luck:1
 	},
 	'Shroud':
 	{
 		type: types.chest,
-		damage:0,
+		damageModifier:0,
 		defense:3,
 		luck:4
 	},
 	'Ring':
 	{
 		type: types.arms,
-		damage:0,
+		damageModifier:0,
 		defense:0,
 		luck:3
 	},
 	'Shackle':
 	{
 		type: types.legs,
-		damage:0,
+		damageModifier:0,
 		defense:1,
 		luck:2
 	},
 	'Sandals':
 	{
 		types: types.feet,
-		damage:0,
+		damageModifier:0,
 		defense:0,
 		luck:4
 	},
 	'Boots':
 	{
 		type: types.feet,
-		damage:0,
+		damageModifier:0,
 		defense:1,
 		luck:2
 	}
@@ -634,35 +634,35 @@ var Item = function()
 		var mname = new MName();
 
 		this.name = nameMod + ' ' + itemType;
-
-		if (referenceList[itemType].damage < 0)
-			this.damage = Math.floor(referenceList[itemType].damage*modifier[nameMod].multiplier);
+		this.statChanges = {};
+		if (referenceList[itemType].damageModifier < 0)
+			this.statChanges.damageModifier = Math.floor(referenceList[itemType].damageModifier*modifier[nameMod].multiplier);
 		else
-			this.damage = Math.floor(modifier[nameMod].multiplier*Math.sqrt(referenceList[itemType].damage*player.level));
+			this.statChanges.damageModifier = Math.floor(modifier[nameMod].multiplier*Math.sqrt(referenceList[itemType].damageModifier*player.level));
 		if (referenceList[itemType].defense < 0)
-			this.defense = Math.floor(referenceList[itemType].defense*modifier[nameMod].multiplier);
+			this.statChanges.defense = Math.floor(referenceList[itemType].defense*modifier[nameMod].multiplier);
 		else
-			this.defense = Math.floor(modifier[nameMod].multiplier*Math.sqrt(referenceList[itemType].defense*player.level));
+			this.statChanges.defense = Math.floor(modifier[nameMod].multiplier*Math.sqrt(referenceList[itemType].defense*player.level));
 		if (referenceList[itemType].luck < 0)
-			this.luck = Math.floor(referenceList[itemType].luck*modifier[nameMod].multiplier);
+			this.statChanges.luck = Math.floor(referenceList[itemType].luck*modifier[nameMod].multiplier);
 		else
-			this.luck = Math.floor(modifier[nameMod].multiplier*Math.sqrt(referenceList[itemType].luck*player.level));
+			this.statChanges.luck = Math.floor(modifier[nameMod].multiplier*Math.sqrt(referenceList[itemType].luck*player.level));
 		this.type = referenceList[itemType].type;
-		this.cost = Math.floor((getRandomInt(30, 200)+this.luck+this.defense+this.damage)*modifier[nameMod].multiplier);
-        if (getRandomInt(0, 100)<10)
-        {
-            this.name += ' of ' + mname.New();
-            this.damage *= 1.1;
-            this.defense *= 1.1;
-            this.luck *= 1.1;
-        }
+		this.cost = Math.floor((getRandomInt(30, 200)+this.statChanges.luck+this.statChanges.defense+this.statChanges.damageModifier)*modifier[nameMod].multiplier);
+    if (getRandomInt(0, 100)<10)
+    {
+      this.name += ' of ' + mname.New();
+      this.statChanges.damageModifier *= 1.1;
+      this.statChanges.defense *= 1.1;
+      this.statChanges.luck *= 1.1;
+  	}
 	}
 	else
 	{
 		this.name = "Regular Fist";
-		this.damage = 0;
-		this.luck = 0;
-		this.defense = 0;
-		this.type = types.wield;
+		this.statChanges.damageModifier = 0;
+		this.statChanges.luck = 0;
+		this.statChanges.defense = 0;
+		this.statChanges.type = types.wield;
 	}
 }

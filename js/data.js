@@ -19,25 +19,29 @@ gameState = {
 };
 
 //Possible races and race stats
-playerRace =
+playerRaces =
 {
     human: {
-        damage: 6,
+        luck: 4,
+				damageModifier: 2,
         defense: 1,
-        health: 30
+        health: 35
     },
     elf: {
-        damage: 5,
-        defense: 1,
+        luck: 1,
+				damageModifier: 1,
+        defense: 2,
         health: 40
     },
     dwarf: {
-        damage: 4,
+        luck: 0,
+				damageModifier: 2,
         defense: 2,
         health: 50
     },
     goblin: {
-        damage: 5,
+        luck: 3,
+				damageModifier: 3,
         defense: 0,
         health: 45
     }
@@ -47,22 +51,34 @@ playerRace =
 playerClasses =
 {
     warrior: {
-        damage: 2,
-        defense: 1,
-        health: 5
+        damageRollMax: 5,
+				damageRollQty: 1,
+				damageModifier: 3,
+				attackSpeed: 1,
+        defense: 3,
+        health: 6
     },
     ranger: {
-        damage: 1,
-        defenese: 2,
-        health: 4
-    },
-    mage: {
-        damage: 1,
-        defense: 1,
+        damageRollMax: 2,
+				damageRollQty: 2,
+				damageModifier: 1,
+				attackSpeed: 1,
+        defense: 2,
         health: 5
     },
+    mage: {
+        damageRollMax: 2,
+				damageRollQty: 4,
+				damageModifier: 1,
+				attackSpeed: 1,
+        defense: 1,
+        health: 4
+    },
     monk: {
-        damage: 1,
+        damageRollMax: 2,
+				damageRollQty: 1,
+				damageModifier: 0,
+				attackSpeed: 2,
         defense: 2,
         health: 5
     }
@@ -78,13 +94,19 @@ namingTemplate =
 	'Aura', //aura aura aura aura aura aura aura
   'Aule',
 	'Avian',
+	'Bannove',
 	'Berenthos',
+	'Birgol',
 	'Bragi',
 	'Brakas',
 	'Chelisern',
 	'Ciel',
+	'Daenan',
 	'Daggard',
+	'Darora',
 	'Erenthar',
+	'Faera',
+	'Farren',
 	'Farzen',
   'Feanor',
 	'Fiend',
@@ -93,7 +115,8 @@ namingTemplate =
 	'Gary',
 	'Ghazeer',
 	'Goelleniar',
-	'Halberd',,
+	'Grinrune',
+	'Halberd',
 	'Hemdallr',
 	'Ifris',
 	'Igneous',
@@ -107,7 +130,9 @@ namingTemplate =
 	'Luminous',
   'Manwe',
 	'Mahuta',
+	'Marsh',
 	'Meadow',
+	'Midna',
 	'Nallander',
 	'Orian',
 	'Paladin',
@@ -115,7 +140,11 @@ namingTemplate =
 	'Quixor',
 	'Ragnarok',
 	'Rallian',
+	'Roren',
+	'Sera',
+	'Shao',
 	'Starchaser',
+	'Sumorel',
 	'Tanfanna',
 	'Tempest',
 	'Trallos',
@@ -127,6 +156,7 @@ namingTemplate =
 	'Ulyntos',
 	'Valor',
 	'Vastorn',
+	'Woodruff',
 	'Wind',
 	'Wynd',
 	'Wrath',

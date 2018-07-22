@@ -291,14 +291,14 @@ TerminalShell.commands['stats'] = function(terminal)
 	if (gameState.currentCase == gameState.dead || gameState.currentCase == gameState.start) {return;}
 	currentDisplay = "STATS";
 	//Use CLI script to make list formatting
-	drawStatsWindow();
+	ui.drawStatsWindow();
 	terminal.print("Stats are available in the top-right window.");
 }
 // Displays the map in the GameInfo pane
 TerminalShell.commands['map'] = function(terminal)
 {
 	if (gameState.currentCase >= gameState.normal && gameState.currentCase <= gameState.shop) {
-		UI.drawMap(map);
+		ui.drawMap(map);
 		currentDisplay = "MAP"; // Update the gameInfo tab
 		terminal.print("The map is available in the top-right window.");
 	} else {
@@ -308,16 +308,16 @@ TerminalShell.commands['map'] = function(terminal)
 
 TerminalShell.commands['fight'] = function(terminal)
 {
-	if (gameState.currentCase == gameState.dead) {Terminal.print("That's what got you into this mess.");return;}
+	if (gameState.currentCase == gameState.dead) { Terminal.print("That's what got you into this mess."); return; }
 	if (gameState.currentCase == gameState.fight)
 	{
-		Fight(player, npc);
+		combat.setUpEncounter(player, npc);
 	} else if (isNpcOnTile(player.X, player.Y)) {
     if (npcList[currentNpcIndex].npc == null) {
       npcList[currentNpcIndex].npc = new Npc();
       npcList[currentNpcIndex].npc.createNpc(false);
     }
-    Fight(player, npcList[currentNpcIndex].npc);
+		combat.setUpEncounter(player, npcList[currentNpcIndex].npc);
     currentNpcIndex = null;
   }	else {
 		terminal.print("Fight what? There's nothing else around.");
@@ -330,13 +330,22 @@ TerminalShell.commands['inspect'] = function(terminal)
 	if (gameState.currentCase == gameState.dead) {return;}
 	if (gameState.currentCase == gameState.fight)
 	{
+		var npc_damage = npc.combat_stats.damageRollQty+"d"+npc.combat_stats.damageRollMax;
+		if (npc.combat_stats.damageModifier > 0) {
+	    npc_damage += "+"+npc.combat_stats.damageModifier;
+	  } else if (npc.combat_stats.damageModifier < 0) {
+	    npc_damage += "-"+npc.combat_stats.damageModifier;
+	  }
+	  if (npc.combat_stats.attackSpeed != 1) {
+	    npc_damage += " x " + npc.combat_stats.attackSpeed;
+	  }
 		var npcData = {
 			list: {
 				'Name':npc.name_mod,
 				'Level':npc.level,
-				'Health':npc.currentHP + "/" + npc.maxHP,
-				'Damage':npc.baseDamage,
-				'Defense':npc.defense,
+				'Health':npc.combat_stats.currentHP + "/" + npc.combat_stats.maxHP,
+				'Damage':npc_damage,
+				'Defense':npc.combat_stats.defense,
 			},
 			display: {
 				'Description': allNpcs[npc.name].description
@@ -455,7 +464,7 @@ TerminalShell.commands['inv'] = TerminalShell.commands['inventory'] = function(t
 	}
 	else
 	{
-		drawInventoryWindow(invPage);
+		ui.drawInventoryWindow(invPage);
 		currentDisplay = "INVENTORY";
 	}
 	terminal.print("Inventory is available in the top-right window.");
@@ -471,7 +480,7 @@ TerminalShell.commands['wielding'] = TerminalShell.commands['equipped'] = Termin
     terminal.print("You don't have anything equipped!");
     return;
   }
-  UI.drawEquipped();
+  ui.drawEquipped();
 }
 
 TerminalShell.commands['shop'] = TerminalShell.commands['enter'] = function(terminal)
@@ -605,9 +614,9 @@ TerminalShell.commands['equip'] = function(terminal)
 	}
 	player.wielding.push(player.inventory[itemIndex]);
 	terminal.print("You equip the " + player.wielding[player.wielding.length-1].name + ".");
+	player.applyWielding();
 	// Update the player stat window when appropriate
-	if (currentDisplay == "STATS")
-		drawStatsWindow();
+	ui.resumeDisplay();
 }
 
 TerminalShell.commands['unequip'] = function(terminal)
@@ -621,8 +630,8 @@ TerminalShell.commands['unequip'] = function(terminal)
 		if (player.wielding[i].name.toLowerCase() == item)
 		{
 			terminal.print("You unequip the " + player.wielding.splice(i, 1)[0].name + ".");// Update the player stat window when appropriate
-			if (currentDisplay == "STATS")
-				drawStatsWindow();
+			player.applyWielding();
+			ui.resumeDisplay();
 			return;
 		}
 	}
