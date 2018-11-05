@@ -31,23 +31,26 @@ function Combat() {
   this.setUpEncounter = function(attacker, defender) {
     this.attacker = attacker;
     this.defender = defender;
-
+    if (this.attacker.name_mod == undefined) {
+      this.attacker.name_mod = this.attacker.name;
+    }
+    if (this.defender.name_mod == undefined) {
+      this.defender.name_mod = this.defender.name;
+    }
     this.initializeDisplay();
     this.fight();
   }
 }
 
 Combat.prototype.combatTurn = function(attacker, defender) {
-  // If the attacker starts a round at zero HP,
-  console.log((attacker == player));
   if (attacker.combat_stats.currentHP == 0) {
     for (var i in attacker.inventory) {
       if (attacker.inventory[i].type == types.healing) {
         var healAmount = (attacker.inventory[i].HP>0)?attacker.inventory[i].HP:attacker.combat_stats.maxHP;
         attacker.combat_stats.currentHP = Math.max(attacker.combat_stats.maxHP, attacker.combat_stats.currentHP+healAmount);
-        animateHealing(healAmount, attacker);
+        this.animateHealing(healAmount, attacker);
         Terminal.print(randomChoice([
-          "On the brink of death, the " + attacker.inventory.splice(i, 1)[0].name + " was consumed and " + attacker.nameMod + " HP was restored."
+          "On the brink of death, the " + attacker.inventory.splice(i, 1)[0].name + " was consumed and " + attacker.name_mod + " experienced a surge of vitality!"
         ]));
         break;
       }
@@ -97,8 +100,13 @@ Combat.prototype.fight = function() {
   ];
   var index = 0;
   var hasIncrementedTurn = false;
+  var combatFinished, winner, loser;
   var interval = window.setInterval($.proxy(function combatRound() {
     // while is used instead of if to skip past 'empty' turns
+    if (combatFinished) {
+      clearInterval(interval);
+      this.processVictory(winner, loser);
+    }
     while (combatants[index].combatState.turn < combatants[index].combatState.nextAttackThreshold) {
       combatants[index].combatState.turn += combatants[index].combat_stats.attackSpeed;
       index = (index+1)%(combatants.length);
@@ -106,9 +114,12 @@ Combat.prototype.fight = function() {
     }
     this.combatTurn(combatants[index], combatants[(index+1)%combatants.length]);
 
+    // This means that second hit on an enemy while they're at 0HP is an auto-death, without a chance to restore HP.
     if (combatants[index].combat_stats.currentHP == 0) {
-      clearInterval(interval);
-      this.processVictory(combatants[(index+1)%combatants.length], combatants[index]);
+      // This condition satisfies the current player starting their turn at 0HP.
+      combatFinished = true;
+      winner = combatants[(index+1)%combatants.length];
+      loser = combatants[index];
     }
     /* After an attack, increment the requirement for attacks */
     combatants[index].combatState.nextAttackThreshold++;
@@ -120,6 +131,19 @@ Combat.prototype.fight = function() {
     if (combatants[index].combatState.turn <= combatants[index].combatState.nextAttackThreshold) {
       index = (index+1)%combatants.length;
       hasIncrementedTurn = false;
+      if (combatants[index].combat_stats.currentHP == 0) {
+        let canSurvive = false;
+        for (var i in combatants[index].inventory) {
+          if (combatants[index].inventory[i].type == types.healing) {
+            canSurvive = true; break;
+          }
+        }
+        if (!canSurvive) {
+          combatFinished = true;
+          winner = combatants[(index+1)%combatants.length];
+          loser = combatants[index];
+        }
+      }
     }
   }, this), 1650);
 }
@@ -151,28 +175,31 @@ Combat.prototype.animateHealing = function(restored, character) {
 }
 
 Combat.prototype.processVictory = function(winner, loser) {
-  Terminal.print("Winner: " + winner.nameMod);
-  if (winner == player) { // Time Being: If player is winner
+  if (winner != player) {
     Terminal.resetGameInfo();
-    Terminal.print("You won!");
-    gameState.currentCase = gameState.normal;
-    if (loser.gold > 0) {
-      player.gold += loser.gold;
-      Terminal.print("You gained " + loser.gold + " gold.");
-    }
-    for (var i in loser.inventory) {
-      Terminal.print("You found: " + loser.inventory[i].name);
-      player.inventory.push(loser.inventory[i]);
-    }
-    player.gainExperience(loser.experience);
-    updateQuest(loser);
-    if (currentNpcIndex != null) {
-      Terminal.print("After killing " + npcList[currentNpcIndex].npc.name_mod + ", it feels like a weight has been lifted off of your shoulders.");
-      npcList.splice(currentNpcIndex, 1);
-      delete player.quests[currentNpcIndex];
-      currentNpcIndex = null;
-    }
-  } else { // If player is loser
-
+    ui.drawTombstone();
+    Terminal.print("You died...");
+    Terminal.promptActive = true;
+    gameState.currentCase = gameState.dead;
+    return;
+  }
+  Terminal.resetGameInfo();
+  Terminal.print("You won!");
+  gameState.currentCase = gameState.normal;
+  if (loser.gold > 0) {
+    player.gold += loser.gold;
+    Terminal.print("You gained " + loser.gold + " gold.");
+  }
+  for (var i in loser.inventory) {
+    Terminal.print("You found: " + loser.inventory[i].name);
+    player.inventory.push(loser.inventory[i]);
+  }
+  player.gainExperience(loser.experience);
+  updateQuest(loser);
+  if (currentNpcIndex != null) {
+    Terminal.print("After killing " + npcList[currentNpcIndex].npc.name_mod + ", it feels like a weight has been lifted off of your shoulders.");
+    npcList.splice(currentNpcIndex, 1);
+    delete player.quests[currentNpcIndex];
+    currentNpcIndex = null;
   }
 }

@@ -6,7 +6,6 @@ function setCookie(c_name, value, exdays)
 	exdate.setDate(exdate.getDate() + exdays);
 	var c_value=escape(playerSave) + ((exdays==null) ? "" : "; expires="+exdate.toUTCString());
 	document.cookie=c_name + "=" + c_value;
-    console.log(document.cookie);
 }
 //Return JSON string if cookie exists, null otherwise
 function getCookie(c_name)

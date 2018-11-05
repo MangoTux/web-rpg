@@ -18,18 +18,14 @@ $(document).ready(function()
 	Terminal.promptActive = false;
 	ui = new UI();
 	combat = new Combat();
-	map = new Map(0);
 	player = new Player("");
-	if (map.getTile(player.X, player.Y).type == "W")
-	{
-	  player.inventory.push(new ToolItem());
-	}
 	$('#game').bind('cli-load', function(e)
 	{
 		$('#game').one('cli-ready', function (e)
 		{});
 
 		Terminal.runCommand('start');
+		ui.drawDefaultView();
 	});
 });
 

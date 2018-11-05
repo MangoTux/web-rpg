@@ -1,4 +1,3 @@
-
 var npc;
 // List of npcs and their descriptions.
 allNpcs = {
@@ -698,7 +697,7 @@ specialModifiers = [
   }
 ];
 
-var debug = true;
+var debug = false;
 function getName()
 {
     var baseName;
@@ -756,6 +755,7 @@ function Npc()
 	this.gold = 0;
 
 	// Creates the npc based on player info
+	// TODO Damage isn't scaling on level.
 	this.createNpc = function(isRandomEncounter)
 	{
     this.name = getName();
@@ -765,7 +765,7 @@ function Npc()
     this.level = player.level;
     if (distance > 60) // Make encounters more difficult the further the Player strays
     {
-      this.level += getRandomInt(-Math.sqrt(distance)/2, Math.sqrt(distance));
+      this.level += getRandomInt(-Math.log10(distance)/2, Math.log10(distance));
     }
     this.level += getRandomInt(-1-(player.level/5), (player.level/5));
     this.level = Math.floor(this.level);
