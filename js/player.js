@@ -30,7 +30,7 @@ function Player(name)
 
 	this.load = function(jsonObj)
 	{
-		this.name = jsonObj.name;
+		this.setName(jsonObj.name);
 		this.race = jsonObj.race;
 		this.playerClass = jsonObj.playerClass;
 		this.level = jsonObj.level;
@@ -45,6 +45,25 @@ function Player(name)
 		this.wielding = jsonObj.wielding;
 		this.applyWielding();
 	};
+
+	// Map seed is keyed off of the player's name.
+	this.setName = function(name) {
+		this.name = name;
+		map = new Map(name);
+		this.onCreation();
+	}
+
+	// Perform initial map-based details after player has been instantiated
+	this.onCreation = function() {
+		let moveable = map.canMove(this.X, this.Y);
+		if (moveable.canMove) {
+			return;
+		}
+		// Find good starting square that isn't dangerous to walk on.
+		let nearestCoordinate = map.findNearestTraversible(this.X, this.Y);
+		this.X = nearestCoordinate.X;
+		this.Y = nearestCoordinate.Y;
+	}
 
 	this.move = function(h, v)
 	{

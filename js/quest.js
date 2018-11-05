@@ -53,7 +53,7 @@ function giveReward() {
     if (currentNpcIndex == null) { return; }
     var rewardList = "";
     var rewards = npcList[currentNpcIndex].npc.quest.details.reward;
-    
+
     rewardList += rewards.gold + " gold";
     player.gold += rewards.gold;
     for (var i in rewards.items) {
@@ -66,24 +66,26 @@ function giveReward() {
 
 // Depending on a quest's state, update the text here
 function getQuestText() {
-    var quest = npcList[currentNpcIndex].npc.quest;
-    var text;
-    switch (quest.status) {
-        case questStatus.new: 
-            text = quest.text.start + "\n" + quest.text.reward;
-            break;
-        case questStatus.progress: 
-            text = quest.text.progress;
-            break;
-        case questStatus.complete: 
-            text = quest.text.complete;
-            break;
-        case questStatus.post:
-            text = quest.text.post;
-            break;
-    }
+    // The NPC Doesn't have quests, so npc.quest is undefined.
+    // var quest = npcList[currentNpcIndex].npc.quest;
+    // var text;
+    // switch (quest.status) {
+    //     case questStatus.new:
+    //         text = quest.text.start + "\n" + quest.text.reward;
+    //         break;
+    //     case questStatus.progress:
+    //         text = quest.text.progress;
+    //         break;
+    //     case questStatus.complete:
+    //         text = quest.text.complete;
+    //         break;
+    //     case questStatus.post:
+    //         text = quest.text.post;
+    //         break;
+    // }
     for (var key in quest.details) {
-        text = text.replace("%"+key, quest.details[key]); // TODO "kill 10 skeleton"
+      text = "There are no quests.";
+        //text = text.replace("%"+key, quest.details[key]); // TODO "kill 10 skeleton"
     }
     var header = "<br>" + npcList[currentNpcIndex].npc.name_mod + " says:<br><br>";
     return header + text;
@@ -97,7 +99,7 @@ function updateQuest(npc) {
         giveReward();
         player.quests[currentNpcIndex].status = questStatus.post;
     }
-    
+
     if (npc != undefined) {
          for (var quest in player.quests) {
             if (player.quests[quest].type=="kill") {
@@ -108,7 +110,7 @@ function updateQuest(npc) {
                     player.quests[quest].status = questStatus.complete;
                 }
             }
-        }   
+        }
     }
 }
 
@@ -117,7 +119,7 @@ function getQuest()
     var quest = {};
     quest.type = randomChoice(["kill"]);
     quest.status = "new";
-    
+
     quest.text = {};
     // Or maybe quest.text is an object with start, progress, complete, reward and just one randomChoice?
     quest.text.start = randomChoice(questText[quest.type].start);
@@ -133,6 +135,6 @@ function getQuest()
     for (var i=0; i<numItems; i++) {
         quest.details.reward.items.push(new Item());
     }
-    
+
     return quest;
 }
