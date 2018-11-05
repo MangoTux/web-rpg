@@ -1,10 +1,37 @@
-function Terrain(detail)
+// Alea prng, because javascript doesn't allow seeding by default.
+// I could have imported P5js, but I didn't want to worry about that much overhead
+// for an optimized RNG system that is only for the maps (For now)
+function Alea(seed) {
+  if(seed === undefined) {seed = +new Date() + Math.random();}
+  function Mash() {
+    var n = 4022871197;
+    return function(r) {
+      for(var t, s, u = 0, e = 0.02519603282416938; u < r.length; u++)
+      s = r.charCodeAt(u), f = (e * (n += s) - (n*e|0)),
+      n = 4294967296 * ((t = f * (e*n|0)) - (t|0)) + (t|0);
+      return (n|0) * 2.3283064365386963e-10;
+    }
+  }
+  return function() {
+    var m = Mash(), a = m(" "), b = m(" "), c = m(" "), x = 1, y;
+    seed = seed.toString(), a -= m(seed), b -= m(seed), c -= m(seed);
+    a < 0 && a++, b < 0 && b++, c < 0 && c++;
+    return function() {
+      var y = x * 2.3283064365386963e-10 + a * 2091639; a = b, b = c;
+      return c = y - (x = y|0);
+    };
+  }();
+}
+
+function Terrain(detail, seed)
 {
-    this.size = Math.pow(2, detail) + 1;
-    this.max = this.size - 1;
-    this.map = new Float32Array(this.size * this.size);
+  this.size = Math.pow(2, detail) + 1;
+  this.max = this.size - 1;
+  this.map = new Float32Array(this.size * this.size);
 	this.minValue = 1025;
 	this.maxValue = -1025;
+
+  this.randomizer = Alea(seed);
 }
 
 Terrain.prototype.get = function(x, y)
@@ -39,9 +66,9 @@ Terrain.prototype.generate = function(roughness)
 			for (x = half; x < self.max; x += size)
 			{
         if (x == 256 && y == 256) {
-          square(x, y, half, getRandomInt(-450, 450));
+          square(x, y, half, (900 * self.randomizer() - 450));
         } else {
-          square(x, y, half, Math.random() * scale * 2 - scale);
+          square(x, y, half, self.randomizer() * scale * 2 - scale);
         }
       }
     }
@@ -51,9 +78,9 @@ Terrain.prototype.generate = function(roughness)
 			{
         if (x == 256 && y == 256)
         {
-          square(x, y, half, getRandomInt(-150, 150));
+          square(x, y, half, (300 * self.randomizer() - 150));
         } else {
-				  diamond(x, y, half, Math.random() * scale * 2 - scale);
+				  diamond(x, y, half, self.randomizer() * scale * 2 - scale);
         }
       }
     }
@@ -102,8 +129,8 @@ function scale(map, x, y)
 function Map(seed)
 {
   this.seed = seed;
-  this.elevation = new Terrain(9); // 2^n + 1 tiles
-  this.rainfall = new Terrain(9);
+  this.elevation = new Terrain(9, seed); // 2^n + 1 tiles
+  this.rainfall = new Terrain(9, seed.split("").reverse().join(""));
   this.elevation.generate(1);
   this.rainfall.generate(1);
   for (var i=0; i<this.elevation.size; i++)
@@ -135,9 +162,6 @@ function Map(seed)
 
 Map.prototype.getTile = function(x, y)
 {
-  /*
-  Create a probability map: 100% probability of water where > 512 or < 0 for X or Y,
-  */
   if (Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)) > 255)
   {
     return {style:"#134FCB",symbol:"N",type:"W"};
@@ -164,7 +188,46 @@ Map.prototype.canMove = function(x, y)
           return {canMove:true};
       }
     }
-    // TODO check if inventory has boat;
     return {canMove:false, reason:tile.type};
   }
+}
+
+Map.prototype.getNeighbors = function(x, y) {
+  let neighbors = [];
+  neighbors.push([x+1, y]);
+  neighbors.push([x, y+1]);
+  neighbors.push([x-1, y]);
+  neighbors.push([x, y-1]);
+  return neighbors;
+}
+
+// Simple BFS to find a tile that isn't in the excluded types
+Map.prototype.findNearestTraversible = function(x, y)
+{
+  // Easier way of indexing coordinates
+  function stringify(a, b) {
+    return a + ":" + b
+  }
+  // Don't walk on water or lava
+  let excluded_types = ["W", "L"];
+  let frontier = [];
+  let visited = {};
+  visited[stringify(x, y)] = true;
+  frontier.push([x, y]);
+
+  while (frontier.length > 0) {
+    let current = frontier.shift();
+    let current_tile = this.getTile(current[0], current[1]);
+    if (excluded_types.indexOf(current_tile.type) == -1) {
+      return {X: current[0], Y: current[1]};
+    }
+    let neighbors = this.getNeighbors(current[0], current[1]);
+    for (let index in neighbors) {
+      if (!(stringify(neighbors[index][0], neighbors[index][1]) in visited)) {
+        frontier.push(neighbors[index]);
+        visited[stringify(neighbors[index][0], neighbors[index][1])] = true;
+      }
+    }
+  }
+  return [x, y]; // Uh-oh. TODO, But slim chance of actually occurring.
 }

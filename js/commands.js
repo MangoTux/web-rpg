@@ -75,7 +75,7 @@ TerminalShell.commands['go'] = function(terminal)
 	{
 		if (cmd_args.join(' ') == 'north')
 		{
-			Terminal.print('You head north.');
+			terminal.print('You head north.');
 			gameState.currentCase = gameState.normal;
 			player.move(0, -1);
 		}
