@@ -58,7 +58,7 @@ var TerminalShell =
 			//Set the player name to user input
 			if (gameState.currentCase == gameState.playerName)
 			{
-				player.name = cmd.charAt(0).toUpperCase() + cmd.slice(1);
+				player.setName(cmd.charAt(0).toUpperCase() + cmd.slice(1));
 				gameState.currentCase = gameState.playerRace;
 				terminal.print("Okay, " + player.name + ", what is your race? [Human/Elf/Dwarf/Goblin]");
 			}
