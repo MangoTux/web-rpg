@@ -25,7 +25,7 @@ function restock()
         else if (x < 0.9)
             shopList[currentShopIndex].shop.inventory.push(new HealthItem());
         else
-            shopList[currentShopIndex].shop.inventory.push(new toolItem());
+            shopList[currentShopIndex].shop.inventory.push(new ToolItem());
 	}
 }
 

@@ -106,16 +106,7 @@ UI.prototype.drawInventoryWindow = function(invPage) {
 	for (var i = 0; (invPage-1)*5+i<player.inventory.length && i<6; i++)
 	{
 		var I = 5*(invPage-1)+i;
-		if (player.inventory[I].type == types.healing)
-			invList.append($('<li>').html(player.inventory[I].name + "<br>   Type: " + player.inventory[I].type + "; Heals " + ((player.inventory[I].HP>0)?player.inventory[I].HP:"all of your") + " HP."));
-		else if (player.inventory[I].type == types.tool)
-        {
-            invList.append($('<li>').html(player.inventory[I].name + "<br>   Purpose: " + player.inventory[I].purpose));
-        }
-        else
-		{
-			invList.append($('<li>').html(player.inventory[I].name + "<br>   Type: " + player.inventory[I].type + "; Damage: " + player.inventory[I].damage + "; Defense: " + player.inventory[I].defense));
-		}
+    invList.append($('<li>').html(player.inventory[I].name + "<br>   " + toString(player.inventory[I])));
 	}
 	$("#gameInfo").html("<h3>Player Inventory</h3><ul>" + invList.html()+"</ul>Page " + (invPage) + " of " + Math.ceil(player.inventory.length/5) + ".");
 }

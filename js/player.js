@@ -94,6 +94,10 @@ function Player(name)
 		ui.resumeDisplay(currentDisplay);
 	};
 
+	this.rest = function() {
+		this.base_combat_stats.currentHP = this.base_combat_stats.maxHP;
+	}
+
 	//Performs all functions related to leveling up
 	this.gainLevel = function()
 	{

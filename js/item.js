@@ -604,65 +604,89 @@ var Item = function()
 	var itemnamingTemplate = []; // List of possible items
 	var referenceList; // List to use for item pool
 
-	if (!(typeof player === "undefined"))
-	{
-		switch (player.playerClass)
-		{
-			case "warrior": referenceList = warriorItems; break;
-			case "ranger": referenceList = rangerItems; break;
-			case "mage": referenceList = mageItems; break;
-			case "monk": referenceList = monkItems; break;
-			default: referenceList = allItems; break;
-		}
-
-		for (var p in modifier)
-		{
-			if ((modifier[p].type == types.both) || (isWeapon && modifier[p].type == types.weapon) || (!isWeapon && modifier[p].type == types.armor))
-			{
-				itemModList.push(p);
-			}
-		}
-		for (var p in referenceList)
-		{
-			if ((referenceList[p].type == types.wield && isWeapon) || (referenceList[p].type != types.wield && !isWeapon))
-			{
-				itemnamingTemplate.push(p);
-			}
-		}
-		var nameMod = randomChoice(itemModList);
-		var itemType = randomChoice(itemnamingTemplate);
-		var mname = new MName();
-
-		this.name = nameMod + ' ' + itemType;
-		this.statChanges = {};
-		if (referenceList[itemType].damageModifier < 0)
-			this.statChanges.damageModifier = Math.floor(referenceList[itemType].damageModifier*modifier[nameMod].multiplier);
-		else
-			this.statChanges.damageModifier = Math.floor(modifier[nameMod].multiplier*Math.sqrt(referenceList[itemType].damageModifier*player.level));
-		if (referenceList[itemType].defense < 0)
-			this.statChanges.defense = Math.floor(referenceList[itemType].defense*modifier[nameMod].multiplier);
-		else
-			this.statChanges.defense = Math.floor(modifier[nameMod].multiplier*Math.sqrt(referenceList[itemType].defense*player.level));
-		if (referenceList[itemType].luck < 0)
-			this.statChanges.luck = Math.floor(referenceList[itemType].luck*modifier[nameMod].multiplier);
-		else
-			this.statChanges.luck = Math.floor(modifier[nameMod].multiplier*Math.sqrt(referenceList[itemType].luck*player.level));
-		this.type = referenceList[itemType].type;
-		this.cost = Math.floor((getRandomInt(30, 200)+this.statChanges.luck+this.statChanges.defense+this.statChanges.damageModifier)*modifier[nameMod].multiplier);
-    if (getRandomInt(0, 100)<10)
-    {
-      this.name += ' of ' + mname.New();
-      this.statChanges.damageModifier *= 1.1;
-      this.statChanges.defense *= 1.1;
-      this.statChanges.luck *= 1.1;
-  	}
-	}
-	else
+	if (typeof player === "undefined")
 	{
 		this.name = "Regular Fist";
 		this.statChanges.damageModifier = 0;
 		this.statChanges.luck = 0;
 		this.statChanges.defense = 0;
-		this.statChanges.type = types.wield;
+		this.type = types.wield;
+		return;
 	}
+	switch (player.playerClass)
+	{
+		case "warrior": referenceList = warriorItems; break;
+		case "ranger": referenceList = rangerItems; break;
+		case "mage": referenceList = mageItems; break;
+		case "monk": referenceList = monkItems; break;
+		default: referenceList = allItems; break;
+	}
+
+	for (var p in modifier)
+	{
+		if ((modifier[p].type == types.both) || (isWeapon && modifier[p].type == types.weapon) || (!isWeapon && modifier[p].type == types.armor))
+		{
+			itemModList.push(p);
+		}
+	}
+	for (var p in referenceList)
+	{
+		if ((referenceList[p].type == types.wield && isWeapon) || (referenceList[p].type != types.wield && !isWeapon))
+		{
+			itemnamingTemplate.push(p);
+		}
+	}
+	var nameMod = randomChoice(itemModList);
+	var itemType = randomChoice(itemnamingTemplate);
+	var mname = new MName();
+
+	this.name = nameMod + ' ' + itemType;
+	this.statChanges = {};
+	if (referenceList[itemType].damageModifier < 0)
+		this.statChanges.damageModifier = Math.floor(referenceList[itemType].damageModifier*modifier[nameMod].multiplier);
+	else
+		this.statChanges.damageModifier = Math.floor(modifier[nameMod].multiplier*Math.sqrt(referenceList[itemType].damageModifier*player.level));
+	if (referenceList[itemType].defense < 0)
+		this.statChanges.defense = Math.floor(referenceList[itemType].defense*modifier[nameMod].multiplier);
+	else
+		this.statChanges.defense = Math.floor(modifier[nameMod].multiplier*Math.sqrt(referenceList[itemType].defense*player.level));
+	if (referenceList[itemType].luck < 0)
+		this.statChanges.luck = Math.floor(referenceList[itemType].luck*modifier[nameMod].multiplier);
+	else
+		this.statChanges.luck = Math.floor(modifier[nameMod].multiplier*Math.sqrt(referenceList[itemType].luck*player.level));
+	this.type = referenceList[itemType].type;
+	this.cost = Math.floor((getRandomInt(30, 200)+this.statChanges.luck+this.statChanges.defense+this.statChanges.damageModifier)*modifier[nameMod].multiplier);
+  if (getRandomInt(0, 100)<10)
+  {
+    this.name += ' of ' + mname.New();
+    this.statChanges.damageModifier *= 1.1;
+    this.statChanges.defense *= 1.1;
+    this.statChanges.luck *= 1.1;
+  }
+}
+
+function toString(item) {
+	var dataString;
+	if (item.type == types.healing) {
+		dataString = "Type: " + item.type + "; ";
+		if (item.HP > 0) {
+			dataString += "Heals " + item.HP + " HP.";
+		} else {
+			dataString += "Heals all of your HP.";
+		}
+	}	else if (item.type == types.tool) {
+		dataString = "Purpose: " + item.purpose;
+	} else {
+		dataString = "Type: " + item.type;
+		if (!("statChanges" in item)) {
+			return dataString;
+		}
+		if ("damageModifier" in item.statChanges && item.statChanges.damageModifier != 0) {
+			dataString += "; Damage: " + (item.statChanges.damageModifier<0?"":"+")+item.statChanges.damageModifier.toFixed(0);
+		}
+		if ("defense" in item.statChanges && item.statChanges.defense != 0) {
+			dataString += "; Defense: " + (item.statChanges.defense<0?"":"+")+item.statChanges.defense.toFixed(0);
+		}
+	}
+	return dataString;
 }
