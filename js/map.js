@@ -1,3 +1,14 @@
+String.prototype.hashCode = function() {
+  var hash = 0, i, chr;
+  if (this.length === 0) return hash;
+  for (i = 0; i < this.length; i++) {
+    chr   = this.charCodeAt(i);
+    hash  = ((hash << 5) - hash) + chr;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return hash;
+};
+
 // Alea prng, because javascript doesn't allow seeding by default.
 // I could have imported P5js, but I didn't want to worry about that much overhead
 // for an optimized RNG system that is only for the maps (For now)
@@ -129,16 +140,12 @@ function scale(map, x, y)
 function Map(seed)
 {
   this.seed = seed;
-  this.elevation = new Terrain(9, seed); // 2^n + 1 tiles
-  this.rainfall = new Terrain(9, seed.split("").reverse().join(""));
+  noise.seed(seed.hashCode());
+  this.elevation = new Terrain(9, seed);
   this.elevation.generate(1);
-  this.rainfall.generate(1);
-  for (var i=0; i<this.elevation.size; i++)
-  {
-    for (var j=0; j<this.elevation.size; j++)
-    {
+  for (var i=0; i<this.elevation.size; i++) {
+    for (var j=0; j<this.elevation.size; j++) {
       this.elevation.set(i, j, scale(this.elevation, i, j));
-      this.rainfall.set(i, j, scale(this.rainfall, i, j));
     }
   }
   this.biomeMap = [
@@ -162,34 +169,31 @@ function Map(seed)
 
 Map.prototype.getTile = function(x, y)
 {
-  if (Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2)) > 255)
-  {
-    return {style:"#134FCB",symbol:"N",type:"W"};
+  function noisy(x, y) {
+    return noise.perlin2(x, y)/2 + 0.5
   }
-  x += 256;
-  y += 256;
-  elevationVal = this.elevation.get(x, y);
-  rainVal = this.rainfall.get(x, y);
-  return this.biomeMap[elevationVal][rainVal];
+  var detail = 64;
+  var height = this.elevation.get(x+256, y+256);
+  var rain = (noisy(x / detail, y / detail) + 0.5 * noisy(2 * x / detail, 2 * y / detail) + 0.25 * noisy(4 * x / detail, 4 * y / detail)) / 1.75;
+  rain = Math.floor(10*rain);
+  return this.biomeMap[height][rain];
 }
 
 Map.prototype.canMove = function(x, y)
 {
   var tile = this.getTile(x, y);
-  if (tile.type == undefined)
-  {
+  if (tile.type == undefined) {
     return {canMove:true}
-  } else {
-    if (tile.type == "W")
-    {
-      for (var i in player.inventory)
-      {
-        if (player.inventory[i].purpose_c == "waterTravel")
-          return {canMove:true};
-      }
-    }
-    return {canMove:false, reason:tile.type};
   }
+
+  if (tile.type == "W") {
+    for (var i in player.inventory)
+    {
+      if (player.inventory[i].purpose_c == "waterTravel")
+        return {canMove:true};
+    }
+  }
+  return {canMove:false, reason:tile.type};
 }
 
 Map.prototype.getNeighbors = function(x, y) {
