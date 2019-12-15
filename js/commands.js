@@ -219,38 +219,38 @@ TerminalShell.commands['my'] = function(terminal)
 	gameState.currentCase = gameState.normal;
 }
 //Followup to go left/right
-TerminalShell.commands['your'] = function(terminal)
-{
+TerminalShell.commands['your'] = function(terminal) {
 	if (gameState.currentCase == gameState.dead) {return;}
 	var cmd_args = Array.prototype.slice.call(arguments);
 	cmd_args.shift();
-	if ((cmd_args.join(' ') == 'left' && gameState.currentCase == gameState.goLeft) || (cmd_args.join(' ') == 'right' && gameState.currentCase == gameState.goRight))
-	{
+	if (
+		(cmd_args.join(' ') == 'left' && gameState.currentCase == gameState.goLeft) ||
+		(cmd_args.join(' ') == 'right' && gameState.currentCase == gameState.goRight)) {
 		terminal.print('I\'m a computer. I have no sense of direction.');
 	}
-	else
+	else {
 		terminal.print('What?');
+	}
 }
 //Resets player to full health
-TerminalShell.commands['rest'] = function(terminal)
-{
-	if (gameState.currentCase == gameState.dead) {return;}
-	$('#game').fadeOut(2000, function() {
+TerminalShell.commands['rest'] = function(terminal) {
+	if (gameState.currentCase == gameState.dead) { return; }
+	$('#game').fadeOut(2000, () => {
 		terminal.setPromptActive(false);
-		player.currentHP = player.maxHP;
+		player.rest();
 		terminal.clear();
-		$('#game').fadeIn(2000, function() {
+		$('#game').fadeIn(2000, () => {
 			terminal.print('You feel rested.');
 			terminal.setPromptActive(true);
 		});
 	});
-	$('#gameInfo').fadeOut(2000, function() {
-		$('#gameInfo').fadeIn(2000); });
+	$('#gameInfo').fadeOut(2000, () => {
+		$('#gameInfo').fadeIn(2000);
+	});
 }
 //Saves player data
-TerminalShell.commands['save'] = function(terminal)
-{
-	if (gameState.currentCase == gameState.dead) {return;}
+TerminalShell.commands['save'] = function(terminal) {
+	if (gameState.currentCase == gameState.dead) { return; }
 	//Write data to save
 	if (gameState.currentCase >= gameState.normal && gameState.currentCase <= gameState.goRight)
 	{
@@ -258,15 +258,12 @@ TerminalShell.commands['save'] = function(terminal)
 		setCookie("player_save", {p:player/*, s:{shopList}*/}, 365); //Store all data in player object for one year
         //setCookie("shop", shopList, 365);
 		terminal.print('Data has been saved.');
-	}
-	else
-	{
+	} else {
 		terminal.print('You can\'t save right now!');
 	}
 }
 //If data exists, load the player
-TerminalShell.commands['load'] = function(terminal)
-{
+TerminalShell.commands['load'] = function(terminal) {
 	var obj = checkCookie();
 	if (obj == '')
 	{
@@ -480,7 +477,7 @@ TerminalShell.commands['wielding'] = TerminalShell.commands['equipped'] = Termin
     terminal.print("You don't have anything equipped!");
     return;
   }
-  ui.drawEquipped();
+  ui.drawEquippedWindow();
 }
 
 TerminalShell.commands['shop'] = TerminalShell.commands['enter'] = function(terminal)
@@ -495,28 +492,25 @@ TerminalShell.commands['shop'] = TerminalShell.commands['enter'] = function(term
 		{
 			if (shopList[i].x == player.X && shopList[i].y == player.Y)
 			{
-                if (shopList[i].shop == null)
-                {
-                    shopList[i].shop = new Shop(player);
-                    shopList[i].shop.init();
-                }
+        if (shopList[i].shop == null) {
+          shopList[i].shop = new Shop(player);
+          shopList[i].shop.init();
+        }
 				currentShopIndex = i;
 				restock();
-                Terminal.print("You enter the shop.");
-                gameState.currentCase = gameState.shop;
-                displayShopInfo();
+        Terminal.print("You enter the shop.");
+        gameState.currentCase = gameState.shop;
+        displayShopInfo();
 				return;
 			}
 		}
 		if (currentShopIndex == -1)
 		{
-            Terminal.print("There's not a shop here!");
+      Terminal.print("There's not a shop here!");
 		}
-	}
-    else
-    {
-        Terminal.print("This is a horrible time to go shopping.");
-    }
+	} else {
+    Terminal.print("This is a horrible time to go shopping.");
+  }
 }
 
 //Purchases an object in shop inventory and adds it to player's inventory
@@ -567,7 +561,7 @@ TerminalShell.commands['sell'] = function(terminal)
 	{
 		if (player.inventory[i].name.toLowerCase().indexOf(selection) > -1)
 		{
-            var cost = Math.floor(player.inventory[i].cost*3/4);
+      var cost = Math.floor(player.inventory[i].cost*3/4);
 			//TODO add to shop stock if it's already there
 			player.gold += cost;
 			terminal.print("You sell the " + player.inventory.splice(i, 1)[0].name + " for " + cost + " gold.");
@@ -619,8 +613,7 @@ TerminalShell.commands['equip'] = function(terminal)
 	ui.resumeDisplay();
 }
 
-TerminalShell.commands['unequip'] = function(terminal)
-{
+TerminalShell.commands['unequip'] = function(terminal) {
 	if (player.wielding.length == 0) {terminal.print("Nothing to unequip"); return;}
 	var cmd_args = Array.prototype.slice.call(arguments);
 	cmd_args.shift();
@@ -639,20 +632,19 @@ TerminalShell.commands['unequip'] = function(terminal)
 }
 
 /* Used in quests */
-TerminalShell.commands['talk'] = function(terminal)
-{
+TerminalShell.commands['talk'] = function(terminal) {
     /* If current tile has an NPC, talk to it to reveal information */
-    if (isNpcOnTile(player.X, player.Y)) {
-        terminal.print("You strike up a conversation");
-        if (npcList[currentNpcIndex].npc == null) {
-            npcList[currentNpcIndex].npc = new Npc();
-            npcList[currentNpcIndex].npc.createNpc(false);
-            player.quests[currentNpcIndex] = npcList[currentNpcIndex].npc.quest;
-        }
-        $("#gameInfo").html(getQuestText());
-        updateQuest();
-    } else {
-        terminal.print("You're talking to yourself.");
+    if (!isNpcOnTile(player.X, player.Y)) {
+      terminal.print("You're talking to yourself.");
+			return;
     }
+    terminal.print("You strike up a conversation");
+    if (npcList[currentNpcIndex].npc == null) {
+      npcList[currentNpcIndex].npc = new Npc();
+      npcList[currentNpcIndex].npc.createNpc(false);
+      player.quests[currentNpcIndex] = npcList[currentNpcIndex].npc.quest;
+    }
+    $("#gameInfo").html(getQuestText());
+    updateQuest();
     currentNpcIndex = null;
 }
