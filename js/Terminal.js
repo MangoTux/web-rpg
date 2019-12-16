@@ -40,7 +40,7 @@ var TerminalShell =
 			terminal.clear();
 		}
 	},
-	filters: [], //What does this mean?!?
+	filters: [],
 
 	process: function(terminal, cmd)
 	{
@@ -109,6 +109,9 @@ var TerminalShell =
 			//If the entered command is in the elements in command
 			else if (this.commands.hasOwnProperty(cmd_name))
 			{
+				if (gameState.currentCase == gameState.dead && !['start', 'new', 'help', 'updates', 'about', 'fight', 'run'].includes(cmd_name)) {
+					return;
+				}
 				this.commands[cmd_name].apply(this, cmd_args);
 			}
 			else
@@ -337,75 +340,32 @@ Terminal=
 		this.setCursorState(true);
 	},
 
-	//Deletes the entire word - Is it currently being used?
-	deleteWord: function()
-	{
-        if (this.pos > 0)
-		{
-            var ncp = this.pos;
-			//Iterate through until a space is found
-            while (ncp > 0 && this.buffer.charAt(ncp) !== ' ')
-			{
-                ncp--;
-            }
-			//Concatenates everything to the left and right of deleted word
-            left = this.buffer.substr(0, ncp - 1);
-            right = this.buffer.substr(ncp, this.buffer.length - this.pos);
-            this.buffer = left + right;
-            this.pos = ncp;
-            this.updateInputDisplay();
-        }
-        this.setCursorState(true);
-    },
-
-	//Moves the cursor based on arrow key values
-    moveCursor: function(val)
-	{
-        this.setPos(this.pos + val);
-    },
-
-	//Sets the position of the cursor
-    setPos: function(pos)
-	{
-        if ((pos >= 0) && (pos <= this.buffer.length))
-		{
-            this.pos = pos;
-            Terminal.updateInputDisplay();
-        }
-        this.setCursorState(true);
-    },
 
 	//Jumps to the bottom of the input display - Should use this for changing anchorpoint
-	jumpToBottom: function()
-	{
+	jumpToBottom: function() {
 		$('#screen').animate({scrollTop: $('#screen').attr('scrollHeight')}, this.config.scrollSpeed, 'linear');
 	},
 
-	removeLines: function(displayElement)
-	{
-		if (displayElement.find('*').length > 30) // Recursively removes all extra lines - While loop hangs page
-		{
-			displayElement.children().first().fadeOut(500, function() {
-				$(this).remove();
-				Terminal.removeLines(displayElement);
-			});
+	removeLines: function(displayElement) {
+		// TODO apply a timestamp in combination with count
+		if (displayElement.find('*').length < 30) { // Recursively removes all extra lines - While loop hangs page
+			return;
 		}
+		displayElement.children().first().fadeOut(500, function() {
+			$(this).remove();
+			Terminal.removeLines(displayElement);
+		});
 	},
 
 	//Prints the given text to the terminal display
-	print: function(text)
-	{
+	print: function(text) {
 		var displayElement = $('#display');
 		if (!text)
 		{
 			displayElement.append($('<div>'));
-		}
-		else if (text instanceof jQuery)
-		{
+		} else if (text instanceof jQuery) {
 			displayElement.append(text);
-		}
-		else
-		{
+		} else {
 			if (this.suppressed) return;
 			var av = Array.prototype.slice.call(arguments, 0);
 			displayElement.append($('<p>').text(av.join(' ')));
@@ -414,37 +374,28 @@ Terminal=
 		this.jumpToBottom();
 	},
 
-	processInputBuffer: function(cmd)
-	{
+	processInputBuffer: function(cmd) {
 		this.print($('<p>').addClass('command').text(this.config.prompt + this.buffer));
 		var cmd = trimInput(this.buffer);
 		this.clearInputBuffer();
-		if (cmd.length == 0)
-		{
+		if (cmd.length == 0) {
 			return false;
 		}
-		if (this.output)
-		{
-			return this.output.process(this, cmd.toLowerCase());
-		}
-		else
-		{
+		if (!this.output) {
 			return false;
 		}
+		return this.output.process(this, cmd.toLowerCase());
 	},
 
 	//Enables the input to be active
-	setPromptActive: function(active)
-	{
+	setPromptActive: function(active) {
 		this.promptActive = active;
 		$('#inputline').toggle(this.promptActive);
 	},
 
 	//Sets the terminal to allow input/output
-	setWorking: function(working)
-	{
-		if (working && !this._spinnerTimemout)
-		{
+	setWorking: function(working) {
+		if (working && !this._spinnerTimemout) {
 			$('#display .command:last-child').add('#bottomline').first().append($('#spinner'));
 			this._spinnerTimeout = window.setInterval($.proxy(function() {
 				if (!$('#spinner').is(':visible'))
@@ -456,9 +407,7 @@ Terminal=
 			}, this), this.config.spinnerSpeed);
 			this.setPromptActive(false);
 			$('#game').triggerHandler('cli-busy');
-		}
-		else if (!working && this._spinnerTimeout)
-		{
+		} else if (!working && this._spinnerTimeout) {
 			clearInterval(this._spinnerTimeout);
 			this._spinnerTimout = null;
 			$('#spinner').fadeOut();
@@ -468,8 +417,7 @@ Terminal=
 	},
 
 	//Manually enters the command and executes it as if the user had typed it
-	runCommand: function(text)
-	{
+	runCommand: function(text) {
 		var index = 0;
 		var mine = false;
 
@@ -481,13 +429,17 @@ Terminal=
 			{
 				this.addCharacter(text.charAt(index));
 				index += 1;
-			}
-			else
-			{
+			} else {
 				clearInterval(interval);
 				this.promptActive = true;
 				this.processInputBuffer('');
 			}
 		}, this), this.config.typingSpeed);
+	},
+
+	processArgs: function(text) {
+		let cmd_args = Array.prototype.slice.call(text);
+		cmd_args.shift();
+		return cmd_args;
 	}
 }

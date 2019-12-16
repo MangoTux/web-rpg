@@ -1,226 +1,183 @@
-TerminalShell.commands['start'] = function(terminal)
-{
+TerminalShell.commands['start'] = function(terminal) {
 	//Check if there's a cookie - If so, Load.
 	//Otherwise, get name, class, race.
 	gameState.currentCase = gameState.start;
 	terminal.print("Hello! Type \'new\' to begin, or \'load\' if you already have a profile.");
 };
+
 //Create player data.
-TerminalShell.commands['new'] = function(terminal)
-{
+TerminalShell.commands['new'] = function(terminal) {
 	if (gameState.currentCase == gameState.start || gameState.currentCase == gameState.dead)
 	{
 		gameState.currentCase = gameState.playerName;
 		terminal.print("What is your name?");
 		//The rest of the input is taken care of during the command processing
-	}
-	else
-	{
+	} else {
 		terminal.print("You can't quit now!");
 	}
 }
-TerminalShell.commands['help'] = function(terminal)
-{
-    var helpList =
-        "<h3>Commands</h3>" +
-        "<p>" +
-        "Go [dir]	 - Go in a direction</br>" +
-        "Rest		 - Rest and recover HP</br>" +
-        "Save		 - Save progress</br>" +
-        "Load        - Load a saved game</br>" +
-        "Stats		 - Current character info</br>" +
-        "Map	     - Displays the map and legend</br>" +
-        "Fight 		 - Used when NPC encounter occurs</br>" +
-        "Inspect     - In a fight, assess enemy</br>" +
-        "Shop        - Enter a shop and purchase items</br>" +
-        "Buy [item]  - Purchase items from the shop</br>" +
-        "Exit Shop   - Leave the shop</br>" +
-        "Equip [item]- Equip an item</br>" +
-        "Inv [page]  - View your inventory</br>" +
-        //"Quest [page]- View a list of your current quests</br>" +
-        "Help        - View this page</p>";
-    $("#gameInfo").html(helpList);
-    Terminal.print("Game commands can be found on the right-hand pane");
+
+TerminalShell.commands['help'] = function(terminal) {
+  let help_list = `
+<h3>Commands</h3>
+<p>
+Go [dir]     - Go in a direction</br>
+Rest         - Rest and recover HP</br>
+Save         - Save progress</br>
+Load         - Load a saved game</br>
+Stats        - Current character info</br>
+Map	         - Displays the map and legend</br>
+Fight        - Used when NPC encounter occurs</br>
+Inspect      - In a fight, assess enemy</br>
+Shop         - Enter a shop and purchase items</br>
+Buy [item]   - Purchase items from the shop</br>
+Exit Shop    - Leave the shop</br>
+Equip [item] - Equip an item</br>
+Inv [page]   - View your inventory</br>
+Quest [page] - View a list of your current quests</br>
+Help         - View this page
+</p>
+`;
+	help_list = help_list.replace(/ /g, "&nbsp;");
+	$("#gameInfo").html(help_list);
+  terminal.print("Game commands can be found on the right-hand pane");
 }
-TerminalShell.commands['updates'] = function(terminal)
-{
-    var updateList = "<h3>Updates</h3>" +
-        "<p>Site Layout</br>" +
-        "Npcs and fighting!</br>" +
-        "Shops!</br>" +
-        "Maps!</p>" +
-        "<h3>Planned Updates</h3>" +
-        "<p>Bugfixes</p>" +
-        "<p>New game option clears previous data</p>" +
-        "<p>Load data is functional</p>" +
-        "<p>Map stuff</p>";
-    $("#gameInfo").html(updateList);
-    Terminal.print("Updates to the game can be found on the right-hand pane");
+
+TerminalShell.commands['updates'] = function(terminal) {
+	$("#gameInfo").html($("#updates").html());
+	terminal.print("Updates to the game can be found on the right-hand pane");
 }
-TerminalShell.commands['about'] = function(terminal)
-{
-    var about = "<h3>About</h3><p><b>rpg the rpg: an mmorpg</b> is a monotonous monoplayer<br>oldschool role-playing game that started out as<br>an assignment in one of my classes. To be<br>succinct, this is a game where you walk around<br>and get in fights. Or not. I can't tell you<br>what to do, I'm just some text on a screen.</p>";
+
+TerminalShell.commands['about'] = function(terminal) {
+    let about = `
+<h3>About</h3>
+<p>
+<b>rpg the rpg: an mmorpg</b> is a monotonous monoplayer<br>
+oldschool role-playing game that started out as<br>
+an assignment in one of my classes. To be<br>
+succinct, this is a game where you walk around<br>
+and get in fights. Or not. I can't tell you<br>
+what to do, I'm just some text on a screen.
+</p>
+`;
     $("#gameInfo").html(about);
-    Terminal.print("Information about the game can be found on the right-hand pane");
+    terminal.print("Information about the game can be found on the right-hand pane");
 }
+
 //Used for movement around map.
 //Occasionally on move, an npc should be created.
 // TODO only print 'You head [direction]' if successful
-TerminalShell.commands['go'] = function(terminal)
-{
-	if (gameState.currentCase == gameState.dead) {return;}
-	var cmd_args = Array.prototype.slice.call(arguments);
-	cmd_args.shift();
-	if (gameState.currentCase >= gameState.normal && gameState.currentCase <= gameState.goRight)
-	{
-		if (cmd_args.join(' ') == 'north')
-		{
-			terminal.print('You head north.');
-			gameState.currentCase = gameState.normal;
-			player.move(0, -1);
-		}
-		else if (cmd_args.join(' ') == 'south')
-		{
-			terminal.print('You head south.');
-			gameState.currentCase = gameState.normal;
-			player.move(0, 1);
-		}
-		else if (cmd_args.join(' ') == 'east')
-		{
-			terminal.print('You head east.');
-			gameState.currentCase = gameState.normal;
-			player.move(1, 0);
-		}
-		else if (cmd_args.join(' ') == 'west')
-		{
-			terminal.print('You head west.');
-			gameState.currentCase = gameState.normal;
-			player.move(-1, 0);
-		}
-		else if (cmd_args.join(' ') == 'left')
-		{
-			terminal.print('My left or your left?');
-			gameState.currentCase = gameState.goLeft;
-		}
-		else if (cmd_args.join(' ') == 'right')
-		{
-			terminal.print('My right or your right?');
-			gameState.currentCase = gameState.goRight;
-		}
-		else if (cmd_args.join(' ') == 'up')
-		{
-			terminal.print('What are you doing? You are not a bird. You cannot go up.');
-			gameState.currentCase = gameState.normal;
-		}
-		else if (cmd_args.join(' ') == 'down')
-		{
-			if (map.getTile(player.X, player.Y).type == "W")
-			{
-				terminal.print("You can't swim!");
-			}
-			else { // TODO Special moleperson fight
-				terminal.print('You start digging down. It is dark down here.');
-				gameState.currentCase = gameState.goDown;
-			}
-		}
-		else if (cmd_args.join(' ') == 'back')
-		{
-			terminal.print('You go back to where you were.');
-			player.move(-1*player.prevDirection[0], -1*player.prevDirection[1]);
-		}
-		else if (cmd_args.join(' ') == 'forward')
-		{
-			player.move(player.prevDirection[0], player.prevDirection[1]);
-			terminal.print('You continue forward.');
-		}
-		else if (cmd_args.join(' ') == 'away' || cmd_args.join(' ') == 'to hell')
-		{
-			terminal.print(randomChoice([':(', 'I\'m sorry...', 'Was... was it something I said?']));
-			terminal.suppressed = true;
-		}
-		else
-		{
-			terminal.print("I don't know that direction.");
-		}
+TerminalShell.commands['go'] = function(terminal) {
+	// You can't go anywhere right now belongs here if not applicable
+	if ([gameState.fight, gameState.shop, gameState.start, gameState.playerName, gameState.playerRace, gameState.playerClass].includes(gameState.currentCase)) {
+		terminal.print("You can't go anywhere right now!");
+		return;
 	}
-	else if (gameState.currentCase == gameState.goDown)
-	{
-		if (cmd_args.join(' ') == 'up')
-		{
+
+	let args = terminal.processArgs(arguments);
+	let direction = args.join(' ');
+	if (direction === '') {
+		terminal.print("Go where?");
+		return;
+	}
+	// Mean movements
+	if (direction === 'away' || direction === 'to hell') {
+		terminal.print(randomChoice([':(', 'I\'m sorry...', 'Was... was it something I said?']));
+		terminal.suppressed = true;
+		return;
+	}
+	// Silly movements
+	if (direction === 'down') {
+		if (gameState.currentCase == gameState.goDown) {
+			terminal.print(randomChoice(['Sorry, it\'s all up from here.', 'Wow, bedrock already? Guess you\'re gonna have to turn around.', 'Careful! You\'ll anger the mole people!', 'No.']));
+		} else if (map.getTile(player.X, player.Y).type == "W") {
+			terminal.print("You can't swim!");
+		} else {
+			terminal.print('You start digging down. It is dark down here.');
+			gameState.currentCase = gameState.goDown;
+		}
+		return;
+	} else if (direction === 'up') {
+		if (gameState.currentCase == gameState.goDown) {
 			terminal.print('You\'re back on level ground. It\'s not as dark up here.');
 			gameState.currentCase = gameState.normal;
+		} else {
+			terminal.print("What are you doing? You are not a bird. You cannot go up.");
 		}
-		else if (gameState.currentCase == gameState.goDown)
-			terminal.print(randomChoice(['Sorry, it\'s all up from here.', 'Wow, bedrock already? Guess you\re gonna have to turn around.', 'Careful! You\'ll anger the mole people!', 'No.']));
-		else
-			terminal.print('You\'re underground. It would probably be wiser to go up first.');
+		return;
 	}
-	else
-	{
-		terminal.print("You can't go anywhere right now!");
+	// Standard movements
+	// TODO Current an issue when approaching non-contact space. "You head west. You can't swim!"
+	gameState.currentCase = gameState.normal;
+	switch (direction) {
+		case 'right':
+			terminal.print('My left or your left?');
+			gameState.currentCase = gameState.goLeft;
+			break;
+		case 'left':
+			terminal.print('My right or your right?');
+			gameState.currentCase = gameState.goRight;
+			break;
+		case 'north':
+			terminal.print('You head north.');
+			player.move(0, -1);
+			break;
+		case 'south':
+			terminal.print('You head south.');
+			player.move(0, 1);
+			break;
+		case 'east':
+			terminal.print('You head east.');
+			player.move(1, 0);
+			break;
+		case 'west':
+			terminal.print('You head west.');
+			player.move(-1, 0);
+			break;
+		case 'back':
+			terminal.print('You go back to where you were.');
+			player.move(-1*player.prevDirection[0], -1*player.prevDirection[1]);
+			break;
+		case 'forward':
+			player.move(player.prevDirection[0], player.prevDirection[1]);
+			terminal.print('You continue forward.');
+			break;
+		default:
+			terminal.print("I don't know that direction.");
+			break;
 	}
 }
+
 //Apologize after saying 'go away'
-TerminalShell.commands['sorry'] = function(terminal)
-{
+TerminalShell.commands['sorry'] = function(terminal) {
 	terminal.suppressed = false;
 	terminal.print(randomChoice(["It's okay c:", "I forgive you.", "Yay! Friends again!"]));
 }
+
 //Followup to go left/right
-TerminalShell.commands['my'] = function(terminal)
-{
-	if (gameState.currentCase == gameState.dead) {return;}
-	var cmd_args = Array.prototype.slice.call(arguments);
-	cmd_args.shift();
-	if (cmd_args.join(' ') == 'left')
-	{
-		if (gameState.currentCase == gameState.goLeft)
-		{
-			terminal.print('You head to your left.');
-			var h = player.prevDirection[0];
-			var v = player.prevDirection[1];
-			if (h == 1)
-				player.move(0, -1);
-			else if (h == -1)
-				player.move(0, 1);
-			else if (v == -1)
-				player.move(-1, 0);
-			else
-				player.move(1, 0);
-		}
-		else if (gameState.currentCase == gameState.goRight)
-			terminal.print('That\'s not what you said before.');
-		else
-			terminal.print('What?');
+TerminalShell.commands['my'] = function(terminal) {
+	let args = terminal.processArgs(arguments);
+	let direction = args.join(' ');
+
+	if (!['left', 'right'].includes(direction)) {
+		terminal.print("What?");
+		return;
 	}
-	else if (cmd_args.join(' ') == 'right')
-	{
-		if (gameState.currentCase == gameState.goRight)
-		{
-			terminal.print('You head to your right.');
-			var h = player.prevDirection[0];
-			var v = player.prevDirection[1];
-			if (h == 1)
-				player.move(0, 1);
-			else if (h == -1)
-				player.move(0, -1);
-			else if (v == -1)
-				player.move(1, 0);
-			else
-				player.move(-1, 0);
-		}
-		else if (gameState.currentCase == gameState.goLeft)
-			terminal.print('That\'s not what you said before.');
-		else
-			terminal.print('What?');
-	}
-	else
-		terminal.print('What?');
 	gameState.currentCase = gameState.normal;
+	if ((gameState.currentState == gameState.goRight && direction == "left") ||
+		(gameState.currentState == gameState.goLeft && direction == "right")) {
+		terminal.print("That's not what you said before.");
+		return;
+	}
+	let direction_factor = direction === "left" ? -1 : 1;
+
+	let h = player.prevDirection[0] * direction_factor;
+	let v = player.prevDirection[1] * direction_factor;
+	terminal.print("You head to your " + direction + ".");
+	player.move(v, h);
 }
 //Followup to go left/right
 TerminalShell.commands['your'] = function(terminal) {
-	if (gameState.currentCase == gameState.dead) {return;}
 	var cmd_args = Array.prototype.slice.call(arguments);
 	cmd_args.shift();
 	if (
@@ -234,7 +191,6 @@ TerminalShell.commands['your'] = function(terminal) {
 }
 //Resets player to full health
 TerminalShell.commands['rest'] = function(terminal) {
-	if (gameState.currentCase == gameState.dead) { return; }
 	$('#game').fadeOut(2000, () => {
 		terminal.setPromptActive(false);
 		player.rest();
@@ -250,7 +206,6 @@ TerminalShell.commands['rest'] = function(terminal) {
 }
 //Saves player data
 TerminalShell.commands['save'] = function(terminal) {
-	if (gameState.currentCase == gameState.dead) { return; }
 	//Write data to save
 	if (gameState.currentCase >= gameState.normal && gameState.currentCase <= gameState.goRight)
 	{
@@ -264,36 +219,31 @@ TerminalShell.commands['save'] = function(terminal) {
 }
 //If data exists, load the player
 TerminalShell.commands['load'] = function(terminal) {
-	var obj = checkCookie();
-	if (obj == '')
-	{
-		Terminal.print("No load data exists yet.");
+	let obj = checkCookie();
+	if (obj == '') {
+		terminal.print("No load data exists yet.");
+		return;
 	}
-	else
-	{
-		player.load(obj.p);
-        //shopList = obj.s.shopList;
-		if (gameState.currentCase == gameState.dead)
-			Terminal.print("Welcome back from the dead, " + player.name);
-		else
-			Terminal.print("Welcome back, " + player.name);
-		// Reset game state to original
-		gameState.currentCase = gameState.normal;
+	player.load(obj.p);
+  //shopList = obj.s.shopList;
+	if (gameState.currentCase == gameState.dead) {
+		terminal.print("Welcome back from the dead, " + player.name);
+	} else {
+		terminal.print("Welcome back, " + player.name);
 	}
+	gameState.currentCase = gameState.normal;
 }
 
-
-TerminalShell.commands['stats'] = function(terminal)
-{
-	if (gameState.currentCase == gameState.dead || gameState.currentCase == gameState.start) {return;}
+TerminalShell.commands['stats'] = function(terminal) {
+	if (gameState.currentCase == gameState.start) {return;}
 	currentDisplay = "STATS";
 	//Use CLI script to make list formatting
 	ui.drawStatsWindow();
 	terminal.print("Stats are available in the top-right window.");
 }
+
 // Displays the map in the GameInfo pane
-TerminalShell.commands['map'] = function(terminal)
-{
+TerminalShell.commands['map'] = function(terminal) {
 	if (gameState.currentCase >= gameState.normal && gameState.currentCase <= gameState.shop) {
 		ui.drawMap(map);
 		currentDisplay = "MAP"; // Update the gameInfo tab
@@ -303,11 +253,9 @@ TerminalShell.commands['map'] = function(terminal)
 	}
 }
 
-TerminalShell.commands['fight'] = function(terminal)
-{
+TerminalShell.commands['fight'] = function(terminal) {
 	if (gameState.currentCase == gameState.dead) { Terminal.print("That's what got you into this mess."); return; }
-	if (gameState.currentCase == gameState.fight)
-	{
+	if (gameState.currentCase == gameState.fight) {
 		combat.setUpEncounter(player, npc);
 	} else if (isNpcOnTile(player.X, player.Y)) {
     if (npcList[currentNpcIndex].npc == null) {
@@ -322,11 +270,8 @@ TerminalShell.commands['fight'] = function(terminal)
 }
 
 //Examine npc to see
-TerminalShell.commands['inspect'] = function(terminal)
-{
-	if (gameState.currentCase == gameState.dead) {return;}
-	if (gameState.currentCase == gameState.fight)
-	{
+TerminalShell.commands['inspect'] = function(terminal) {
+	if (gameState.currentCase == gameState.fight) {
 		var npc_damage = npc.combat_stats.damageRollQty+"d"+npc.combat_stats.damageRollMax;
 		if (npc.combat_stats.damageModifier > 0) {
 	    npc_damage += "+"+npc.combat_stats.damageModifier;
@@ -370,8 +315,7 @@ TerminalShell.commands['inspect'] = function(terminal)
 	}
 }
 
-function runDirection(x, y)
-{
+function runDirection(x, y) {
 	runTimeout = setTimeout(function() {
 		player.move(x, y);
 		runDirection(x, y);
@@ -380,15 +324,16 @@ function runDirection(x, y)
 	{
 		clearTimeout(runTimeout);
 		Terminal.promptActive = true;
-        player.forcedStop = false;
+    player.forcedStop = false;
 	}
 }
 
-TerminalShell.commands['run'] = function(terminal)
-{
-	if (gameState.currentCase == gameState.dead) {Terminal.print("You should have done that sooner."); return;}
-	if (gameState.currentCase == gameState.fight)
-	{
+TerminalShell.commands['run'] = function(terminal) {
+	if (gameState.currentCase == gameState.dead) {
+		terminal.print("You should have done that sooner.");
+		return;
+	}
+	if (gameState.currentCase == gameState.fight) {
 		//Set fight to over
 		gameState.currentCase = gameState.normal;
         player.forcedStop = false;
