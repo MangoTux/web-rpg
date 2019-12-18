@@ -68,7 +68,6 @@ what to do, I'm just some text on a screen.
 //Occasionally on move, an npc should be created.
 // TODO only print 'You head [direction]' if successful
 TerminalShell.commands['go'] = function(terminal) {
-	// You can't go anywhere right now belongs here if not applicable
 	if ([gameState.fight, gameState.shop, gameState.start, gameState.playerName, gameState.playerRace, gameState.playerClass].includes(gameState.currentCase)) {
 		terminal.print("You can't go anywhere right now!");
 		return;
@@ -119,20 +118,11 @@ TerminalShell.commands['go'] = function(terminal) {
 			gameState.currentCase = gameState.goRight;
 			break;
 		case 'north':
-			terminal.print('You head north.');
-			player.move(0, -1);
-			break;
 		case 'south':
-			terminal.print('You head south.');
-			player.move(0, 1);
-			break;
 		case 'east':
-			terminal.print('You head east.');
-			player.move(1, 0);
-			break;
 		case 'west':
-			terminal.print('You head west.');
-			player.move(-1, 0);
+			terminal.print("You head " + direction + ".");
+			player.move(...map.getUnitVectorFromDirection(direction));
 			break;
 		case 'back':
 			terminal.print('You go back to where you were.');
@@ -176,19 +166,20 @@ TerminalShell.commands['my'] = function(terminal) {
 	terminal.print("You head to your " + direction + ".");
 	player.move(v, h);
 }
+
 //Followup to go left/right
 TerminalShell.commands['your'] = function(terminal) {
-	var cmd_args = Array.prototype.slice.call(arguments);
-	cmd_args.shift();
+	let args = terminal.processArgs(arguments);
+	let direction = args.join(' ');
 	if (
-		(cmd_args.join(' ') == 'left' && gameState.currentCase == gameState.goLeft) ||
-		(cmd_args.join(' ') == 'right' && gameState.currentCase == gameState.goRight)) {
+		(direction == 'left' && gameState.currentCase == gameState.goLeft) ||
+		(direction == 'right' && gameState.currentCase == gameState.goRight)) {
 		terminal.print('I\'m a computer. I have no sense of direction.');
-	}
-	else {
+	}	else {
 		terminal.print('What?');
 	}
 }
+
 //Resets player to full health
 TerminalShell.commands['rest'] = function(terminal) {
 	$('#game').fadeOut(2000, () => {
@@ -204,19 +195,18 @@ TerminalShell.commands['rest'] = function(terminal) {
 		$('#gameInfo').fadeIn(2000);
 	});
 }
+
 //Saves player data
 TerminalShell.commands['save'] = function(terminal) {
 	//Write data to save
-	if (gameState.currentCase >= gameState.normal && gameState.currentCase <= gameState.goRight)
-	{
-        //4093 byte limit for cookies - Save seed instead and get implemented
-		setCookie("player_save", {p:player/*, s:{shopList}*/}, 365); //Store all data in player object for one year
-        //setCookie("shop", shopList, 365);
-		terminal.print('Data has been saved.');
-	} else {
-		terminal.print('You can\'t save right now!');
+	if (![gameState.normal, gameState.goLeft, gameState.goRight, gameState.goDown].includes(gameState.currentCase)) {
+		terminal.print("You can't save right now!");
+		return;
 	}
+	setCookie("player_save", {p:player}, 365);
+	// Shops don't currently save
 }
+
 //If data exists, load the player
 TerminalShell.commands['load'] = function(terminal) {
 	let obj = checkCookie();
@@ -269,46 +259,46 @@ TerminalShell.commands['fight'] = function(terminal) {
 	}
 }
 
-//Examine npc to see
+const inspect_npc = function(npc) {
+	let npc_damage = npc.combat_stats.damageRollQty+"d"+npc.combat_stats.damageRollMax;
+	if (npc.combat_stats.damageModifier > 0) {
+		npc_damage += "+"+npc.combat_stats.damageModifier;
+	} else if (npc.combat_stats.damageModifier < 0) {
+		npc_damage += "-"+npc.combat_stats.damageModifier;
+	}
+	if (npc.combat_stats.attackSpeed != 1) {
+		npc_damage += " x " + npc.combat_stats.attackSpeed;
+	}
+	let data = {
+		list: {
+			'Name':npc.name_mod,
+			'Level':npc.level,
+			'Health':npc.combat_stats.currentHP + "/" + npc.combat_stats.maxHP,
+			'Damage':npc_damage,
+			'Defense':npc.combat_stats.defense,
+		},
+	};
+	if (typeof allNpcs[npc.name] !== "undefined") {
+		data.display = {
+			'Description': allNpcs[npc.name].description,
+		}
+	}
+	return data;
+}
+
 TerminalShell.commands['inspect'] = function(terminal) {
 	if (gameState.currentCase == gameState.fight) {
-		var npc_damage = npc.combat_stats.damageRollQty+"d"+npc.combat_stats.damageRollMax;
-		if (npc.combat_stats.damageModifier > 0) {
-	    npc_damage += "+"+npc.combat_stats.damageModifier;
-	  } else if (npc.combat_stats.damageModifier < 0) {
-	    npc_damage += "-"+npc.combat_stats.damageModifier;
-	  }
-	  if (npc.combat_stats.attackSpeed != 1) {
-	    npc_damage += " x " + npc.combat_stats.attackSpeed;
-	  }
-		var npcData = {
-			list: {
-				'Name':npc.name_mod,
-				'Level':npc.level,
-				'Health':npc.combat_stats.currentHP + "/" + npc.combat_stats.maxHP,
-				'Damage':npc_damage,
-				'Defense':npc.combat_stats.defense,
-			},
-			display: {
-				'Description': allNpcs[npc.name].description
-			}
-		};
-		ui.drawNpcInfo(npcData);
+		ui.drawNpcInfo(inspect_npc(npc));
 		terminal.print(randomChoice(["Hmm... Interesting.", "Cool!", "Ooh, seems tough.", "Inspect away!"]));
 		terminal.print("What will you do? [Fight/Inspect/Run]");
 	} else if (isNpcOnTile(player.X, player.Y)) {
+		// If the character hasn't been cached, create it now
     if (npcList[currentNpcIndex].npc == null) {
       npcList[currentNpcIndex].npc = new Npc();
       npcList[currentNpcIndex].npc.createNpc(false);
     }
-		var npcData = {
-			list: {
-				'Name':npc.name_mod,
-				'Level':npc.level,
-				'Health':npcList[currentNpcIndex].npc.currentHP + "/" + npcList[currentNpcIndex].npc.maxHP
-			}
-		}
-		ui.drawNpcInfo(npcData);
+		// Not a fan of the global npc above or currentNpcIndex here.
+		ui.drawNpcInfo(inspect_npc(npcList[currentNpcIndex]));
     terminal.print("What will you do? [Fight/Inspect/Talk/Leave]");
   }	else {
     terminal.print("Nothing to inspect");
@@ -348,73 +338,37 @@ TerminalShell.commands['run'] = function(terminal) {
 			"You ran from the " + npc.name_mod + ". It just wanted to be friends."]));
 
 		ui.resumeDisplay();
+		return;
 	}
-	else if (gameState.currentCase == gameState.normal)
-	{
-		// Move in a direction until an npc is encountered.
-		var cmd_args = Array.prototype.slice.call(arguments);
-		cmd_args.shift();
-		if (cmd_args.join(' ') == 'north')
-		{
-			Terminal.print('You start running north.');
-			terminal.promptActive = false;
-			runDirection(0, -1);
-		}
-		else if (cmd_args.join(' ') == 'south')
-		{
-			terminal.print('You start running south.');
-			terminal.promptActive = false;
-			runDirection(0, 1);
-		}
-		else if (cmd_args.join(' ') == 'east')
-		{
-			terminal.print('You start running east.');
-			terminal.promptActive = false;
-			runDirection(1, 0);
-		}
-		else if (cmd_args.join(' ') == 'west')
-		{
-			terminal.print('You start running west.');
-			terminal.promptActive = false;
-			runDirection(-1, 0);
-		}
-		else
-		{
-			terminal.print("What?");
-		}
-	}
-	else
-	{
+	if (gameState.currentCase != gameState.normal) {
 		terminal.print("What?");
+		return;
 	}
+	// Move in a direction until an npc is encountered.
+	let args = terminal.processArgs(arguments);
+	let direction = args.join(' ');
+	if (!['north', 'south', 'east', 'west'].includes(direction)) {
+		terminal.print("I don't know that direction.");
+		return;
+	}
+	terminal.promptActive = false;
+	Terminal.print("You start running " + direction + ".");
+	runDirection(...map.getUnitVectorFromDirection(direction));
 }
 
 //Displays the user's inventory
-TerminalShell.commands['inv'] = TerminalShell.commands['inventory'] = function(terminal)
-{
-	if (gameState.currentCase == gameState.dead || gameState.currentCase == gameState.start) {return;}
-	var cmd_args = Array.prototype.slice.call(arguments);
-	cmd_args.shift();
-	var invPage = parseInt(cmd_args.join(' ')); // Will yield a number or NaN - in which case, display page 1
-	if (isNaN(invPage) || invPage < 1)
-	{
+TerminalShell.commands['inv'] = TerminalShell.commands['inventory'] = function(terminal) {
+	let args = terminal.processArgs(arguments);
+	let invPage = parseInt(args);
+	if (isNaN(invPage) || invPage < 1) {
 		invPage = 1;
 	}
-	if (player.inventory.length == 0)
-	{
-		$("#gameInfo").html("<h3>Player Inventory</h3><ul><li>You\'ve got nothing!</li></ul>Page " + (invPage) + " of " + Math.ceil(player.inventory.length/5) + ".");
-	}
-	else
-	{
-		ui.drawInventoryWindow(invPage);
-		currentDisplay = "INVENTORY";
-	}
+	ui.drawInventoryWindow(invPage);
 	terminal.print("Inventory is available in the top-right window.");
 }
 
 //Displays all items currently wielded by player
-TerminalShell.commands['wielding'] = TerminalShell.commands['equipped'] = TerminalShell.commands['equipment'] = function(terminal)
-{
+TerminalShell.commands['wielding'] = TerminalShell.commands['equipped'] = TerminalShell.commands['equipment'] = function(terminal) {
 	if (gameState.currentCase == gameState.dead || gameState.currentCase == gameState.currentCase.start) { return; }
 	currentDisplay = "WIELDING";
   if (player.wielding.length == 0)
@@ -425,131 +379,150 @@ TerminalShell.commands['wielding'] = TerminalShell.commands['equipped'] = Termin
   ui.drawEquippedWindow();
 }
 
-TerminalShell.commands['shop'] = TerminalShell.commands['enter'] = function(terminal)
-{
-	if (gameState.currentCase == gameState.shop)
-	{ displayShopInfo(); }
-	else if (gameState.currentCase == gameState.normal)
-	{
-		currentShopIndex = -1;
-		//Check here if a map exists on current square, else print no shops
-		for (var i in shopList)
-		{
-			if (shopList[i].x == player.X && shopList[i].y == player.Y)
-			{
-        if (shopList[i].shop == null) {
-          shopList[i].shop = new Shop(player);
-          shopList[i].shop.init();
-        }
-				currentShopIndex = i;
-				restock();
-        Terminal.print("You enter the shop.");
-        gameState.currentCase = gameState.shop;
-        displayShopInfo();
-				return;
+TerminalShell.commands['shop'] = TerminalShell.commands['enter'] = function(terminal) {
+	if (![gameState.shop, gameState.normal].includes(gameState.currentState)) {
+		terminal.print("This is a horrible time to go shopping.");
+		return;
+	}
+	// Scan the world for shops on the tile
+	if (gameState.currentCase == gameState.normal) {
+		currentShopIndex = null;
+		for (let i in shopList) {
+			if (shopList[i].x != player.X || shopList[i].y != player.Y) {
+				continue;
 			}
-		}
-		if (currentShopIndex == -1)
-		{
-      Terminal.print("There's not a shop here!");
-		}
-	} else {
-    Terminal.print("This is a horrible time to go shopping.");
-  }
-}
-
-//Purchases an object in shop inventory and adds it to player's inventory
-TerminalShell.commands['purchase'] = TerminalShell.commands['buy'] = function(terminal)
-{
-	if (gameState.currentCase != gameState.shop) { Terminal.print("What?"); return }
-	var cmd_args = Array.prototype.slice.call(arguments);
-	cmd_args.shift();
-	var selection = cmd_args.join(' ');
-	for (var i in shopList[currentShopIndex].shop.inventory)
-	{
-		if (shopList[currentShopIndex].shop.inventory[i].name.toLowerCase().indexOf(selection) > -1)
-		{
-			var cost = shopList[currentShopIndex].shop.inventory[i].cost;
-			if (player.gold >= cost)
-			{
-				//Add item to player inventory, remove from shop inventory
-				player.inventory.push(shopList[currentShopIndex].shop.inventory.splice(i, 1).shift());
-				Terminal.print("You purchased the " + player.inventory[player.inventory.length-1].name + " for " + cost + " gold.");
-				player.gold -= cost;
+			if (shopList[i].shop == null) {
+				shopList[i].shop = new Shop(player);
+				shopList[i].shop.init();
 			}
-			else
-			{
-				terminal.print("You can't afford that!");
-			}
-			displayShopInfo();
+			currentShopIndex = i;
+			restock();
+			gameState.currentCase = gameState.shop;
+			terminal.print("You enter the shop");
 			break;
 		}
-	}
-}
-
-// Sells any obtained items back to the shop for 1/2 gold
-TerminalShell.commands['sell'] = function(terminal)
-{
-	if (gameState.currentCase != gameState.shop) { Terminal.print("What?"); return }
-	var cmd_args = Array.prototype.slice.call(arguments);
-	cmd_args.shift();
-	var selection = cmd_args.join(' ');
-	for (var i in player.wielding)
-	{
-		if (player.wielding[i].name.toLowerCase().indexOf(selection) > -1)
-		{
-			terminal.print("You can't sell something you're wearing! Take it off first.");
+		if (currentShopIndex == null) {
+			terminal.print("There's no shop here.");
 			return;
 		}
 	}
-	for (var i in player.inventory)
-	{
-		if (player.inventory[i].name.toLowerCase().indexOf(selection) > -1)
-		{
-      var cost = Math.floor(player.inventory[i].cost*3/4);
-			//TODO add to shop stock if it's already there
-			player.gold += cost;
-			terminal.print("You sell the " + player.inventory.splice(i, 1)[0].name + " for " + cost + " gold.");
-			displayShopInfo();
-			break;
-		}
-	}
+	gameState.currentCase == gameState.shop && displayShopInfo();
 }
 
-TerminalShell.commands['leave'] = TerminalShell.commands['exit'] = TerminalShell.commands['quit'] = function(terminal)
-{
-	if (gameState.currentCase == gameState.shop)
-	{
-		terminal.print("You leave the shop.");
-		gameState.currentCase = gameState.normal;
-		Terminal.resetGameInfo();
+// Purchases an object in shop inventory and adds it to player's inventory
+// Future: Steal might be an option?
+TerminalShell.commands['purchase'] = TerminalShell.commands['buy'] = function(terminal) {
+	if (gameState.currentCase != gameState.shop) { Terminal.print("What?"); return }
+	let selection = terminal.processArgs(arguments);
+	let selection_index = null;
+	for (let i in shopList[currentShopIndex].shop.inventory) {
+		if (shopList[currentShopIndex].shop.inventory[i].name.toLowerCase().indexOf(selection) == -1) {
+			continue;
+		}
+		if (selection_index != null) {
+			terminal.print("You're going to have to be more specific.");
+			return;
+		}
+	  selection_index = i;
 	}
+	if (selection_index == null) {
+		terminal.print("There's nothing here by that name.");
+		return;
+	}
+	let item = shopList[currentShopIndex].shop.inventory[i];
+	if (player.gold < item.cost) {
+		terminal.print("You can't afford that!");
+		return;
+	}
+	player.gold -= item.cost;
+	shopList[currentShopIndex].shop.inventory.splice(selection_index, 1);
+	player.inventory.push(item);
+	terminal.print("You purchased the " + item.name + " for " + item.cost + " gold.");
+	displayShopInfo();
+}
+
+// Sells any obtained items back to the shop for 1/2 gold
+TerminalShell.commands['sell'] = function(terminal) {
+	if (gameState.currentCase != gameState.shop) {
+		terminal.print("Nobody here is interested."); return;
+	}
+	let selection = terminal.processArgs(arguments);
+	let selection_index = null;
+	for (let i in player.wielding) {
+		if (player.wielding[i].name.toLowerCase().indexOf(selection) == -1) {
+			continue;
+		}
+		selection_index = i;
+	}
+	if (selection_index != null) {
+		terminal.print("You can't sell something you're wearing! Take it off first.");
+		return;
+	}
+	for (let i in player.inventory) {
+		if (player.inventory[i].name.toLowerCase().indexOf(selection) == -1) {
+			continue;
+		}
+		if (selection_index != null) {
+			terminal.print("You're going to have to be more specific.");
+			return;
+		}
+		selection_index = i;
+	}
+	if (selection_index == null) {
+		terminal.print("You don't have anything by that name.");
+		return;
+	}
+	let item = player.inventory.splice(selection_index, 1).shift();
+	let cost = Math.floor(item.cost / 2);
+	shopList[i].shop.inventory.push(item);
+	player.gold += cost;
+	terminal.print("You sell the " + item.name + " for " + cost + " gold.");
+	displayShopInfo();
+}
+
+TerminalShell.commands['leave'] = TerminalShell.commands['exit'] = function(terminal) {
+	if (gameState.currentCase != gameState.shop) {
+		terminal.print("But we're having so much fun!")
+		terminal.print("Be sure to save, but you don't need to tell me you're leaving.");
+		return;
+	}
+	terminal.print("You leave the shop.");
+	gameState.currentCase = gameState.normal;
+	terminal.resetGameInfo();
 }
 
 TerminalShell.commands['equip'] = function(terminal)
 {
-	var cmd_args = Array.prototype.slice.call(arguments);
-	cmd_args.shift();
-	var item = cmd_args.join(' '); // The item to equip
-	if (item.length<4) //Soup is the shortest
-	{ terminal.print("Please specify an item to equip."); return; }
-	var itemIndex = -1;
-	for (var i in player.inventory)
-	{
-		if (player.inventory[i].name.toLowerCase() == item)
-		{
-			if (player.inventory[i].type == types.healing) { terminal.print("You can't equip that!"); return; }
-			itemIndex = i;
-			break;
+	// This should be a middleware for a player.equip, honestly
+	let selection = terminal.processArgs(arguments);
+	// TODO Use the same behavior as shop, checking for pattern-matched items.
+	let selection_index = null;
+	for (let i in player.inventory) {
+		if (player.inventory[i].type == types.healing) {
+			continue;
 		}
+		if (player.inventory[i].name.toLowerCase().indexOf(selection) == -1) {
+			continue;
+		}
+		if (selection_index != null) {
+			terminal.print("You're going to have to be more specific.");
+			return;
+		}
+		selection_index = i;
 	}
-	if (itemIndex == -1) { Terminal.print("You need to own an item to equip it!"); return; }
-	for (i in player.wielding)
-	{
-		if (player.wielding[i].type == player.inventory[itemIndex].type)
-		{
-			terminal.print("You unequip the " + player.wielding.splice(i, 1)[0].name + ".");
+	if (selection_index == null) {
+		// Don't equip soup or things that don't exist.
+		terminal.print("You don't have anything by that name worth equipping.");
+		return;
+	}
+	// Each body part can only have one equipped item; unattach current items before wielding
+	for (let i in player.wielding) {
+		if (player.wielding[i].type == player.inventory[selection_index].type) {
+			continue;
 		}
+		let old_item = player.wielding.splice(i, 1).shift();
+		terminal.print("You unequip the " + old_item.name + ".");
+		break;
 	}
 	player.wielding.push(player.inventory[itemIndex]);
 	terminal.print("You equip the " + player.wielding[player.wielding.length-1].name + ".");
@@ -559,12 +532,10 @@ TerminalShell.commands['equip'] = function(terminal)
 }
 
 TerminalShell.commands['unequip'] = function(terminal) {
-	if (player.wielding.length == 0) {terminal.print("Nothing to unequip"); return;}
-	var cmd_args = Array.prototype.slice.call(arguments);
-	cmd_args.shift();
-	var item = cmd_args.join(' '); // The item to unequip
-	for (i in player.wielding)
-	{
+	if (player.wielding.length == 0) { terminal.print("Nothing to unequip"); return; }
+	let item = terminal.processArgs(arguments);
+	for (let i in player.wielding)
+	{ // TODO shop behavior
 		if (player.wielding[i].name.toLowerCase() == item)
 		{
 			terminal.print("You unequip the " + player.wielding.splice(i, 1)[0].name + ".");// Update the player stat window when appropriate
