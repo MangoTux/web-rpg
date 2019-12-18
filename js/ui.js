@@ -98,17 +98,23 @@ UI.prototype.drawStatsWindow = function() {
 	statList.append($('<li>').text("Location: " + coord));
 	$("#gameInfo").html("<h3>Player Stats<br><ul>"+statList.html()+"</ul></h3>");
 }
-// Display the invPage-nth page of the Player's inventory
 
+// Display the invPage-nth page of the Player's inventory
 UI.prototype.drawInventoryWindow = function(invPage) {
   if (typeof invPage === "undefined") { invPage = 1; }
-  var invList = $('<ul>');
-	for (var i = 0; (invPage-1)*5+i<player.inventory.length && i<6; i++)
-	{
-		var I = 5*(invPage-1)+i;
-    invList.append($('<li>').html(player.inventory[I].name + "<br>   " + toString(player.inventory[I])));
+  let display = "<h3>Player Inventory</h3>";
+  let invList = $('<ul>');
+  if (player.inventory.length == 0) {
+    invList.append($("<li>").html("You've got nothing!"));
+  }
+  // Display 6 items per inventory page
+  let page_offset = (invPage-1)*5;
+	for (let i = 0; page_offset+i<player.inventory.length && i<6; i++) {
+		let page_index = page_offset+i;
+    invList.append($('<li>').html(player.inventory[page_index].name + "<br>   " + toString(player.inventory[page_index])));
 	}
-	$("#gameInfo").html("<h3>Player Inventory</h3><ul>" + invList.html()+"</ul>Page " + (invPage) + " of " + Math.ceil(player.inventory.length/5) + ".");
+  display += invList[0].outerHTML;
+  $("#gameInfo").html(display);
 }
 
 // Display all items the user currently has equippedd
