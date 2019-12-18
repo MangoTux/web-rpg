@@ -1,3 +1,7 @@
+/*
+While the auto combat is neat, I'd like to consider a more turn-based approach in the future
+Actions determine movement speed?
+*/
 function Combat() {
   this.critValues = [1, 1.5, 2, 3];
   this.critStrings = ["", "Critical Hit!", "Double Crit!", "Triple Crit!"];

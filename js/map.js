@@ -235,3 +235,16 @@ Map.prototype.findNearestTraversible = function(x, y)
   }
   return [x, y]; // Uh-oh. TODO, But slim chance of actually occurring.
 }
+
+Map.prototype.getUnitVectorFromDirection = function(direction_string) {
+  switch (direction_string) {
+    case 'north': return [0, -1];
+    case 'south': return [0, 1];
+    case 'east': return [1, 0];
+    case 'west': return [-1, 0];
+    case 'northeast': return [-1, -1];
+    case 'southeast': return [-1, 1];
+    case 'southwest': return [1, 1];
+    case 'northwest': return [1, -1];
+  }
+}
