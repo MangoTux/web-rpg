@@ -665,6 +665,7 @@ var Item = function()
   }
 }
 
+// TODO Move to class function
 function toString(item) {
 	var dataString;
 	if (item.type == types.healing) {
