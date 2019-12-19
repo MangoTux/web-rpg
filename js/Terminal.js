@@ -440,6 +440,6 @@ Terminal=
 	processArgs: function(text) {
 		let cmd_args = Array.prototype.slice.call(text);
 		cmd_args.shift();
-		return cmd_args;
+		return cmd_args.join(' ');
 	}
 }

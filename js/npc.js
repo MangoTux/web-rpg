@@ -704,32 +704,17 @@ function getName()
 
 		if (debug) {
 			baseName = randomChoice(npcs.debug);
-		}
-    else if (map.getTile(player.X, player.Y).type=="W")
-    {
+		} else if (map && map.getTile(player.X, player.Y).type=="W") {
         baseName = randomChoice(npcs.waterNpcs);
-    }
-
-    // Extreme north or south; create arctic npcs
-    else if (player.Y > 70 || player.Y < -70)
-    {
+    } else if (player.Y > 70 || player.Y < -70) {
         baseName = randomChoice(npcs.coldNpcs);
-    }
-    // Center of world, create people
-    else if ((player.Y < 30 && player.Y > -30) && (player.X < 30 && player.X > -30))
-    {
+    } else if ((player.Y < 30 && player.Y > -30) && (player.X < 30 && player.X > -30)) {
         baseName = randomChoice(npcs.peopleNpcs);
-    }
-    else if (player.level < 25)
-    {
+    } else if (player.level < 25) {
         baseName = randomChoice(npcs.easyNpcs.concat(npcs.normalNpcs));
-    }
-    else if (player.level > 60)
-    {
+    } else if (player.level > 60) {
         baseName = randomChoice(npcs.hardNpcs.concat(npcs.normalNpcs));
-    }
-    else
-    {
+    } else {
         baseName = randomChoice(npcs.normalNpcs);
     }
     return baseName;
@@ -828,3 +813,16 @@ for (var i=1; i<=1000; i++)
     npcList.push({x:getRandomInt(-500, 500), y:getRandomInt(-500, 500), npc:null});
 }
 var currentNpcIndex;
+
+// Eventually, will allow multiple enemies to be encountered at once.
+class Encounter {
+	npc = null;
+	constructor() {
+		this.npc = new Npc();
+		this.npc.createNpc(true);
+	}
+
+	getEncounter() {
+		return this.npc;
+	}
+}
