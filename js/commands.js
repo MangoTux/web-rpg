@@ -4,19 +4,71 @@ Note: All auxiliary functions should probably be moved to mediators.
 TerminalShell.commands['start'] = function(terminal) {
 	//Check if there's a cookie - If so, Load.
 	//Otherwise, get name, class, race.
-	gameState.currentCase = gameState.start;
-	terminal.print("Hello! Type \'new\' to begin, or \'load\' if you already have a profile.");
+	player.state = state.player.start;
+	terminal.print("Hello! Type 'new' to begin, or 'load' if you already have a profile.");
 };
 
 //Create player data.
 TerminalShell.commands['new'] = function(terminal) {
-	if (gameState.currentCase == gameState.start || gameState.currentCase == gameState.dead)
-	{
-		gameState.currentCase = gameState.playerName;
+	if ([state.player.start, state.player.dead].includes(player.state)) {
+		player.state = state.player.name;
 		terminal.print("What is your name?");
-		//The rest of the input is taken care of during the command processing
+		return;
+	}
+	terminal.print("You can't quit now!");
+}
+
+const prompt_name = function(terminal, name) {
+	player.name = name.charAt(0).toUpperCase() + name.slice(1);
+	// TODO Seed map
+	player.state = state.player.race;
+	terminal.print(`Okay, ${player.name}, what is your race? [Human/Elf/Dwarf/Goblin]`);
+}
+
+const prompt_race = function(terminal, race) {
+	race = race.charAt(0).toUpperCase() + race.slice(1);
+	// Be optimistic after switching.
+	player.state = state.player.archetype;
+	switch (race) {
+		case Human.name:
+			player.race = new Human(); break;
+		case Elf.name:
+			player.race = new Elf(); break;
+		case Dwarf.name:
+			player.race = new Dwarf(); break;
+		case Goblin.name:
+			player.race = new Goblin(); break;
+		default:
+			player.state = state.player.race;
+	}
+	if (player.state == state.player.race) {
+		terminal.print("What is your race? [Human/Elf/Dwarf/Goblin]");
 	} else {
-		terminal.print("You can't quit now!");
+		terminal.print("Final question: What is your class? [Warrior/Ranger/Mage/Monk]");
+	}
+}
+
+const prompt_archetype = function(terminal, archetype) {
+	archetype = archetype.charAt(0).toUpperCase() + archetype.slice(1);
+	// Benefit of the doubt
+	player.state = state.player.standard;
+	switch (archetype) {
+		case Warrior.name:
+			player.archetype = new Warrior(); break;
+		case Ranger.name:
+			player.archetype = new Elf(); break;
+		case Mage.name:
+			player.archetype = new Mage(); break;
+		case Monk.name:
+			player.archetype = new Monk(); break;
+		default:
+			player.state = state.player.archetype;
+	}
+	if (player.state == state.player.archetype) {
+		terminal.print("What is your class? [Warrior/Ranger/Mage/Monk]");
+	} else {
+		terminal.print(`Welcome to the world, ${player.name} the ${player.race.name} ${player.archetype.name}!`);
+		terminal.print(`Type 'help' to view a list of commands.`);
 	}
 }
 
@@ -244,13 +296,21 @@ TerminalShell.commands['stats'] = function(terminal) {
 
 // Displays the map in the GameInfo pane
 TerminalShell.commands['map'] = function(terminal) {
-	if (gameState.currentCase >= gameState.normal && gameState.currentCase <= gameState.shop) {
-		ui.drawMap(map);
-		currentDisplay = "MAP"; // Update the gameInfo tab
-		terminal.print("The map is available in the top-right window.");
-	} else {
-		terminal.print("You can't access the map right now!");
+	if (player.state == state.player.underground) {
+		terminal.print("It's too dark to read the map!");
+		return;
 	}
+	if ([
+		state.player.standard,
+		state.player.fight,
+		state.player.shop
+	].includes(player.state)) {
+		currentDisplay = "MAP";
+		ui.drawMap(map);
+		terminal.print("The map is available in the top-right window.");
+		return;
+	}
+	terminal.print("You can't access the map right now.");
 }
 
 TerminalShell.commands['fight'] = function(terminal) {
