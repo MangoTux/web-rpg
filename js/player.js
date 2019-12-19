@@ -1,4 +1,14 @@
 //Player object
+/*
+WIP
+class Player {
+	constructor(name) {
+		this.name = name;
+		this.race = null;
+		this.archetype = null;
+	}
+}
+*/
 function Player(name)
 {
 	//Info

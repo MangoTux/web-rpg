@@ -209,9 +209,7 @@ Map.prototype.getNeighbors = function(x, y) {
 Map.prototype.findNearestTraversible = function(x, y)
 {
   // Easier way of indexing coordinates
-  function stringify(a, b) {
-    return a + ":" + b
-  }
+  const stringify = (a, b) => a + ":" + b;
   // Don't walk on water or lava
   let excluded_types = ["W", "L"];
   let frontier = [];
@@ -221,17 +219,17 @@ Map.prototype.findNearestTraversible = function(x, y)
 
   while (frontier.length > 0) {
     let current = frontier.shift();
-    let current_tile = this.getTile(current[0], current[1]);
+    let current_tile = this.getTile(...current);
     if (excluded_types.indexOf(current_tile.type) == -1) {
       return {X: current[0], Y: current[1]};
     }
-    let neighbors = this.getNeighbors(current[0], current[1]);
-    for (let index in neighbors) {
-      if (!(stringify(neighbors[index][0], neighbors[index][1]) in visited)) {
+    let neighbors = this.getNeighbors(...current);
+    neighbors.forEach((element, index) => {
+      if (!(stringify(...element) in visited)) {
         frontier.push(neighbors[index]);
-        visited[stringify(neighbors[index][0], neighbors[index][1])] = true;
+        visited[stringify(...neighbors[index])] = true;
       }
-    }
+    });
   }
   return [x, y]; // Uh-oh. TODO, But slim chance of actually occurring.
 }
