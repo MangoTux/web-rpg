@@ -305,7 +305,7 @@ TerminalShell.commands['inspect'] = function(terminal) {
 	}
 }
 
-function runDirection(x, y) {
+const runDirection = function(x, y) {
 	runTimeout = setTimeout(function() {
 		player.move(x, y);
 		runDirection(x, y);
@@ -414,16 +414,13 @@ TerminalShell.commands['shop'] = TerminalShell.commands['enter'] = function(term
 TerminalShell.commands['purchase'] = TerminalShell.commands['buy'] = function(terminal) {
 	if (gameState.currentCase != gameState.shop) { Terminal.print("What?"); return }
 	let selection = terminal.processArgs(arguments);
-	let selection_index = null;
-	for (let i in shopList[currentShopIndex].shop.inventory) {
-		if (shopList[currentShopIndex].shop.inventory[i].name.toLowerCase().indexOf(selection) == -1) {
-			continue;
-		}
-		if (selection_index != null) {
-			terminal.print("You're going to have to be more specific.");
-			return;
-		}
-	  selection_index = i;
+	let selection_index = shopList[currentShopIndex].shop.inventory.getIndexFromPattern(selection);
+	if (selection_index == null) {
+		terminal.print("There's nothing here by that name.");
+		return;
+	} else if (selection_index == -1) {
+		terminal.print("You're going to have to be more specific.");
+		return;
 	}
 	if (selection_index == null) {
 		terminal.print("There's nothing here by that name.");
@@ -447,29 +444,17 @@ TerminalShell.commands['sell'] = function(terminal) {
 		terminal.print("Nobody here is interested."); return;
 	}
 	let selection = terminal.processArgs(arguments);
-	let selection_index = null;
-	for (let i in player.wielding) {
-		if (player.wielding[i].name.toLowerCase().indexOf(selection) == -1) {
-			continue;
-		}
-		selection_index = i;
-	}
+	let selection_index = player.wielding.getIndexFromPattern(selection);
 	if (selection_index != null) {
 		terminal.print("You can't sell something you're wearing! Take it off first.");
 		return;
 	}
-	for (let i in player.inventory) {
-		if (player.inventory[i].name.toLowerCase().indexOf(selection) == -1) {
-			continue;
-		}
-		if (selection_index != null) {
-			terminal.print("You're going to have to be more specific.");
-			return;
-		}
-		selection_index = i;
-	}
+	selection_index = player.inventory.getIndexFromPattern(selection);
 	if (selection_index == null) {
 		terminal.print("You don't have anything by that name.");
+		return;
+	} else if (selection_index == -1) {
+		terminal.print("You're going to have to be more specific.");
 		return;
 	}
 	let item = player.inventory.splice(selection_index, 1).shift();
@@ -491,28 +476,16 @@ TerminalShell.commands['leave'] = TerminalShell.commands['exit'] = function(term
 	terminal.resetGameInfo();
 }
 
-TerminalShell.commands['equip'] = function(terminal)
-{
+TerminalShell.commands['equip'] = function(terminal) {
 	// This should be a middleware for a player.equip, honestly
 	let selection = terminal.processArgs(arguments);
 	// TODO Use the same behavior as shop, checking for pattern-matched items.
-	let selection_index = null;
-	for (let i in player.inventory) {
-		if (player.inventory[i].type == types.healing) {
-			continue;
-		}
-		if (player.inventory[i].name.toLowerCase().indexOf(selection) == -1) {
-			continue;
-		}
-		if (selection_index != null) {
-			terminal.print("You're going to have to be more specific.");
-			return;
-		}
-		selection_index = i;
-	}
+	let selection_index = player.inventory.getIndexFromPattern(selection);
 	if (selection_index == null) {
-		// Don't equip soup or things that don't exist.
 		terminal.print("You don't have anything by that name worth equipping.");
+		return;
+	} else if (selection_index == -1) {
+		terminal.print("You're going to have to be more specific.");
 		return;
 	}
 	// Each body part can only have one equipped item; unattach current items before wielding
@@ -524,8 +497,8 @@ TerminalShell.commands['equip'] = function(terminal)
 		terminal.print("You unequip the " + old_item.name + ".");
 		break;
 	}
-	player.wielding.push(player.inventory[itemIndex]);
-	terminal.print("You equip the " + player.wielding[player.wielding.length-1].name + ".");
+	player.wielding.push(player.inventory[selection_index]);
+	terminal.print("You equip the " + player.inventory[selection_index].name + ".");
 	player.applyWielding();
 	// Update the player stat window when appropriate
 	ui.resumeDisplay();
@@ -533,34 +506,35 @@ TerminalShell.commands['equip'] = function(terminal)
 
 TerminalShell.commands['unequip'] = function(terminal) {
 	if (player.wielding.length == 0) { terminal.print("Nothing to unequip"); return; }
-	let item = terminal.processArgs(arguments);
-	for (let i in player.wielding)
-	{ // TODO shop behavior
-		if (player.wielding[i].name.toLowerCase() == item)
-		{
-			terminal.print("You unequip the " + player.wielding.splice(i, 1)[0].name + ".");// Update the player stat window when appropriate
-			player.applyWielding();
-			ui.resumeDisplay();
-			return;
-		}
+	let selection = terminal.processArgs(arguments);
+	let selection_index = player.wielding.getIndexFromPattern(selection);
+	if (selection_index == null) {
+		terminal.print("You don't have anything by that to unequip.");
+		return;
+	} else if (selection_index == -1) {
+		terminal.print("You're going to have to be more specific.");
+		return;
 	}
-	terminal.print("You need to be wearing an item to unequip it!");
+	let item = player.wielding.splice(selection_index, 1).shift();
+	terminal.print("You unequip the " + item.name + ".");// Update the player stat window when appropriate
+	player.applyWielding();
+	ui.resumeDisplay();
 }
 
 /* Used in quests */
 TerminalShell.commands['talk'] = function(terminal) {
-    /* If current tile has an NPC, talk to it to reveal information */
-    if (!isNpcOnTile(player.X, player.Y)) {
-      terminal.print("You're talking to yourself.");
-			return;
-    }
-    terminal.print("You strike up a conversation");
-    if (npcList[currentNpcIndex].npc == null) {
-      npcList[currentNpcIndex].npc = new Npc();
-      npcList[currentNpcIndex].npc.createNpc(false);
-      player.quests[currentNpcIndex] = npcList[currentNpcIndex].npc.quest;
-    }
-    $("#gameInfo").html(getQuestText());
-    updateQuest();
-    currentNpcIndex = null;
+  /* If current tile has an NPC, talk to it to reveal information */
+  if (!isNpcOnTile(player.X, player.Y)) {
+    terminal.print("You're talking to yourself.");
+		return;
+  }
+  terminal.print("You strike up a conversation");
+  if (npcList[currentNpcIndex].npc == null) {
+    npcList[currentNpcIndex].npc = new Npc();
+    npcList[currentNpcIndex].npc.createNpc(false);
+    player.quests[currentNpcIndex] = npcList[currentNpcIndex].npc.quest;
+  }
+  $("#gameInfo").html(getQuestText());
+  updateQuest();
+  currentNpcIndex = null;
 }
