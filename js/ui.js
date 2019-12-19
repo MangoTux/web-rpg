@@ -21,7 +21,7 @@ UI.prototype.drawMap = function(map) {
         isNPC = false;
         for (var i in shopList)
         {
-          if (shopList[i].x == x+player.X && shopList[i].y == y+player.Y)
+          if (shopList[i].x == x+player.position[0] && shopList[i].y == y+player.position[1])
           {
             row.append($('<td>').text(map.customTiles.shop.symbol).css("color", map.customTiles.shop.style));
             isShop = true;
@@ -30,7 +30,7 @@ UI.prototype.drawMap = function(map) {
         }
         for (var i in npcList)
         {
-          if (npcList[i].x == x+player.X && npcList[i].y == y+player.Y)
+          if (npcList[i].x == x+player.position[0] && npcList[i].y == y+player.position[1])
           {
             row.append($('<td>').text(map.customTiles.npc.symbol).css("color", map.customTiles.npc.color));
             isNPC = true;
@@ -39,7 +39,7 @@ UI.prototype.drawMap = function(map) {
         }
         if (!isShop && !isNPC)
         {
-          var tile = map.getTile(x+player.X, y+player.Y);
+          var tile = map.getTile(x+player.position[0], y+player.position[1]);
           row.append($('<td>').text(tile.symbol).css("color", tile.style));
         }
       }
