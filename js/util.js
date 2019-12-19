@@ -18,3 +18,8 @@ Array.prototype.getIndexFromPattern = function(selection) {
   }
   return selection_index;
 }
+
+// TODO Save State Management
+// - Player
+// - Map
+// - Shops

@@ -17,6 +17,27 @@ gameState = {
 	fight:8,
 	dead:9,
 };
+state = {
+	player: {
+		start: 1,
+		name: 2,
+		race: 2.1,
+		archetype: 2.2,
+
+		standard: 3,
+		underground: 4,
+		fight: 5,
+		combat: 6,
+
+		dead: 0
+	},
+	terminal: {
+		suppressed: 0,
+		standard: 1,
+		direction_left: 2,
+		direction_right: 3,
+	},
+};
 
 //Possible races and race stats
 playerRaces =

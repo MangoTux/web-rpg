@@ -134,14 +134,11 @@ UI.prototype.drawEquippedWindow = function() {
           continue;
         }
       }
-      if (equip_slots[i] != 0)
-      {
-        equipList.append($('<li>').html(i + ":" + padding.substr(0, 8-i.length).replace(/ /g, '&nbsp;') + equip_slots[i].name));
+      let item_name = "<i>None</i>";
+      if (equip_slots[i]) {
+        item_name = equip_slots[i].name
       }
-      else
-      {
-        equipList.append($('<li>').html(i + ":" + padding.substr(0, 8-i.length).replace(/ /g, '&nbsp;') + "<i>None</i>"));
-      }
+      equipList.append($('<li>').html(i + ":" + padding.substr(0, 8-i.length).replace(/ /g, '&nbsp;') + item_name));
     }
   }
 	$("#gameInfo").html("<h3>Equipped Items</h3><ul>" + equipList.html());
