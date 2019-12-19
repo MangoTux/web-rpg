@@ -19,6 +19,7 @@ $(document).ready(function()
 	ui = new UI();
 	combat = new Combat();
 	player = new Player("");
+	encounter = new Encounter();
 	$('#game').bind('cli-load', function(e)
 	{
 		$('#game').one('cli-ready', function (e)
