@@ -98,3 +98,9 @@ p
 .combat__miss {
 	color:white;
 }
+.error {
+	color: red;
+}
+.success {
+	color: lime;
+}

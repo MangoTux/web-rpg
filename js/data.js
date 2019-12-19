@@ -26,8 +26,9 @@ state = {
 
 		standard: 3,
 		underground: 4,
-		fight: 5,
-		combat: 6,
+		fight: 5,  // The player has encountered a fight, and needs to choose what to do
+		combat: 6, // The player is in the middle of a fight
+		shop: 7,   // The player is in a shop
 
 		dead: 0
 	},

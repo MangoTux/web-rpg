@@ -88,6 +88,111 @@ class Player {
 
 	get luck() {
 		// This needs to factor in class features and inventory items eventually
-		return this.level;
+		return this.level + this.race.luck;
 	}
 }
+
+class Race {
+	base_health;
+	luck;
+	name;
+	constructor() {}
+
+	get name() {
+		return this.name;
+	}
+}
+
+class Human extends Race {
+	name = "Human";
+	constructor() {
+		super();
+		this.base_health = 30,
+		this.luck = 2;
+	}
+}
+
+class Elf extends Race {
+	name = "Elf";
+	constructor() {
+		super();
+		this.base_health = 50;
+		this.luck = 0;
+	}
+}
+
+class Dwarf extends Race {
+	name = "Dwarf";
+	constructor() {
+		super();
+		this.base_health = 40;
+		this.luck = 1;
+	}
+}
+
+class Goblin extends Race {
+	name = "Goblin";
+	constructor() {
+		super();
+		this.base_health = 20;
+		this.luck = 4;
+	}
+}
+
+class Archetype {
+	constructor() {
+
+	}
+
+	get name() {
+		return this.name;
+	}
+}
+
+class Warrior extends Archetype {
+	name = "Warrior";
+	constructor() {
+		super();
+
+	}
+}
+
+class Ranger extends Archetype {
+	name = "Ranger";
+	constructor() {
+		super();
+
+	}
+}
+
+class Mage extends Archetype {
+	name = "Mage";
+	constructor() {
+		super();
+
+	}
+}
+
+class Monk extends Archetype {
+	name = "Monk";
+	constructor() {
+		super();
+
+	}
+}
+
+/*
+Eventually, Sub-archetypes:
+Warrior:
+- Champion (All-around decent tank, Passive skills)
+- Thief (Can steal items, avoid being hit)
+Ranger:
+- Hunter (Bonus to enemies, Rapid Fire?)
+- Druid (Magic breaks armor, HP restoration (true))
+Mage:
+- Elementalist (Bigger blasts, some abjuration?)
+- Necromancer (Bonus to enemies, HP restoration (buffer))
+Monk:
+- Priest (Paladin, Enemy bonus)
+- Sage (Guru/Martial Artist, Ignores armor/piercing, higher luck?)
+*/
