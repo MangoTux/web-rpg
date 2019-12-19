@@ -1,3 +1,10 @@
+Object.defineProperty(Array.prototype, "containsKey", {
+  enumerable: false,
+  value: function(obj) {
+    for (let key in this) { if (key == obj) { return true; } return false; }
+  }
+});
+
 Array.prototype.getIndexFromPattern = function(selection) {
   let selection_index = null;
   for (let i in this) {
