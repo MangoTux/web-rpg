@@ -40,99 +40,50 @@ var TerminalShell =
 			terminal.clear();
 		}
 	},
-	filters: [],
 
-	process: function(terminal, cmd)
-	{
+	process: function(terminal, cmd) {
 		try
 		{
-			$.each(this.filters, $.proxy(function(index, filter)
-			{
-				cmd = filter.call(this, terminal, cmd);
-			}, this));
 			//Get the individual arguments, parsed by spaces
 			var cmd_args = cmd.split(' ');
 			//Get the command name from the input
 			var cmd_name = cmd_args.shift();
 			cmd_args.unshift(terminal);
 			//Set the player name to user input
-			if (gameState.currentCase == gameState.playerName)
-			{
-				player.setName(cmd.charAt(0).toUpperCase() + cmd.slice(1));
-				gameState.currentCase = gameState.playerRace;
-				terminal.print("Okay, " + player.name + ", what is your race? [Human/Elf/Dwarf/Goblin]");
-			}
-			 //Process the player's input, and if correct, advance to class query
-			else if (gameState.currentCase == gameState.playerRace)
-			{
-				var race = cmd.toLowerCase();
-				//If the input is in the array
-				if (playerRaces[race] != undefined)
-				{
-					//Update character information based on selected values
-					player.race = race;
-					player.base_combat_stats.damageModifier = playerRaces[race].damageModifier;
-					player.base_combat_stats.luck = playerRaces[race].damageModifier;
-					player.base_combat_stats.defense = playerRaces[race].defense;
-					player.base_combat_stats.maxHP = playerRaces[race].health;
-
-					terminal.print("Okay, what is your class? [Warrior/Ranger/Mage/Monk]");
-					gameState.currentCase = gameState.playerClass;
-				}
-				else //Continue asking until correct input is received
-				{
-					terminal.print("What is your race? [Human/Elf/Dwarf/Goblin]");
-				}
-			}
-			//Process the player's input, and if correct, start the actual gameplay
-			else if (gameState.currentCase == gameState.playerClass)
-			{
-				var pclass = cmd.toLowerCase();
-				//If the input is in the pclass array
-				if (playerClasses[pclass] != undefined)
-				{
-					//Update character information based on selected values
-					player.playerClass = pclass;
-					player.base_combat_stats.damageRollMax = playerClasses[pclass].damageRollMax;
-					player.base_combat_stats.damageRollQty = playerClasses[pclass].damageRollQty;
-					player.base_combat_stats.damageModifier += playerClasses[pclass].damageModifier;
-					player.base_combat_stats.attackSpeed = playerClasses[pclass].attackSpeed;
-					player.base_combat_stats.defense += playerClasses[pclass].defense;
-					player.base_combat_stats.maxHP += playerClasses[pclass].health;
-					player.inventory.push(new HealthItem());
-					player.base_combat_stats.currentHP = player.combat_stats.maxHP;
-					terminal.print("Welcome! View the help tab to get started, " + player.name + " the " + player.race + " " + player.playerClass + ".");
-					//Set the special case denotion to regular input
-					gameState.currentCase = gameState.normal;
-				}
+			// Handlers for dynamic commands
+			switch (player.state) {
+				case state.player.name:
+					prompt_name(terminal, cmd);
+					return;
+				case state.player.race:
+					prompt_race(terminal, cmd);
+					return;
+				case state.player.archetype:
+					prompt_archetype(terminal, cmd);
+					return;
 			}
 			//If the entered command is in the elements in command
-			else if (this.commands.hasOwnProperty(cmd_name))
+			if (!this.commands.hasOwnProperty(cmd_name))
 			{
-				if (gameState.currentCase == gameState.dead && !['start', 'new', 'help', 'updates', 'about', 'fight', 'run'].includes(cmd_name)) {
+				terminal.print("What?");
+				return;
+			}
+
+			// Some messages don't have a meaning while dead, so this ignores those actions
+			if (player.state == state.player.dead &&
+				!['start', 'new', 'help', 'updates', 'about', 'fight', 'run'].includes(cmd_name)) {
 					return;
-				}
-				this.commands[cmd_name].apply(this, cmd_args);
 			}
-			else
-			{
-				//If the command is not recognized by any existing commands
-				if (!(this.fallback && this.fallback(terminal, cmd)))
-				{
-					terminal.print('What?');
-				}
-			}
-		}
-		catch (e)
-		{
+			this.commands[cmd_name].apply(this, cmd_args);
+		} catch (e) {
 			//Something went horribly, horribly wrong
-			terminal.print($('<p>').addClass('error').text('Something happened: ' + e));
+			terminal.error('Something happened: ' + e);
 			console.log(e);
 			terminal.setWorking(false);
 		}
 	}
 };
-//Define terminal object for CLI interface
+//Define terminal object for CLI
 Terminal=
 {
 	buffer: '',
@@ -372,6 +323,14 @@ Terminal=
 		}
 		this.removeLines(displayElement);
 		this.jumpToBottom();
+	},
+
+	success: function(text) {
+		this.print($('<p>').addClass('success').text(text));
+	},
+
+	error: function(text) {
+		this.print($('<p>').addClass('error').text(text));
 	},
 
 	processInputBuffer: function(cmd) {
