@@ -20,7 +20,7 @@ TerminalShell.commands['new'] = function(terminal) {
 
 const prompt_name = function(terminal, name) {
 	player.name = name.charAt(0).toUpperCase() + name.slice(1);
-	// TODO Seed map
+	map = new Map(player.name);
 	player.state = state.player.race;
 	terminal.print(`Okay, ${player.name}, what is your race? [Human/Elf/Dwarf/Goblin]`);
 }
@@ -161,7 +161,7 @@ TerminalShell.commands['go'] = function(terminal) {
 	if (direction === 'down') {
 		if (player.state == state.player.underground) {
 			terminal.print(randomChoice(["Sorry, it's all up from here.", "Wow, bedrock already? Guess you're gonna have to turn around.", "Careful! You'll anger the mole people!", "No."]));
-		} else if (map.getTile(player.X, player.Y).type == "W") {
+		} else if (map.getTile(...player.position).type == "W") {
 			terminal.print("You can't swim!");
 		} else {
 			terminal.print("You start digging down. It is dark down here.");

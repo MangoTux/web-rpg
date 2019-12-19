@@ -176,6 +176,7 @@ Map.prototype.getTile = function(x, y)
   var height = this.elevation.get(x+256, y+256);
   var rain = (noisy(x / detail, y / detail) + 0.5 * noisy(2 * x / detail, 2 * y / detail) + 0.25 * noisy(4 * x / detail, 4 * y / detail)) / 1.75;
   rain = Math.floor(10*rain);
+  console.log(x, y);
   return this.biomeMap[height][rain];
 }
 

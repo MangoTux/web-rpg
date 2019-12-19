@@ -704,7 +704,7 @@ function getName()
 
 		if (debug) {
 			baseName = randomChoice(npcs.debug);
-		} else if (map && map.getTile(player.X, player.Y).type=="W") {
+		} else if (map && map.getTile(...player.position).type=="W") {
         baseName = randomChoice(npcs.waterNpcs);
     } else if (player.Y > 70 || player.Y < -70) {
         baseName = randomChoice(npcs.coldNpcs);
