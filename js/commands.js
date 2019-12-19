@@ -1,3 +1,6 @@
+/*
+Note: All auxiliary functions should probably be moved to mediators.
+*/
 TerminalShell.commands['start'] = function(terminal) {
 	//Check if there's a cookie - If so, Load.
 	//Otherwise, get name, class, race.
@@ -64,17 +67,34 @@ what to do, I'm just some text on a screen.
     terminal.print("Information about the game can be found on the right-hand pane");
 }
 
+const advance = function(direction, response) {
+	let move_probe = player.move(...direction);
+	if (!move_probe[0]) {
+		terminal.print(move_probe[1]);
+		return false;
+	}
+	response && terminal.print(response);
+	if (map.hasEncounter(player.position)) {
+		encounter = new Encounter();
+		let encounter_data = encounter.getEncounter();
+		terminal.print("Oh no! You ran into a level " + encounter_data.level + " " + encounter_data.name_mod + "!");
+		terminal.print("What will you do? [Fight/Inspect/Run]");
+		player.state = state.player.fight;
+		return false;
+	}
+	ui.resumeDisplay(currentDisplay);
+	return true;
+}
 //Used for movement around map.
 //Occasionally on move, an npc should be created.
 // TODO only print 'You head [direction]' if successful
 TerminalShell.commands['go'] = function(terminal) {
-	if ([gameState.fight, gameState.shop, gameState.start, gameState.playerName, gameState.playerRace, gameState.playerClass].includes(gameState.currentCase)) {
+	if (player.state != state.player.standard) {
 		terminal.print("You can't go anywhere right now!");
 		return;
 	}
 
-	let args = terminal.processArgs(arguments);
-	let direction = args.join(' ');
+	let direction = terminal.processArgs(arguments);
 	if (direction === '') {
 		terminal.print("Go where?");
 		return;
@@ -87,55 +107,51 @@ TerminalShell.commands['go'] = function(terminal) {
 	}
 	// Silly movements
 	if (direction === 'down') {
-		if (gameState.currentCase == gameState.goDown) {
-			terminal.print(randomChoice(['Sorry, it\'s all up from here.', 'Wow, bedrock already? Guess you\'re gonna have to turn around.', 'Careful! You\'ll anger the mole people!', 'No.']));
+		if (player.state == state.player.underground) {
+			terminal.print(randomChoice(["Sorry, it's all up from here.", "Wow, bedrock already? Guess you're gonna have to turn around.", "Careful! You'll anger the mole people!", "No."]));
 		} else if (map.getTile(player.X, player.Y).type == "W") {
 			terminal.print("You can't swim!");
 		} else {
-			terminal.print('You start digging down. It is dark down here.');
-			gameState.currentCase = gameState.goDown;
+			terminal.print("You start digging down. It is dark down here.");
+			player.state = state.player.underground;
 		}
 		return;
 	} else if (direction === 'up') {
-		if (gameState.currentCase == gameState.goDown) {
-			terminal.print('You\'re back on level ground. It\'s not as dark up here.');
-			gameState.currentCase = gameState.normal;
+		if (player.state == state.player.underground) {
+			terminal.print("You're back on level ground. It's not as dark up here.");
+			player.state = state.player.standard;
 		} else {
 			terminal.print("What are you doing? You are not a bird. You cannot go up.");
 		}
 		return;
 	}
+	if (['right', 'left'].includes(direction)) {
+		terminal.print(`My ${direction} or your ${direction}?`);
+		terminal.setState(direction === 'right' ? state.terminal.direction_right : state.terminal.direction_left);
+		return;
+	}
+
 	// Standard movements
-	// TODO Current an issue when approaching non-contact space. "You head west. You can't swim!"
-	gameState.currentCase = gameState.normal;
+	let vector = null;
+	let response = null;
 	switch (direction) {
-		case 'right':
-			terminal.print('My left or your left?');
-			gameState.currentCase = gameState.goLeft;
-			break;
-		case 'left':
-			terminal.print('My right or your right?');
-			gameState.currentCase = gameState.goRight;
-			break;
-		case 'north':
-		case 'south':
-		case 'east':
-		case 'west':
-			terminal.print("You head " + direction + ".");
-			player.move(...map.getUnitVectorFromDirection(direction));
+		case 'north': case 'south': case 'east': case 'west':
+			vector = map.getUnitVectorFromDirection(direction);
+			response = `You head ${direction}.`;
 			break;
 		case 'back':
-			terminal.print('You go back to where you were.');
-			player.move(-1*player.prevDirection[0], -1*player.prevDirection[1]);
+			vector = player.previous_direction.map(v => -v);
+			response = "You go back to where you were.";
 			break;
 		case 'forward':
-			player.move(player.prevDirection[0], player.prevDirection[1]);
-			terminal.print('You continue forward.');
+			vector = player.previous_direction;
+			response = "You continue forward.";
 			break;
 		default:
 			terminal.print("I don't know that direction.");
-			break;
+			return;
 	}
+	advance(vector, response);
 }
 
 //Apologize after saying 'go away'
@@ -146,31 +162,24 @@ TerminalShell.commands['sorry'] = function(terminal) {
 
 //Followup to go left/right
 TerminalShell.commands['my'] = function(terminal) {
-	let args = terminal.processArgs(arguments);
-	let direction = args.join(' ');
+	let direction = terminal.processArgs(arguments);
 
 	if (!['left', 'right'].includes(direction)) {
 		terminal.print("What?");
 		return;
 	}
-	gameState.currentCase = gameState.normal;
-	if ((gameState.currentState == gameState.goRight && direction == "left") ||
-		(gameState.currentState == gameState.goLeft && direction == "right")) {
+	if ((terminal.state == state.terminal.direction_right && direction == "left") ||
+		(terminal.state == state.terminal.direction_left && direction == "right")) {
 		terminal.print("That's not what you said before.");
 		return;
 	}
-	let direction_factor = direction === "left" ? -1 : 1;
-
-	let h = player.prevDirection[0] * direction_factor;
-	let v = player.prevDirection[1] * direction_factor;
-	terminal.print("You head to your " + direction + ".");
-	player.move(v, h);
+	let delta = player.previous_direction.map(x => x*(direction === "left") ? -1 : 1);
+	advance(delta, `You head to your ${direction}.`);
 }
 
 //Followup to go left/right
 TerminalShell.commands['your'] = function(terminal) {
-	let args = terminal.processArgs(arguments);
-	let direction = args.join(' ');
+	let direction = terminal.processArgs(arguments);
 	if (
 		(direction == 'left' && gameState.currentCase == gameState.goLeft) ||
 		(direction == 'right' && gameState.currentCase == gameState.goRight)) {
@@ -215,6 +224,7 @@ TerminalShell.commands['load'] = function(terminal) {
 		return;
 	}
 	player.load(obj.p);
+	// Initialize the map
   //shopList = obj.s.shopList;
 	if (gameState.currentCase == gameState.dead) {
 		terminal.print("Welcome back from the dead, " + player.name);
@@ -305,28 +315,27 @@ TerminalShell.commands['inspect'] = function(terminal) {
 	}
 }
 
-const runDirection = function(x, y) {
-	runTimeout = setTimeout(function() {
-		player.move(x, y);
-		runDirection(x, y);
+const run_direction = function(direction, response) {
+	const can_continue = true;
+	terminal.promptActive = false;
+	run_timeout = setTimeout(function() {
+		can_continue = advance(direction, response);
+		runDirection(direction, "");
 	}, 400);
-	if (gameState.currentCase == gameState.fight || player.forcedStop)
-	{
-		clearTimeout(runTimeout);
-		Terminal.promptActive = true;
-    player.forcedStop = false;
+	if (player.state == state.player.fight || !can_continue) {
+		clearTimeout(run_timeout);
+		terminal.promptActive = true;
 	}
 }
 
 TerminalShell.commands['run'] = function(terminal) {
-	if (gameState.currentCase == gameState.dead) {
+	if (player.state == state.player.dead) {
 		terminal.print("You should have done that sooner.");
 		return;
 	}
 	if (gameState.currentCase == gameState.fight) {
 		//Set fight to over
-		gameState.currentCase = gameState.normal;
-        player.forcedStop = false;
+		player.state = state.player.standard;
 
 		terminal.print(randomChoice(
 			["You ran from the " + npc.name_mod + ". Coward.",
@@ -345,15 +354,12 @@ TerminalShell.commands['run'] = function(terminal) {
 		return;
 	}
 	// Move in a direction until an npc is encountered.
-	let args = terminal.processArgs(arguments);
-	let direction = args.join(' ');
+	let direction = terminal.processArgs(arguments);
 	if (!['north', 'south', 'east', 'west'].includes(direction)) {
 		terminal.print("I don't know that direction.");
 		return;
 	}
-	terminal.promptActive = false;
-	Terminal.print("You start running " + direction + ".");
-	runDirection(...map.getUnitVectorFromDirection(direction));
+	run_direction(map.getUnitVectorFromDirection(direction), `You start running ${direction}.`);
 }
 
 //Displays the user's inventory
