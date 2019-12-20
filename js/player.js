@@ -23,10 +23,10 @@ class Player {
 
 	// When a player is created, move them to a non-lava/water tile
 	onCreate(map) {
-		if (map.canMove(this.position).canMove) {
+		if (map.canMove(...this.position).canMove) {
 			return;
 		};
-	  this.position = map.findNearestTraversible(this.position);
+	  this.position = map.findNearestTraversible(...this.position);
 	}
 
 	load(json) {
@@ -139,6 +139,9 @@ class Goblin extends Race {
 	}
 }
 
+/*
+Items should go into archetypes (into their own file)
+*/
 class Archetype {
 	constructor() {
 

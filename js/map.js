@@ -176,7 +176,6 @@ Map.prototype.getTile = function(x, y)
   var height = this.elevation.get(x+256, y+256);
   var rain = (noisy(x / detail, y / detail) + 0.5 * noisy(2 * x / detail, 2 * y / detail) + 0.25 * noisy(4 * x / detail, 4 * y / detail)) / 1.75;
   rain = Math.floor(10*rain);
-  console.log(x, y);
   return this.biomeMap[height][rain];
 }
 
@@ -222,7 +221,7 @@ Map.prototype.findNearestTraversible = function(x, y)
     let current = frontier.shift();
     let current_tile = this.getTile(...current);
     if (excluded_types.indexOf(current_tile.type) == -1) {
-      return {X: current[0], Y: current[1]};
+      return current;
     }
     let neighbors = this.getNeighbors(...current);
     neighbors.forEach((element, index) => {
@@ -232,7 +231,7 @@ Map.prototype.findNearestTraversible = function(x, y)
       }
     });
   }
-  return [x, y]; // Uh-oh. TODO, But slim chance of actually occurring.
+  return [x, y];
 }
 
 Map.prototype.getUnitVectorFromDirection = function(direction_string) {
@@ -246,4 +245,9 @@ Map.prototype.getUnitVectorFromDirection = function(direction_string) {
     case 'southwest': return [1, 1];
     case 'northwest': return [1, -1];
   }
+}
+
+// A secondary class to handle logic involving map interaction should be created
+Map.prototype.hasEncounter = function() {
+  return Math.random()<0.15;
 }
