@@ -1,22 +1,4 @@
-//Game State
-gameState = {
-	currentCase: 0,
 
-	start:1,
-
-	playerName:2,
-	playerRace:2.1,
-	playerClass:2.2,
-
-	normal:3,
-	goLeft:4,
-	goRight:5,
-	goDown:6,
-	shop:7,
-
-	fight:8,
-	dead:9,
-};
 state = {
 	player: {
 		start: 1,
@@ -32,11 +14,14 @@ state = {
 
 		dead: 0
 	},
+	shell: {
+		standard: 0,
+		direction_left: 1,
+		direction_right: 2,
+	},
 	terminal: {
 		suppressed: 0,
 		standard: 1,
-		direction_left: 2,
-		direction_right: 3,
 	},
 };
 
