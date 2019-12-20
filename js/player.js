@@ -141,8 +141,19 @@ class Goblin extends Race {
 
 /*
 Items should go into archetypes (into their own file)
+
+Still toying with the exact implementation, but this seems like a solid way forward.
 */
 class Archetype {
+	// Each of these should be an ID that maps to something in the Action Catalog
+	actions = [
+		'basic_punch', // Accessible with ActionCatalog.catalog[id]
+	];
+	// These are modifiers based on archetype, such as increasing number of attacks, damage reduction, passives, etc.
+	abilities = [
+		{}
+	];
+
 	constructor() {
 
 	}

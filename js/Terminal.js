@@ -97,7 +97,7 @@ Terminal=
 	spinnerIndex: 0,
 	_spinnerTimeout: null,
 
-	output: TerminalShell,
+	output: Shell,
 
 	//Configuration for graphic interface
 	config:

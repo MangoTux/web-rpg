@@ -1,15 +1,17 @@
 /*
 Note: All auxiliary functions should probably be moved to mediators.
 */
-TerminalShell.commands['start'] = function() {
-	//Check if there's a cookie - If so, Load.
-	//Otherwise, get name, class, race.
+Shell.commands['clear'] = function() {
+	Terminal.clear();
+}
+
+Shell.commands['start'] = function() {
 	player.state = state.player.start;
 	Terminal.print("Hello! Type 'new' to begin, or 'load' if you already have a profile.");
 };
 
 //Create player data.
-TerminalShell.commands['new'] = function() {
+Shell.commands['new'] = function() {
 	if ([state.player.start, state.player.dead].includes(player.state)) {
 		player.state = state.player.name;
 		Terminal.print("What is your name?");
@@ -18,62 +20,7 @@ TerminalShell.commands['new'] = function() {
 	Terminal.print("You can't quit now!");
 }
 
-const prompt_name = function(name) {
-	player.name = name.charAt(0).toUpperCase() + name.slice(1);
-	map = new Map(player.name);
-	player.onCreate(map);
-	player.state = state.player.race;
-	Terminal.print(`Okay, ${player.name}, what is your race? [Human/Elf/Dwarf/Goblin]`);
-}
-
-const prompt_race = function(race) {
-	race = race.charAt(0).toUpperCase() + race.slice(1);
-	// Be optimistic after switching.
-	player.state = state.player.archetype;
-	switch (race) {
-		case Human.name:
-			player.race = new Human(); break;
-		case Elf.name:
-			player.race = new Elf(); break;
-		case Dwarf.name:
-			player.race = new Dwarf(); break;
-		case Goblin.name:
-			player.race = new Goblin(); break;
-		default:
-			player.state = state.player.race;
-	}
-	if (player.state == state.player.race) {
-		Terminal.print("What is your race? [Human/Elf/Dwarf/Goblin]");
-	} else {
-		Terminal.print("Final question: What is your class? [Warrior/Ranger/Mage/Monk]");
-	}
-}
-
-const prompt_archetype = function(archetype) {
-	archetype = archetype.charAt(0).toUpperCase() + archetype.slice(1);
-	// Benefit of the doubt
-	player.state = state.player.standard;
-	switch (archetype) {
-		case Warrior.name:
-			player.archetype = new Warrior(); break;
-		case Ranger.name:
-			player.archetype = new Elf(); break;
-		case Mage.name:
-			player.archetype = new Mage(); break;
-		case Monk.name:
-			player.archetype = new Monk(); break;
-		default:
-			player.state = state.player.archetype;
-	}
-	if (player.state == state.player.archetype) {
-		Terminal.print("What is your class? [Warrior/Ranger/Mage/Monk]");
-	} else {
-		Terminal.print(`Welcome to the world, ${player.name} the ${player.race.name} ${player.archetype.name}!`);
-		Terminal.print(`Type 'help' to view a list of commands.`);
-	}
-}
-
-TerminalShell.commands['help'] = function() {
+Shell.commands['help'] = function() {
   let help_list = `
 <h3>Commands</h3>
 <p>
@@ -99,12 +46,12 @@ Help         - View this page
   Terminal.print("Game commands can be found on the right-hand pane");
 }
 
-TerminalShell.commands['updates'] = function() {
+Shell.commands['updates'] = function() {
 	$("#gameInfo").html($("#updates").html());
 	Terminal.print("Updates to the game can be found on the right-hand pane");
 }
 
-TerminalShell.commands['about'] = function() {
+Shell.commands['about'] = function() {
     let about = `
 <h3>About</h3>
 <p>
@@ -138,10 +85,10 @@ const advance = function(direction, response) {
 	ui.resumeDisplay(currentDisplay);
 	return true;
 }
+
 //Used for movement around map.
 //Occasionally on move, an npc should be created.
-// TODO only print 'You head [direction]' if successful
-TerminalShell.commands['go'] = function() {
+Shell.commands['go'] = function() {
 	if (player.state != state.player.standard) {
 		Terminal.print("You can't go anywhere right now!");
 		return;
@@ -208,13 +155,13 @@ TerminalShell.commands['go'] = function() {
 }
 
 //Apologize after saying 'go away'
-TerminalShell.commands['sorry'] = function() {
+Shell.commands['sorry'] = function() {
 	Terminal.suppressed = false;
 	Terminal.print(randomChoice(["It's okay c:", "I forgive you.", "Yay! Friends again!"]));
 }
 
 //Followup to go left/right
-TerminalShell.commands['my'] = function() {
+Shell.commands['my'] = function() {
 	let direction = Terminal.processArgs(arguments);
 
 	if (
@@ -238,7 +185,7 @@ TerminalShell.commands['my'] = function() {
 }
 
 //Followup to go left/right
-TerminalShell.commands['your'] = function() {
+Shell.commands['your'] = function() {
 	let direction = Terminal.processArgs(arguments);
 	if (
 		(direction == 'left' && this.state == state.terminal.direction_left) ||
@@ -251,7 +198,7 @@ TerminalShell.commands['your'] = function() {
 }
 
 //Resets player to full health
-TerminalShell.commands['rest'] = function() {
+Shell.commands['rest'] = function() {
 	$('#game').fadeOut(2000, () => {
 		Terminal.setPromptActive(false);
 		player.rest();
@@ -267,7 +214,7 @@ TerminalShell.commands['rest'] = function() {
 }
 
 //Saves player data
-TerminalShell.commands['save'] = function() {
+Shell.commands['save'] = function() {
 	//Write data to save
 	if (![state.player.standard, state.player.underground].includes(player.state)) {
 		Terminal.print("You can't save right now!");
@@ -278,25 +225,24 @@ TerminalShell.commands['save'] = function() {
 }
 
 //If data exists, load the player
-TerminalShell.commands['load'] = function() {
+Shell.commands['load'] = function() {
 	let obj = checkCookie();
 	if (obj == '') {
 		Terminal.print("No load data exists yet.");
 		return;
 	}
+	let previous_state = player.state;
 	player.load(obj.p);
 	// Initialize the map
   //shopList = obj.s.shopList;
-	if (gameState.currentCase == gameState.dead) {
+	if (previous_state == state.player.dead) {
 		Terminal.print("Welcome back from the dead, " + player.name);
 	} else {
 		Terminal.print("Welcome back, " + player.name);
 	}
-	gameState.currentCase = gameState.normal;
 }
 
-TerminalShell.commands['stats'] = function() {
-	if (gameState.currentCase == gameState.start) {return;}
+Shell.commands['stats'] = function() {
 	currentDisplay = "STATS";
 	//Use CLI script to make list formatting
 	ui.drawStatsWindow();
@@ -304,7 +250,7 @@ TerminalShell.commands['stats'] = function() {
 }
 
 // Displays the map in the GameInfo pane
-TerminalShell.commands['map'] = function() {
+Shell.commands['map'] = function() {
 	if (player.state == state.player.underground) {
 		Terminal.print("It's too dark to read the map!");
 		return;
@@ -322,9 +268,11 @@ TerminalShell.commands['map'] = function() {
 	Terminal.print("You can't access the map right now.");
 }
 
-TerminalShell.commands['fight'] = function() {
-	if (gameState.currentCase == gameState.dead) { Terminal.print("That's what got you into this mess."); return; }
-	if (gameState.currentCase == gameState.fight) {
+Shell.commands['fight'] = function() {
+	if (player.state == state.player.dead) {
+		Terminal.print("That's what got you into this mess."); return;
+	}
+	if (player.state == state.player.fight) {
 		combat.setUpEncounter(player, npc);
 	} else if (isNpcOnTile(player.X, player.Y)) {
     if (npcList[currentNpcIndex].npc == null) {
@@ -365,8 +313,8 @@ const inspect_npc = function(npc) {
 	return data;
 }
 
-TerminalShell.commands['inspect'] = function() {
-	if (gameState.currentCase == gameState.fight) {
+Shell.commands['inspect'] = function() {
+	if (state.player == state.player.fight) {
 		ui.drawNpcInfo(inspect_npc(npc));
 		Terminal.print(randomChoice(["Hmm... Interesting.", "Cool!", "Ooh, seems tough.", "Inspect away!"]));
 		Terminal.print("What will you do? [Fight/Inspect/Run]");
@@ -397,12 +345,12 @@ const run_direction = function(direction, response) {
 	}
 }
 
-TerminalShell.commands['run'] = function() {
+Shell.commands['run'] = function() {
 	if (player.state == state.player.dead) {
 		Terminal.print("You should have done that sooner.");
 		return;
 	}
-	if (gameState.currentCase == gameState.fight) {
+	if (player.state == state.player.fight) {
 		//Set fight to over
 		player.state = state.player.standard;
 
@@ -418,7 +366,7 @@ TerminalShell.commands['run'] = function() {
 		ui.resumeDisplay();
 		return;
 	}
-	if (gameState.currentCase != gameState.normal) {
+	if (player.state != state.player.standard) {
 		Terminal.print("What?");
 		return;
 	}
@@ -432,7 +380,7 @@ TerminalShell.commands['run'] = function() {
 }
 
 //Displays the user's inventory
-TerminalShell.commands['inv'] = TerminalShell.commands['inventory'] = function() {
+Shell.commands['inv'] = Shell.commands['inventory'] = function() {
 	let args = Terminal.processArgs(arguments);
 	let invPage = parseInt(args);
 	if (isNaN(invPage) || invPage < 1) {
@@ -443,8 +391,8 @@ TerminalShell.commands['inv'] = TerminalShell.commands['inventory'] = function()
 }
 
 //Displays all items currently wielded by player
-TerminalShell.commands['wielding'] = TerminalShell.commands['equipped'] = TerminalShell.commands['equipment'] = function(terminal) {
-	if (gameState.currentCase == gameState.dead || gameState.currentCase == gameState.currentCase.start) { return; }
+Shell.commands['wielding'] = Shell.commands['equipped'] = Shell.commands['equipment'] = function(terminal) {
+	if (player.state == state.player.start) { return; }
 	currentDisplay = "WIELDING";
   if (player.wielding.length == 0)
   {
@@ -454,13 +402,13 @@ TerminalShell.commands['wielding'] = TerminalShell.commands['equipped'] = Termin
   ui.drawEquippedWindow();
 }
 
-TerminalShell.commands['shop'] = TerminalShell.commands['enter'] = function() {
-	if (![gameState.shop, gameState.normal].includes(gameState.currentState)) {
+Shell.commands['shop'] = Shell.commands['enter'] = function() {
+	if (![state.player.shop, state.player.standard].includes(player.state)) {
 		Terminal.print("This is a horrible time to go shopping.");
 		return;
 	}
 	// Scan the world for shops on the tile
-	if (gameState.currentCase == gameState.normal) {
+	if (player.state == state.player.standard) {
 		currentShopIndex = null;
 		for (let i in shopList) {
 			if (shopList[i].x != player.X || shopList[i].y != player.Y) {
@@ -472,7 +420,7 @@ TerminalShell.commands['shop'] = TerminalShell.commands['enter'] = function() {
 			}
 			currentShopIndex = i;
 			restock();
-			gameState.currentCase = gameState.shop;
+			player.state = state.player.shop;
 			Terminal.print("You enter the shop");
 			break;
 		}
@@ -481,13 +429,13 @@ TerminalShell.commands['shop'] = TerminalShell.commands['enter'] = function() {
 			return;
 		}
 	}
-	gameState.currentCase == gameState.shop && displayShopInfo();
+	player.state == state.player.shop && displayShopInfo();
 }
 
 // Purchases an object in shop inventory and adds it to player's inventory
 // Future: Steal might be an option?
-TerminalShell.commands['purchase'] = TerminalShell.commands['buy'] = function() {
-	if (gameState.currentCase != gameState.shop) { Terminal.print("What?"); return }
+Shell.commands['purchase'] = Shell.commands['buy'] = function() {
+	if (player.state != state.player.shop) { Terminal.print("What?"); return }
 	let selection = Terminal.processArgs(arguments);
 	let selection_index = shopList[currentShopIndex].shop.inventory.getIndexFromPattern(selection);
 	if (selection_index == null) {
@@ -514,8 +462,8 @@ TerminalShell.commands['purchase'] = TerminalShell.commands['buy'] = function() 
 }
 
 // Sells any obtained items back to the shop for 1/2 gold
-TerminalShell.commands['sell'] = function() {
-	if (gameState.currentCase != gameState.shop) {
+Shell.commands['sell'] = function() {
+	if (player.state != state.player.shop) {
 		Terminal.print("Nobody here is interested."); return;
 	}
 	let selection = Terminal.processArgs(arguments);
@@ -539,18 +487,19 @@ TerminalShell.commands['sell'] = function() {
 	Terminal.print("You sell the " + item.name + " for " + cost + " gold.");
 	displayShopInfo();
 }
-TerminalShell.commands['leave'] = TerminalShell.commands['exit'] = function() {
-	if (gameState.currentCase != gameState.shop) {
+
+Shell.commands['leave'] = Shell.commands['exit'] = function() {
+	if (player.state != state.player.shop) {
 		Terminal.print("But we're having so much fun!")
 		Terminal.print("Be sure to save, but you don't need to tell me you're leaving.");
 		return;
 	}
 	Terminal.print("You leave the shop.");
-	gameState.currentCase = gameState.normal;
+	player.state = state.player.standard;
 	Terminal.resetGameInfo();
 }
 
-TerminalShell.commands['equip'] = function() {
+Shell.commands['equip'] = function() {
 	// This should be a middleware for a player.equip, honestly
 	let selection = Terminal.processArgs(arguments);
 	// TODO Use the same behavior as shop, checking for pattern-matched items.
@@ -578,7 +527,7 @@ TerminalShell.commands['equip'] = function() {
 	ui.resumeDisplay();
 }
 
-TerminalShell.commands['unequip'] = function() {
+Shell.commands['unequip'] = function() {
 	if (player.wielding.length == 0) { Terminal.print("Nothing to unequip"); return; }
 	let selection = Terminal.processArgs(arguments);
 	let selection_index = player.wielding.getIndexFromPattern(selection);
@@ -596,7 +545,7 @@ TerminalShell.commands['unequip'] = function() {
 }
 
 /* Used in quests */
-TerminalShell.commands['talk'] = function() {
+Shell.commands['talk'] = function() {
   /* If current tile has an NPC, talk to it to reveal information */
   if (!isNpcOnTile(player.X, player.Y)) {
     Terminal.print("You're talking to yourself.");
