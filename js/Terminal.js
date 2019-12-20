@@ -33,39 +33,40 @@ function sanitize(str)
 //Contains information such as commands, filters, and processing of commands
 var TerminalShell =
 {
+	state: state.terminal.standard,
 	commands:
 	{
-		clear: function(terminal)
+		clear: function()
 		{
-			terminal.clear();
+			Terminal.clear();
 		}
 	},
 
-	process: function(terminal, cmd) {
+	process: function(cmd) {
 		try
 		{
 			//Get the individual arguments, parsed by spaces
 			var cmd_args = cmd.split(' ');
 			//Get the command name from the input
 			var cmd_name = cmd_args.shift();
-			cmd_args.unshift(terminal);
+			cmd_args.unshift();
 			//Set the player name to user input
 			// Handlers for dynamic commands
 			switch (player.state) {
 				case state.player.name:
-					prompt_name(terminal, cmd);
+					prompt_name(cmd);
 					return;
 				case state.player.race:
-					prompt_race(terminal, cmd);
+					prompt_race(cmd);
 					return;
 				case state.player.archetype:
-					prompt_archetype(terminal, cmd);
+					prompt_archetype(cmd);
 					return;
 			}
 			//If the entered command is in the elements in command
 			if (!this.commands.hasOwnProperty(cmd_name))
 			{
-				terminal.print("What?");
+				Terminal.print("What?");
 				return;
 			}
 
@@ -77,12 +78,13 @@ var TerminalShell =
 			this.commands[cmd_name].apply(this, cmd_args);
 		} catch (e) {
 			//Something went horribly, horribly wrong
-			terminal.error('Something happened: ' + e);
+			Terminal.error('Something happened: ' + e);
 			console.log(e);
-			terminal.setWorking(false);
 		}
 	}
 };
+
+// Everything here could be static.
 //Define terminal object for CLI
 Terminal=
 {
@@ -107,7 +109,7 @@ Terminal=
 		cursor_blink_time:700,
 		cursor_style: 'block',
 		prompt:'> ',
-		spinnerCharacters:['[   ]','[.  ]','[.. ]','[...]'],
+		spinnerCharacters:['.','..','...',' '],
 		spinnerSpeed: 250,
 		typingSpeed:50
 	},
@@ -343,7 +345,10 @@ Terminal=
 		if (!this.output) {
 			return false;
 		}
-		return this.output.process(this, cmd.toLowerCase());
+		this.setWorking(true);
+		let response = this.output.process(cmd.toLowerCase());
+		this.setWorking(false);
+		return response;
 	},
 
 	//Enables the input to be active
@@ -398,7 +403,6 @@ Terminal=
 
 	processArgs: function(text) {
 		let cmd_args = Array.prototype.slice.call(text);
-		cmd_args.shift();
-		return cmd_args.join(' ');
+		return cmd_args.shift();
 	}
 }
