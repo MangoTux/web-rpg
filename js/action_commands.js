@@ -27,5 +27,5 @@ flurry_of_blows.damage_bounds = [
 ];
 flurry_of_blows.onBeforeHit = () => { this.hit_counter = 0; }
 flurry_of_blows.onHit = () => { this.hit_counter++; }
-flurry_of_blows.onEnd = () => { this.hit_counter == this.hit_count ? console.log("Knock the target prone"); }
-ActionCatalog.catalog('flurry_of_blows') = flurry_of_blows;
+flurry_of_blows.onEnd = () => { if (this.hit_counter == this.hit_count) console.log("Knock the target prone"); }
+ActionCatalog.catalog['flurry_of_blows'] = flurry_of_blows;
