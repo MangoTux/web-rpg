@@ -19,7 +19,5 @@ Array.prototype.getIndexFromPattern = function(selection) {
   return selection_index;
 }
 
-// TODO Save State Management
-// - Player
-// - Map
-// - Shops
+const getRandomInt = (min, max) => Math.floor(Math.random() * (max-min+1)) + min;
+const randomChoice = (list) => list[getRandomInt(0, list.length-1)];
