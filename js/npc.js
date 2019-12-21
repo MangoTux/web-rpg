@@ -706,9 +706,9 @@ function getName()
 			baseName = randomChoice(npcs.debug);
 		} else if (map && map.getTile(...player.position).type=="W") {
         baseName = randomChoice(npcs.waterNpcs);
-    } else if (player.Y > 70 || player.Y < -70) {
+    } else if (player[0] > 70 || player[1] < -70) {
         baseName = randomChoice(npcs.coldNpcs);
-    } else if ((player.Y < 30 && player.Y > -30) && (player.X < 30 && player.X > -30)) {
+    } else if ((player[0] < 30 && player[0] > -30) && (player[0] < 30 && player[0] > -30)) {
         baseName = randomChoice(npcs.peopleNpcs);
     } else if (player.level < 25) {
         baseName = randomChoice(npcs.easyNpcs.concat(npcs.normalNpcs));
@@ -745,7 +745,7 @@ function Npc()
 	{
     this.name = getName();
 
-		var distance = Math.abs(player.X + player.Y);
+		var distance = Math.abs(player[0] + player[1]);
 
     this.level = player.level;
     if (distance > 60) // Make encounters more difficult the further the Player strays
