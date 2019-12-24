@@ -74,7 +74,7 @@ const advance = function(direction, response) {
 		return false;
 	}
 	response && Terminal.print(response);
-	if (map.hasEncounter(player.position)) {
+	if (false && map.hasEncounter(player.position)) {
 		encounter = new Encounter();
 		let encounter_data = encounter.getEncounter();
 		Terminal.print("Oh no! You ran into a level " + encounter_data.level + " " + encounter_data.name_mod + "!");
@@ -136,7 +136,7 @@ Shell.commands['go'] = function() {
 	let response = null;
 	switch (direction) {
 		case 'north': case 'south': case 'east': case 'west':
-			vector = map.getUnitVectorFromDirection(direction);
+			vector = Map.getUnitVectorFromDirection(direction);
 			response = `You head ${direction}.`;
 			break;
 		case 'back':
@@ -261,7 +261,7 @@ Shell.commands['map'] = function() {
 		state.player.shop
 	].includes(player.state)) {
 		currentDisplay = "MAP";
-		ui.drawMap(map);
+		ui.resumeDisplay();
 		Terminal.print("The map is available in the top-right window.");
 		return;
 	}
@@ -333,16 +333,17 @@ Shell.commands['inspect'] = function() {
 }
 
 const run_direction = function(direction, response) {
-	const can_continue = true;
-	Terminal.promptActive = false;
-	run_timeout = setTimeout(function() {
+	let can_continue = true;
+	run_timeout = setTimeout(() => {
 		can_continue = advance(direction, response);
-		runDirection(direction, "");
-	}, 400);
-	if (player.state == state.player.fight || !can_continue) {
-		clearTimeout(run_timeout);
-		Terminal.promptActive = true;
-	}
+		if (can_continue) {
+			Terminal.promptActive = false;
+			run_direction(direction, "");
+		} else {
+			Terminal.promptActive = true;
+			clearTimeout(run_timeout);
+		}
+	}, 100);
 }
 
 Shell.commands['run'] = function() {
@@ -376,7 +377,7 @@ Shell.commands['run'] = function() {
 		Terminal.print("I don't know that direction.");
 		return;
 	}
-	run_direction(map.getUnitVectorFromDirection(direction), `You start running ${direction}.`);
+	run_direction(Map.getUnitVectorFromDirection(direction), `You start running ${direction}.`);
 }
 
 //Displays the user's inventory

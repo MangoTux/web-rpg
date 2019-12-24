@@ -34,8 +34,7 @@ const Shell = class {
 
   static handler_name(name) {
     player.name = name.charAt(0).toUpperCase() + name.slice(1);
-  	map = new Map(player.name); // TODO map.seed(player.name)
-    player.onCreate(map);
+    environment.load_map(player.name);
     player.state = state.player.race;
     Terminal.print(`Okay, ${player.name}, what is your race? [Human/Elf/Dwarf/Goblin]`);
   }
@@ -71,7 +70,7 @@ const Shell = class {
   		case Warrior.name:
   			player.archetype = new Warrior(); break;
   		case Ranger.name:
-  			player.archetype = new Elf(); break;
+  			player.archetype = new Ranger(); break;
   		case Mage.name:
   			player.archetype = new Mage(); break;
   		case Monk.name:
