@@ -20,20 +20,12 @@ class Player extends Sentient {
 		this.gold = 250;
 	}
 
-	// When a player is created, move them to a non-lava/water tile
-	onCreate(map) {
-		if (map.canMove(...this.position).canMove) {
-			return;
-		};
-	  this.position = map.findNearestTraversible(...this.position);
-	}
-
 	load(json) {
 		throw new Exception("Loading hasn't been fully built.");
 	}
 
 	move(h, v) {
-		let moveable = map.canMove(this.position[0] + h, this.position[1] + v);
+		let moveable = environment.map.canMove([this.position[0] + h, this.position[1] + v]);
 		if (!moveable.canMove) {
 			if (moveable.reason == "W") {
 				return [false, "You can't swim!"];
@@ -88,6 +80,13 @@ class Player extends Sentient {
 	get luck() {
 		// This needs to factor in class features and inventory items eventually
 		return this.level + this.race.luck;
+	}
+
+	hasWaterTravel() {
+		const is_water_travel = (item) => {
+			return typeof item.purpose_c !== "undefined" && item.purpose_c == "waterTravel"
+		};
+		return this.inventory.some(is_water_travel);
 	}
 }
 
