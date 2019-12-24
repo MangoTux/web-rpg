@@ -3,46 +3,28 @@ function UI() {
 }
 
 UI.prototype.drawMap = function(map) {
-  var isShop, isNPC;
-  var table = $("<table>");
+  let table = $("<table>");
   table.css("line-height", "4px");
   table.css("font-size", "4px");
-  for (var y=-10; y<10; y++)
-  {
-    var row = $("<tr>");
-    for (var x=-20; x<20; x++)
-    {
-      if (x == 0 && y == 0)
-      {
-        var player_tile = $('<td>').text(map.customTiles.player.symbol).css("color", map.customTiles.player.style);
-        row.append(player_tile);
-      } else {
-        isShop = false;
-        isNPC = false;
-        for (var i in shopList)
-        {
-          if (shopList[i].x == x+player.position[0] && shopList[i].y == y+player.position[1])
-          {
-            row.append($('<td>').text(map.customTiles.shop.symbol).css("color", map.customTiles.shop.style));
-            isShop = true;
-            continue;
-          }
-        }
-        for (var i in npcList)
-        {
-          if (npcList[i].x == x+player.position[0] && npcList[i].y == y+player.position[1])
-          {
-            row.append($('<td>').text(map.customTiles.npc.symbol).css("color", map.customTiles.npc.color));
-            isNPC = true;
-            continue;
-          }
-        }
-        if (!isShop && !isNPC)
-        {
-          var tile = map.getTile(x+player.position[0], y+player.position[1]);
-          row.append($('<td>').text(tile.symbol).css("color", tile.style));
-        }
+  for (let y=-10; y<10; y++) {
+    let row = $("<tr>");
+    for (let x=-20; x<20; x++) {
+      // Draw player on center
+      let absolute_position = [x+player.position[0], + y+player.position[1]];
+      if (x == 0 && y == 0) {
+        row.append($('<td>').text(map.custom_tiles.player.symbol).css("color", map.custom_tiles.player.style));
+        continue;
       }
+      if (environment.hasShopOnTile(absolute_position)) {
+        row.append($('<td>').text(map.custom_tiles.shop.symbol).css("color", map.custom_tiles.shop.style));
+        continue;
+      }
+      if (environment.hasNpcOnTile(absolute_position)) {
+        row.append($('<td>').text(map.custom_tiles.npc.symbol).css("color", map.custom_tiles.npc.color));
+        continue;
+      }
+      let world_tile = map.getTile(absolute_position);
+      row.append($('<td>').text(world_tile.symbol).css("color", world_tile.style));
     }
     table.append(row);
   }
@@ -53,7 +35,7 @@ UI.prototype.drawMap = function(map) {
 // Return
 UI.prototype.resumeDisplay = function() {
   switch (currentDisplay) {
-    case "MAP": this.drawMap(map); break;
+    case "MAP": this.drawMap(environment.map); break;
     case "STATS": this.drawStatsWindow(); break;
     case "INVENTORY": this.drawInventoryWindow(); break;
     default: Terminal.resetGameInfo();
