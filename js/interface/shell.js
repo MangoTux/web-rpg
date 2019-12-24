@@ -32,9 +32,9 @@ const Shell = class {
     }
   }
 
-  static handler_name(cmd) {
+  static handler_name(name) {
     player.name = name.charAt(0).toUpperCase() + name.slice(1);
-  	map = new Map(player.name);
+  	map = new Map(player.name); // TODO map.seed(player.name)
     player.onCreate(map);
     player.state = state.player.race;
     Terminal.print(`Okay, ${player.name}, what is your race? [Human/Elf/Dwarf/Goblin]`);
