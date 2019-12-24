@@ -613,89 +613,7 @@ npcs =
 	]
 };
 
-specialModifiers = [
-  {
-    nameModifier: "Giant %",
-    damageModifier:4,
-		attackSpeed:1,
-    defenseModifier:2,
-    luckModifier:0,
-    hpModifier:0.5,
-    rewardModifier:6
-  },
-  {
-    nameModifier: "Tiny %",
-    damageModifier:0.5,
-		attackSpeed:1,
-    defenseModifier:0.5,
-    luckModifier:0,
-    hpModifier:2,
-    rewardModifier:0.25
-  },
-  {
-    nameModifier: "Puny %",
-    damageModifier:0.5,
-		attackSpeed:1,
-    defenseModifier:2,
-    luckModifier:4,
-    hpModifier:1,
-    rewardModifier:1
-  },
-  {
-    nameModifier: "Trash %",
-    damageModifier:0.5,
-		attackSpeed:1,
-    defenseModifier:0.6,
-    luckModifier:0,
-    hpModifier:0.5,
-    rewardModifier:0
-  },
-  {
-    nameModifier: "Collosal %",
-    damageModifier:10,
-		attackSpeed:1,
-    luckModifier:0,
-    defenseModifier:10,
-    hpModifier:2,
-    rewardModifier:100
-  },
-  {
-    nameModifier: "Quick %",
-    damageModifier:.3,
-		attackSpeed:2,
-    luckModifier:5,
-    defenseModifier:2,
-    hpModifier:.9,
-    rewardModifier:2
-  },
-  {
-    nameModifier: "Slow %",
-    damageModifier:1,
-		attackSpeed:0.5,
-    luckModifier:0,
-    defenseModifier:0.5,
-    hpModifier:2,
-    rewardModifier:0.25
-  },
-  {
-    nameModifier: "King of the %s",
-    damageModifier: 4,
-		attackSpeed:1,
-    luckModifier: 0,
-    defenseModifier: 2,
-    hpModifier:5,
-    rewardModifier:100
-  },
-  {
-    nameModifier: "Queen of the %s",
-    damageModifier: 3,
-		attackSpeed:1,
-    luckModifier:4,
-    defenseModifier:0,
-    hpModifier:1,
-    rewardModifier:100
-  }
-];
+
 
 var debug = false;
 function getName()
@@ -720,81 +638,6 @@ function getName()
     return baseName;
 }
 
-function Npc()
-{
-	this.name = "";
-  this.name_mod = "%";
-	this.level = 0;
-	this.combat_stats = {
-		maxHP: 0,
-		luck: 0,
-		aggression: 0,
-		damageRollMax: 1,
-		damageRollQty: 1,
-		damageModifier: 0,
-		defense: 0,
-		currentHP: 0,
-		attackSpeed: 1,
-	}
-	this.inventory = [];
-	this.gold = 0;
-
-	// Creates the npc based on player info
-	// TODO Damage isn't scaling on level.
-	this.createNpc = function(isRandomEncounter)
-	{
-    this.name = getName();
-
-		var distance = Math.abs(player[0] + player[1]);
-
-    this.level = player.level;
-    if (distance > 60) // Make encounters more difficult the further the Player strays
-    {
-      this.level += getRandomInt(-Math.log10(distance)/2, Math.log10(distance));
-    }
-    this.level += getRandomInt(-1-(player.level/5), (player.level/5));
-    this.level = Math.floor(this.level);
-		if (this.level > 100)
-			this.level = 100;
-		if (this.level < 1)
-			this.level = 1;
-		this.gold = Math.floor(allNpcs[this.name].gold*Math.sqrt(this.level)/2);
-
-		this.experience = allNpcs[this.name].baseXP
-		this.combat_stats.maxHP = 30 + Math.floor(this.level*Math.sqrt(this.level+1)-getRandomInt(0, this.level+1));
-		this.combat_stats.damageRollMax = allNpcs[this.name].damageRollMax;
-		this.combat_stats.damageRollQty = allNpcs[this.name].damageRollQty;
-		this.combat_stats.damageModifier = allNpcs[this.name].damageModifier;
-		this.combat_stats.attackSpeed = allNpcs[this.name].attackSpeed;
-		this.combat_stats.luck = getRandomInt(1, this.level+1);
-		this.combat_stats.defense = allNpcs[this.name].defense
-
-    if (getRandomInt(0, 100)<5)
-    {
-      var mod = randomChoice(specialModifiers);
-      this.combat_stats.luck = Math.floor(this.combat_stats.luck*mod.luckMod);
-
-      this.combat_stats.baseDamage = Math.floor(this.combat_stats.baseDamage*mod.damageModifier);
-      this.combat_stats.defense = Math.floor(this.combat_stats.defense*mod.defenseModifier);
-      this.combat_stats.maxHP = Math.floor(this.combat_stats.maxHP*mod.hpModifier);
-      this.experience = Math.floor(this.experience*mod.rewardModifier);
-      this.gold = Math.floor(this.gold*mod.rewardModifier);
-      this.name_mod = mod.nameModifier.replace("%", this.name);
-			this.combat_stats.attackSpeed = this.combat_stats.attackSpeed*mod.attackSpeed;
-    }
-    else
-    {
-      this.name_mod = this.name;
-    }
-		this.combat_stats.currentHP = this.combat_stats.maxHP;
-
-    if (!isRandomEncounter) {
-      this.name_mod = new MName().New() + " the " + this.name_mod; // Humanize questable NPCs
-      // this.quest = getQuest();
-    }
-	};
-}
-
 function isNpcOnTile(x, y) {
   for (var i in npcList) {
     if (npcList[i].x == x && npcList[i].y == y) {
@@ -806,23 +649,9 @@ function isNpcOnTile(x, y) {
   return false;
 }
 
-var npcList = [];
+const npcList = [];
 npcList.push({x:0,y:1,npc:null});
-for (var i=1; i<=1000; i++)
-{
-    npcList.push({x:getRandomInt(-500, 500), y:getRandomInt(-500, 500), npc:null});
+for (let i=1; i<=1; i++) {
+    npcList.push({x:getRandomInt(-20, 20), y:getRandomInt(-20, 20), npc:null});
 }
 var currentNpcIndex;
-
-// Eventually, will allow multiple enemies to be encountered at once.
-class Encounter {
-	npc = null;
-	constructor() {
-		this.npc = new Npc();
-		this.npc.createNpc(true);
-	}
-
-	getEncounter() {
-		return this.npc;
-	}
-}

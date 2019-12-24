@@ -207,3 +207,18 @@ Combat.prototype.processVictory = function(winner, loser) {
     currentNpcIndex = null;
   }
 }
+
+// Eventually, will allow multiple enemies to be encountered at once.
+class Encounter {
+	npc = null;
+	constructor() {
+	}
+
+  create() {
+    this.npc = new NPC();
+  }
+
+	getEncounter() {
+		return this.npc;
+	}
+}

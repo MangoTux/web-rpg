@@ -1,25 +1,17 @@
-var ui;
-var combat;
-var player;
-var map;
 currentDisplay = "TITLE"; //TITLE, MAP, STATS, SHOP, INVENTORY
-$(document).ready(function()
-{
+var ui, player, combat, encounter, map, item, runTimeout;
+$(window).on('load', $.proxy(function() {
+	ui = new UI();
+	player = new Player("");
+	combat = new Combat();
+	encounter = new Encounter();
+
 	Terminal.init();
 	Terminal.promptActive = false;
-	ui = new UI();
-	combat = new Combat();
-	player = new Player("");
-	encounter = new Encounter();
 	$('#game').bind('cli-load', function(e)
 	{
-		$('#game').one('cli-ready', function (e)
-		{});
-
+		$('#game').one('cli-ready', function (e) {});
 		Terminal.runCommand('start');
 		ui.drawDefaultView();
 	});
-});
-
-var item;
-var runTimeout;
+}, this));

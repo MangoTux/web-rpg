@@ -1,12 +1,8 @@
 //Player object
-class Player {
+class Player extends Sentient {
+	name;
 	level = 1;
 	experience = 0;
-	// Stats are determined by race and archetype
-	base_combat_stats = {};
-	// And combat stats include all modifiers such as equipment and status
-	combat_stats = {};
-	position = [0, 0];
 	previous_direction = [0, -1];
 	inventory = [];
 	wielding = [];
@@ -15,10 +11,13 @@ class Player {
 	quests = {};
 
 	constructor(name) {
+		super();
+		this.level = 1;
 		this.name = name;
 		this.race = null;
 		this.archetype = null;
 		this.state = state.player.start;
+		this.gold = 250;
 	}
 
 	// When a player is created, move them to a non-lava/water tile
