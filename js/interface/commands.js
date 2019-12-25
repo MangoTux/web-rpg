@@ -404,33 +404,23 @@ Shell.commands['wielding'] = Shell.commands['equipped'] = Shell.commands['equipm
 }
 
 Shell.commands['shop'] = Shell.commands['enter'] = function() {
-	if (![state.player.shop, state.player.standard].includes(player.state)) {
+	if (player.state === state.player.shop) {
+		Terminal.print("You're already here!");
+		return;
+	}
+	if (player.state != state.player.standard) {
 		Terminal.print("This is a horrible time to go shopping.");
 		return;
 	}
-	// Scan the world for shops on the tile
-	if (player.state == state.player.standard) {
-		currentShopIndex = null;
-		for (let i in shopList) {
-			if (shopList[i].x != player.X || shopList[i].y != player.Y) {
-				continue;
-			}
-			if (shopList[i].shop == null) {
-				shopList[i].shop = new Shop(player);
-				shopList[i].shop.init();
-			}
-			currentShopIndex = i;
-			restock();
-			player.state = state.player.shop;
-			Terminal.print("You enter the shop");
-			break;
-		}
-		if (currentShopIndex == null) {
-			Terminal.print("There's no shop here.");
-			return;
-		}
+	let active_shop = environment.getShopOnTile(player.position);
+	if (active_shop == null) {
+		Terminal.print("There's no shop here.");
+		return;
 	}
-	player.state == state.player.shop && displayShopInfo();
+	Terminal.print("You enter the shop.");
+	player.state = state.player.shop;
+	active_shop.restock();
+	ui.drawShopWindow();
 }
 
 // Purchases an object in shop inventory and adds it to player's inventory
@@ -438,7 +428,8 @@ Shell.commands['shop'] = Shell.commands['enter'] = function() {
 Shell.commands['purchase'] = Shell.commands['buy'] = function() {
 	if (player.state != state.player.shop) { Terminal.print("What?"); return }
 	let selection = Terminal.processArgs(arguments);
-	let selection_index = shopList[currentShopIndex].shop.inventory.getIndexFromPattern(selection);
+	let active_shop = environment.getShopOnTile(player.position);
+	let selection_index = active_shop.inventory.getIndexFromPattern(selection);
 	if (selection_index == null) {
 		Terminal.print("There's nothing here by that name.");
 		return;
@@ -450,13 +441,13 @@ Shell.commands['purchase'] = Shell.commands['buy'] = function() {
 		Terminal.print("There's nothing here by that name.");
 		return;
 	}
-	let item = shopList[currentShopIndex].shop.inventory[i];
+	let item = active_shop.inventory[i];
 	if (player.gold < item.cost) {
 		Terminal.print("You can't afford that!");
 		return;
 	}
 	player.gold -= item.cost;
-	shopList[currentShopIndex].shop.inventory.splice(selection_index, 1);
+	active_shop.inventory.splice(selection_index, 1);
 	player.inventory.push(item);
 	Terminal.print("You purchased the " + item.name + " for " + item.cost + " gold.");
 	displayShopInfo();
@@ -468,6 +459,7 @@ Shell.commands['sell'] = function() {
 		Terminal.print("Nobody here is interested."); return;
 	}
 	let selection = Terminal.processArgs(arguments);
+	let active_shop = environment.getShopOnTile(player.position);
 	let selection_index = player.wielding.getIndexFromPattern(selection);
 	if (selection_index != null) {
 		Terminal.print("You can't sell something you're wearing! Take it off first.");
@@ -483,7 +475,7 @@ Shell.commands['sell'] = function() {
 	}
 	let item = player.inventory.splice(selection_index, 1).shift();
 	let cost = Math.floor(item.cost / 2);
-	shopList[i].shop.inventory.push(item);
+	active_shop.inventory.push(item);
 	player.gold += cost;
 	Terminal.print("You sell the " + item.name + " for " + cost + " gold.");
 	displayShopInfo();

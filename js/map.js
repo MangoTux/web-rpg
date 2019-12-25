@@ -99,8 +99,13 @@ class Environment {
 
   constructor() {
     this.map = new Map();
-    this.shops = [];
-    this.npcs = [];
+    this.shops = new Hash2D();
+    this.npcs = new Hash2D();
+    // This might be better suited for a function to populate within a radius
+    // If a player wanders outside of the nearest shop, generate new ones
+    for (let i = 1; i<500; i++) {
+      this.shops.push(getRandomInt(-1000, 1000), getRandomInt(-1000, 1000), new Shop());
+    }
   }
 
   load_map() {
@@ -141,32 +146,12 @@ class Environment {
     return (getRandomInt(0, 100) < 10);
   }
 
-  hasShopOnTile(position) {
-    /*
-    for (var i in shopList)
-    {
-      if (shopList[i].x == x+player.position[0] && shopList[i].y == y+player.position[1])
-      {
-        row.append($('<td>').text(map.custom_tiles.shop.symbol).css("color", map.custom_tiles.shop.style));
-        isShop = true;
-        continue;
-      }
-    }
-    */
-    return false;
+  // Returns null if no shops are on the position
+  getShopOnTile(position) {
+    return this.shops.get(...position);
   }
 
-  hasNpcOnTile(position) {
-    /*
-
-      if (npcList[i].x == x+player.position[0] && npcList[i].y == y+player.position[1])
-      {
-        row.append($('<td>').text(map.custom_tiles.npc.symbol).css("color", map.custom_tiles.npc.color));
-        isNPC = true;
-        continue;
-      }
-      */
-    return false;
+  getNpcOnTile(position) {
+    return this.npcs.get(...position);
   }
-
 }
