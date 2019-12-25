@@ -2,6 +2,18 @@ function UI() {
  // The object used to handle any specific gameInfo display data
 }
 
+// While this is a decent speed, any future improvement
+// would probably involve removing a border row and getting the tiles for the other side.
+/*
+Run north:
+- Remove $("tbody>tr:last")
+- Get new tiles for y-10, $("tbody").prepend()
+Run south:
+- Remove $("tbody>tr:first")
+- Get new tiles for y+9, $("tbody").append();
+East and West are similar, but $("tbody>tr>td:first").forEach (and last)
+Player position needs to be updated (custom class for td, removeClass + toggle at approx. 0, 0?)
+*/
 UI.prototype.drawMap = function(map) {
   let table = $("<table>");
   table.css("line-height", "4px");
@@ -15,11 +27,11 @@ UI.prototype.drawMap = function(map) {
         row.append($('<td>').text(map.custom_tiles.player.symbol).css("color", map.custom_tiles.player.style));
         continue;
       }
-      if (environment.hasShopOnTile(absolute_position)) {
+      if (environment.getShopOnTile(absolute_position)) {
         row.append($('<td>').text(map.custom_tiles.shop.symbol).css("color", map.custom_tiles.shop.style));
         continue;
       }
-      if (environment.hasNpcOnTile(absolute_position)) {
+      if (environment.getNpcOnTile(absolute_position)) {
         row.append($('<td>').text(map.custom_tiles.npc.symbol).css("color", map.custom_tiles.npc.color));
         continue;
       }
@@ -35,11 +47,26 @@ UI.prototype.drawMap = function(map) {
 // Return
 UI.prototype.resumeDisplay = function() {
   switch (currentDisplay) {
+    case "SHOP": this.drawShowWindow(); break;
     case "MAP": this.drawMap(environment.map); break;
     case "STATS": this.drawStatsWindow(); break;
     case "INVENTORY": this.drawInventoryWindow(); break;
     default: Terminal.resetGameInfo();
   }
+}
+
+UI.prototype.drawShopWindow = function() {
+  let inventory = $("<ul>");
+  let shop = environment.getShopOnTile(player.position);
+  if (shop == null) { $("#gameInfo").html("There's no shop here."); return; }
+  for (let i = 0; i<shop.max_stock; i++) {
+    if (i >= shop.inventory.length) {
+      inventory.append($("<li>").html("Out of stock!<br>&nbsp;&nbsp;Please visit later."));
+    } else {
+      inventory.append($("<li>").html(`${shop.inventory[i].name}<br>&nbsp;&nbsp;Price:&nbsp;${shop.inventory[i].cost} gold.`));
+    }
+  }
+  $("#gameInfo").html("<h3>" + shop.name + "</h3><ul>" + inventory.html() + "</ul><br><br>" + `You have: ${player.gold} gold.`);
 }
 
 // Print player stats

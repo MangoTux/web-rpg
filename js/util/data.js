@@ -1,5 +1,4 @@
-
-state = {
+const state = {
 	player: {
 		start: 1,
 		name: 2,
@@ -25,98 +24,38 @@ state = {
 	},
 };
 
-//Possible races and race stats
-playerRaces =
-{
-    human: {
-        luck: 4,
-				damageModifier: 2,
-        defense: 1,
-        health: 35
-    },
-    elf: {
-        luck: 1,
-				damageModifier: 1,
-        defense: 2,
-        health: 40
-    },
-    dwarf: {
-        luck: 0,
-				damageModifier: 2,
-        defense: 2,
-        health: 50
-    },
-    goblin: {
-        luck: 3,
-				damageModifier: 3,
-        defense: 0,
-        health: 45
-    }
-};
-
-//Possible classes and class stats
-playerClasses =
-{
-    warrior: {
-        damageRollMax: 5,
-				damageRollQty: 1,
-				damageModifier: 3,
-				attackSpeed: 1,
-        defense: 3,
-        health: 6
-    },
-    ranger: {
-        damageRollMax: 2,
-				damageRollQty: 2,
-				damageModifier: 1,
-				attackSpeed: 1,
-        defense: 2,
-        health: 5
-    },
-    mage: {
-        damageRollMax: 2,
-				damageRollQty: 4,
-				damageModifier: 1,
-				attackSpeed: 1,
-        defense: 1,
-        health: 4
-    },
-    monk: {
-        damageRollMax: 2,
-				damageRollQty: 1,
-				damageModifier: 0,
-				attackSpeed: 2,
-        defense: 2,
-        health: 5
-    }
-};
-
-namingTemplate =
+const namingTemplate =
 [
+	'Ailish',
 	'Amaryll',
 	'Ancient',
 	'Arendall',
 	'Arenia',
 	'Asaru',
-	'Aura', //aura aura aura aura aura aura aura
+	'Aura',
   'Aule',
 	'Avian',
 	'Bannove',
+	'Batu',
 	'Berenthos',
 	'Birgol',
 	'Bragi',
 	'Brakas',
+	'Brom',
+	'Buddy',
 	'Chelisern',
 	'Ciel',
 	'Daenan',
 	'Daggard',
 	'Darora',
+	'Ellisair',
 	'Erenthar',
 	'Faera',
 	'Farren',
 	'Farzen',
   'Feanor',
 	'Fiend',
+	'Flanders',
 	'Fyre',
 	'Garoa',
 	'Gary',
@@ -130,16 +69,19 @@ namingTemplate =
 	'Iruzia',
 	'Javon',
 	'Javallyne',
+	'Jeod',
 	'Jormust',
 	'Kazahn',
 	'Krennemoor',
 	'Lavallyam',
+	'Lindy',
 	'Luminous',
   'Manwe',
 	'Mahuta',
 	'Marsh',
 	'Meadow',
 	'Midna',
+	'Mop',
 	'Nallander',
 	'Orian',
 	'Paladin',
@@ -160,9 +102,12 @@ namingTemplate =
 	'Saria',
 	'Solaris',
 	'Ugori',
+	'Ulad',
 	'Ulyntos',
 	'Valor',
 	'Vastorn',
+	'Vidar',
+	'Vylaerys',
 	'Woodruff',
 	'Wind',
 	'Wynd',
