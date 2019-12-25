@@ -554,7 +554,7 @@ npcs =
 		"Shark",
 		"Squid",
 		"Whale",
-        "Pirate"
+    "Pirate"
 	],
 	//For high levels
 	hardNpcs:
