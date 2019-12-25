@@ -1,3 +1,4 @@
+'use strict';
 /* Unused for now? */
 const equipment_types =
 {
@@ -20,28 +21,6 @@ const equipment_types =
 
 var dep_Item = function()
 {
-	var isWeapon = (Math.random() > .5);
-	var itemModList = []; // List of possible names for the item modifier
-	var itemnamingTemplate = []; // List of possible items
-	var referenceList; // List to use for item pool
-
-	if (typeof player === "undefined")
-	{
-		this.name = "Regular Fist";
-		this.statChanges.damageModifier = 0;
-		this.statChanges.luck = 0;
-		this.statChanges.defense = 0;
-		this.type = types.wield;
-		return;
-	}
-	switch (player.playerClass)
-	{
-		case "warrior": referenceList = warriorItems; break;
-		case "ranger": referenceList = rangerItems; break;
-		case "mage": referenceList = mageItems; break;
-		case "monk": referenceList = monkItems; break;
-		default: referenceList = allItems; break;
-	}
 
 	for (var p in modifier)
 	{
@@ -105,6 +84,7 @@ class Item {
 class Tool extends Item {
 	constructor() {
 		super();
+		this.cost = Math.floor(this.cost);
 	}
 
 	toString() { super.toString(); }
@@ -115,29 +95,67 @@ class Equipment extends Item {
 		super();
 	}
 
+	modify(category) {
+		if (getRandomInt(0, 100) > 20) { return; }
+		const modifier_options = [];
+		for (const i in modifier_list) {
+			if (modifier_list[i].valid.includes(category)) {
+				modifier_options.push(i);
+			}
+		}
+		const name_mod = randomChoice(modifier_options);
+		if (typeof modifier_list[name_mod].multiplier === "function") {
+			this.cost *= modifier_list[name_mod].multiplier();
+		} else {
+			this.cost *= modifier_list[name_mod].multiplier;
+		}
+		// TODO Stat changes apply here
+		this.name = name_mod + " " + this.name;
+		if (getRandomInt(0, 100 > 20)) { return; }
+		this.name += " of " + (new MName().New());
+		// TODO Named items are a little more special
+		this.cost *= 1.1;
+	}
+
 	toString() { super.toString(); }
 }
 
 class Armor extends Equipment {
 	constructor(id) {
 		super();
+		if (id == undefined) {
+			randomChoice(player.archetype.armor);
+		}
 		this.id = id;
 		this.base_item = armor_list[id];
-		// TODO Modifier, name
+		this.cost = 450;
+		this.name = id;
+		this.modify('armor');
+		this.cost = Math.floor(this.cost);
 	}
 
-	toString() { super.toString(); }
+	get name() { return id; }
+
+	toString() { return id; }
 }
 
 class Weapon extends Equipment {
 	constructor(id) {
 		super();
+		if (id == undefined) {
+			randomChoice(player.archetype.weapons);
+		}
 		this.id = id;
 		this.base_item = weapon_list[id];
-		// TODO Modifier, name
+		this.cost = 100;
+		this.name = id;
+		this.modify('weapon');
+		this.cost = Math.floor(this.cost);
 	}
 
-	toString() { super.toString(); }
+	get name() { return this.id; }
+
+	toString() { return this.id; }
 }
 
 class Consumable extends Item {
@@ -145,9 +163,14 @@ class Consumable extends Item {
 		super();
 		this.id = id;
 		this.base_item = consumable_list[id];
+		this.cost = 75;
+		this.name = id;
+		this.cost = Math.floor(this.cost);
 	}
 
-	toString() { super.toString(); }
+	get name() { return this.id; }
+
+	toString() { return this.id; }
 }
 
 class ItemFactory {
@@ -156,11 +179,11 @@ class ItemFactory {
 	}
 
 	static getRandomEquipment() {
-		switch (getRandomInt(0, 5)) {
+		switch (getRandomInt(0, 4)) {
 			case 0:
-			case 1: return new Weapon();
+			case 1: return new Weapon(randomChoice(player.archetype.weapons));
 			case 2:
-			case 3: return new Armor();
+			case 3: return new Armor(randomChoice(player.archetype.armor));
 			case 4: return new Tool();
 		}
 	}
@@ -198,13 +221,10 @@ but certain actions will be enabled by having a specific item.
 */
 const weapon_list = {
 	'Sword': {
-
-	},
-	'Shield': {
-
+		tags: ['melee', '1h'],
 	},
 	'Axe': {
-
+		tags: ['melee', '1h'],
 	},
 	'Hammer': {
 
@@ -219,7 +239,7 @@ const weapon_list = {
 
 	},
 	'Spear': {
-
+		tags: ['melee', '1h', 'ranged'],
 	},
 	'Flail': {
 
@@ -228,19 +248,19 @@ const weapon_list = {
 
 	},
 	'Shortbow': {
-
+		tags: ['ranged', '2h'],
 	},
 	'Longbow': {
-
+		tags: ['ranged', '2h'],
 	},
 	'Crossbow': {
-
+		tags: ['ranged', '1h'],
 	},
 	'Boomerang': {
-
+		tags: ['ranged', '1h'],
 	},
 	'Shuriken': {
-
+		tags: ['ranged', '1h'],
 	},
 	'Dagger': {
 
@@ -331,6 +351,9 @@ const armor_list = {
 	'Vambraces': {
 		region: Item.region.arms,
 	},
+	'Shield': {
+		region: Item.region.arms,
+	},
 	'Greaves': {
 		region: Item.region.legs,
 	},
@@ -349,77 +372,77 @@ const armor_list = {
 };
 const modifier_list = {
 	'Holy': {
-		valid:equipment_types.both,
-		multiplier:()=>{player.archetype.name=="Monk"?4.5:3}
+		valid:['weapon', 'armor'],
+		multiplier:()=>{return player.archetype.name=="Monk"?4.5:3}
 	},
 	'Magical':
 	{
-		valid:equipment_types.both,
-		multiplier:()=>{player.archetype.name=="Mage"?2.2:2}
+		valid:['weapon', 'armor'],
+		multiplier:()=>{return player.archetype.name=="Mage"?2.2:2}
 	},
 	'Golden':
 	{
-		valid:equipment_types.both,
+		valid:['weapon', 'armor'],
 		multiplier:3
 	},
 	'Great':
 	{
-		valid:equipment_types.both,
+		valid:['weapon', 'armor'],
 		multiplier:4
 	},
 	'Leather':
 	{
-		valid:equipment_types.armor,
-		multiplier:()=>{player.archetype.name=="Ranger"?2.5:0.8}
+		valid:['armor'],
+		multiplier:()=>{return player.archetype.name=="Ranger"?2.5:0.8}
 	},
 	'Steel':
 	{
-		valid:equipment_types.both,
+		valid:['weapon', 'armor'],
 		multiplier:1.15
 	},
 	'Iron':
 	{
-		valid:equipment_types.both,
+		valid:['weapon', 'armor'],
 		multiplier:1.1
 	},
 	'Bronze':
 	{
-		valid:equipment_types.both,
+		valid:['weapon', 'armor'],
 		multiplier:1.05
 	},
 	'Silk':
 	{
-		valid:equipment_types.armor,
-		multiplier:()=>{player.archetype.name=="Mage"?2.5:0.8}
+		valid:['armor'],
+		multiplier:()=>{return player.archetype.name=="Mage"?2.5:0.8}
 	},
 	'Flaming':
 	{
-		valid:equipment_types.weapon,
+		valid:['weapon'],
 		multiplier:2.5
 	},
 	'Fire':
 	{
-		valid:equipment_types.weapon,
+		valid:['weapon'],
 		multiplier:2
 	},
 	'Freezing':
 	{
-		valid:equipment_types.weapon,
+		valid:['weapon'],
 		multiplier:2.5
 	},
 	'Ice':
 	{
-		valid:equipment_types.weapon,
+		valid:['weapon'],
 		multiplier:2
 	},
 	'Stone':
 	{
-		valid:equipment_types.weapon,
+		valid:['weapon'],
 		multiplier:1.5
 	},
 	'Dragonscale':
 	{
-		valid:equipment_types.armor,
+		valid:['armor'],
 		multiplier:3
 	}
 };

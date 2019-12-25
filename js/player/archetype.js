@@ -26,7 +26,6 @@ class Warrior extends Archetype {
 	name = "Warrior";
 	weapons = [
 		'Sword',
-		'Shield',
 		'Axe',
 		'Hammer',
 		'Cutlass',
@@ -36,11 +35,12 @@ class Warrior extends Archetype {
 		'Flail',
 		'Halberd'
 	];
-	equipment = [
+	armor = [
 		'Helm',
 		'Brooch',
 		'Breastplate',
 		'Vambraces',
+		'Shield',
 		'Greaves',
 		'Boots'
 	];
