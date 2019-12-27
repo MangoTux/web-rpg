@@ -83,7 +83,7 @@ class Weapon extends Equipment {
 		this.id = id;
 		this.base_item = weapon_list[id];
 		this.cost = 100;
-		this.name = id;
+		this.name = randomChoice(weapon_list[id].variants);
 		this.modify('weapon');
 		this.cost = Math.floor(this.cost);
 	}
@@ -157,81 +157,77 @@ but certain actions will be enabled by having a specific item.
 const weapon_list = {
 	'Sword': {
 		tags: ['melee', '1h'],
+		variants: ['Sword', 'Longsword', 'Shortsword', 'Flamberge', 'Claymore', 'Broadsword'],
 	},
 	'Axe': {
 		tags: ['melee', '1h'],
+		variants: ['Axe', 'Hatchet', 'Mattock'],
 	},
 	'Hammer': {
-
-	},
-	'Cutlass': {
-
+		tags: ['melee', '1h'],
+		variants: ['Hammer', 'Pick'],
 	},
 	'Rapier': {
-
+		tags: ['melee', '1h'],
+		variants: ['Rapier', 'Epee'],
 	},
 	'Scimitar': {
-
+		variants: ['Scimitar', 'Cutlass'],
 	},
 	'Spear': {
 		tags: ['melee', '1h', 'ranged'],
+		variants: ['Spear', 'Javelin', 'Trident'],
 	},
 	'Flail': {
-
+		tags: ['melee', '1h'],
+		variants: ['Flail'],
 	},
 	'Halberd': {
-
+		tags: ['melee', '1h', '2h'],
+		variants: ['Halberd', 'Glaive', 'Naginata'],
 	},
-	'Shortbow': {
+	'Bow': {
 		tags: ['ranged', '2h'],
-	},
-	'Longbow': {
-		tags: ['ranged', '2h'],
+		variants: ['Shortbow', 'Longbow'],
 	},
 	'Crossbow': {
 		tags: ['ranged', '1h'],
 	},
 	'Boomerang': {
 		tags: ['ranged', '1h'],
-	},
-	'Shuriken': {
-		tags: ['ranged', '1h'],
+		variants: ['Boomerang', 'Shuriken', 'Darts', 'Throwing Glaive', 'Chakram'],
 	},
 	'Dagger': {
-
+		tags: ['melee', '1h'],
+		variants: ['Dagger', 'Rondeau', 'Knife'],
 	},
 	'Staff': {
-
+		tags: ['melee', '1h', 'focus'],
+		variants: ['Staff'],
 	},
 	'Wand': {
-
+		tags: ['1h', 'focus'],
+		variants: ['Wand'],
 	},
 	'Rod': {
-
-	},
-	'Scepter': {
-
+		tags: ['1h', 'focus'],
+		variants: ['Rod', 'Scepter'],
 	},
 	'Tome': {
-
+		tags: ['1h', 'focus'],
+		variants: ['Tome', 'Book', 'Scroll'],
 	},
 	'Runes': {
-
-	},
-	'Chakram': {
-
+		tags: ['1h', 'focus'],
+		variants: ['Runes', 'Bones', 'Dice', 'Cards'],
 	},
 	'Claw': {
-
-	},
-	'Fist': {
-
-	},
-	'Gloves': {
-
+		tags: ['1h', 'melee', 'focus'],
+		variants: ['Claw', 'Fist', 'Gloves'],
 	},
 	'Talisman': {
-
+		tags: ['1h', 'melee', 'focus'],
+		variants: ['Talisman', 'Sigil'],
 	}
 }
 const armor_list = {

@@ -119,62 +119,56 @@ class NPC_Modifier {
   }
 }
 
-// const instead
-class Giant_Mod extends NPC_Modifier {
-  constructor() {
-    super();
-    this.name = "Giant %",
-    this.damage_factor = 4;
-    this.luck_factor = 0;
-    this.health_delta = 50;
-    this.reward_factor = 6;
-  }
-}
+const giant_mod = new NPC_Modifier();
+giant_mod.name = "Giant %";
+giant_mod.damage_factor = 4;
+giant_mod.luck_factor = 0;
+giant_mod.reward_factor = 6;
 
-class Tiny_Mod extends NPC_Modifier {
-  constructor() {
-    super();
-  }
-}
+const tiny_mod = new NPC_Modifier();
+tiny_mod.name = "Tiny %";
+tiny_mod.damage_factor = 4;
+tiny_mod.luck_factor = 0;
+tiny_mod.reward_factor = 6;
 
-class Puny_Mod extends NPC_Modifier {
-  constructor() {
-    super();
-  }
-}
+const puny_mod = new NPC_Modifier();
+puny_mod.name = "Puny %";
+puny_mod.damage_factor = 4;
+puny_mod.luck_factor = 0;
+puny_mod.reward_factor = 6;
 
-class Trash_Mod extends NPC_Modifier {
-  constructor() {
-    super();
-  }
-}
+const trash_mod = new NPC_Modifier();
+trash_mod.name = "Trash %";
+trash_mod.damage_factor = 4;
+trash_mod.luck_factor = 0;
+trash_mod.reward_factor = 6;
 
-class Collosal_Mod extends NPC_Modifier {
-  constructor() {
-    super();
-  }
-}
+const colossal_mod = new NPC_Modifier();
+colossal_mod.name = "Colossal %";
+colossal_mod.damage_factor = 4;
+colossal_mod.luck_factor = 0;
+colossal_mod.reward_factor = 6;
 
-class Quick_Mod extends NPC_Modifier {
-  constructor() {
-    super();
-  }
-}
+const quick_mod = new NPC_Modifier();
+quick_mod.name = "Quick %";
+quick_mod.damage_factor = 4;
+quick_mod.luck_factor = 0;
+quick_mod.reward_factor = 6;
 
-class Slow_Mod extends NPC_Modifier {
-  constructor() {
-    super();
-  }
-}
+const slow_mod = new NPC_Modifier();
+slow_mod.name = "Slow %";
+slow_mod.damage_factor = 4;
+slow_mod.luck_factor = 0;
+slow_mod.reward_factor = 6;
 
-class Kind_Mod extends NPC_Modifier {
-  constructor() {
-    super();
-  }
-}
+const king_mod = new NPC_Modifier();
+king_mod.name = "King %";
+king_mod.damage_factor = 4;
+king_mod.luck_factor = 0;
+king_mod.reward_factor = 6;
 
-class Queen_Mod extends NPC_Modifier {
-  constructor() {
-    super();
-  }
-}
+const queen_mod = new NPC_Modifier();
+queen_mod.name = "Queen %";
+queen_mod.damage_factor = 4;
+queen_mod.luck_factor = 0;
+queen_mod.reward_factor = 6;
