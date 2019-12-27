@@ -3,21 +3,47 @@ class Sentient {
   level;
 	experience;
 	// Stats are determined by race and archetype
-	base_combat_stats = {};
+	base_combat_stats = {
+    power: 0,
+    vitality: 0,
+    dexterity: 0,
+    resilience: 0,
+    spirit: 0,
+    luck: 0,
+  };
+  hp = {
+    current: 0,
+    max: 0,
+    buffer: 0,
+  };
 	// And combat stats include all modifiers such as equipment and status
-	combat_stats = {};
 	position = [0, 0];
 	inventory = [];
 	gold = 250;
 
   constructor() {
     this.level = 0;
-    this.combat_stats = {};
     this.inventory = [];
     this.gold = 0;
+    // Modify HP to be
+  }
+
+  calculateHPMax() {
+    // Vitality, Level, Equipped Items
   }
 
   get name() {
     return this.name;
+  }
+
+  get combat_stats() {
+    // From constructor
+    let stats = this.base_stats;
+    // Work through racial formula (if any)
+    // Work through archetype formula (if any)
+    // Work through subarchetype formula (if any)
+    // Work through equipped items (if any)
+    // Work through passive skills (if any)
+    // Work through active skills (if any)
   }
 }

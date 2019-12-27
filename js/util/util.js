@@ -37,44 +37,52 @@ const randomProperty = (obj) => {
 
 
 //Used for generating random names
-var Mdict = function()
-{
-	this.d = [];
+class Mdict {
+	d = [];
 
-	this.getItem = function(key) { if (key in this.d) { return this.d[key]; } }
+	getItem(key) {
+    if (key in this.d) {
+      return this.d[key];
+    }
+  }
+
 	// Adds or appends the given suffix to the prefix in the list
-	this.addKey = function(pref, suff) { if (pref in this.d) { this.d[pref].push(suff); } else { this.d[pref] = [suff]; } }
+	addKey(pref, suff) {
+    if (pref in this.d) {
+      this.d[pref].push(suff);
+    } else {
+      this.d[pref] = [suff];
+    }
+  }
 
-	this.getSuffix = function(prefix) { return randomChoice(this.d[prefix]); }
+	getSuffix(prefix) {
+    return randomChoice(this.d[prefix]);
+  }
 }
 //Used for generating random names
-var MName = function()
-{
-	this.chainLen = 2;
-	this.mcd = new Mdict()
-	var s;
-	for (p in namingTemplate)
-	{
-		s = "  " + namingTemplate[p];
-		for (var i = 0; i<namingTemplate[p].length; i++)
-			this.mcd.addKey(s.substring(i, i+this.chainLen), s.charAt(i+this.chainLen));
-		this.mcd.addKey(s.substring(namingTemplate[p].length, namingTemplate[p].length+this.chainLen), "\n");
-	}
+class MName {
+	chainLen = 2;
+	mcd = new Mdict();
 
-	this.New = function()
-	{
-		var prefix = "  ";
-		var name = "";
-		var suffix = "";
+  constructor() {
+    let s;
+  	for (let p in namingTemplate)	{
+  		s = "  " + namingTemplate[p];
+  		for (let i = 0; i<namingTemplate[p].length; i++)
+  			this.mcd.addKey(s.substring(i, i+this.chainLen), s.charAt(i+this.chainLen));
+  		this.mcd.addKey(s.substring(namingTemplate[p].length, namingTemplate[p].length+this.chainLen), "\n");
+  	}
+  }
+
+	New()	{
+		let prefix = "  ";
+		let name = "";
+		let suffix = "";
 		while (true) {
 			suffix = this.mcd.getSuffix(prefix);
-			if (suffix == "\n" || name.length > 9)
-				break;
-			else
-			{
-				name += suffix;
-				prefix = prefix.charAt(1) + suffix;
-			}
+			if (suffix == "\n" || name.length > 9) { break; }
+			name += suffix;
+			prefix = prefix.charAt(1) + suffix;
 		}
 		return name.charAt(0).toUpperCase() + name.slice(1); // Capitalize name
 	}
