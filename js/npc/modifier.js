@@ -119,6 +119,7 @@ class NPC_Modifier {
   }
 }
 
+// const instead
 class Giant_Mod extends NPC_Modifier {
   constructor() {
     super();

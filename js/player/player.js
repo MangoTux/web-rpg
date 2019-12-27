@@ -8,7 +8,7 @@ class Player extends Sentient {
 	wielding = [];
 	gold = 250;
 
-	quests = {};
+	quest_handler = null;
 
 	constructor(name) {
 		super();
@@ -18,6 +18,7 @@ class Player extends Sentient {
 		this.archetype = null;
 		this.state = state.player.start;
 		this.gold = 250;
+		this.quest_handler = new Quest_Handler();
 	}
 
 	load(json) {
@@ -88,51 +89,17 @@ class Player extends Sentient {
 		};
 		return this.inventory.some(is_water_travel);
 	}
-}
 
-class Race {
-	base_health;
-	luck;
-	name;
-	constructor() {}
-
-	get name() {
-		return this.name;
+	acceptQuest() {
+		this.quest_handler.accept(environment.getNpcOnTile(player.position).quest);
 	}
-}
 
-class Human extends Race {
-	name = "Human";
-	constructor() {
-		super();
-		this.base_health = 30,
-		this.luck = 2;
+	updateQuestProgress(event, target) {
+		this.quest_handler.updateProgress(event, target);
 	}
-}
 
-class Elf extends Race {
-	name = "Elf";
-	constructor() {
-		super();
-		this.base_health = 50;
-		this.luck = 0;
-	}
-}
-
-class Dwarf extends Race {
-	name = "Dwarf";
-	constructor() {
-		super();
-		this.base_health = 40;
-		this.luck = 1;
-	}
-}
-
-class Goblin extends Race {
-	name = "Goblin";
-	constructor() {
-		super();
-		this.base_health = 20;
-		this.luck = 4;
+	receiveQuestReward(reward_object) {
+		// Increase gold
+		// Gain items (if any)
 	}
 }
