@@ -153,6 +153,11 @@ UI.prototype.drawEquippedWindow = function() {
 	$("#gameInfo").html("<h3>Equipped Items</h3><ul>" + equipList.html());
 }
 
+UI.prototype.drawNpcDialogue = function() {
+  const npc = environment.getNpcOnTile(player.position);
+  $("#gameInfo").html(`<h3>${npc.name} says:</h3><br><br>${npc.quest.description}`);
+}
+
 UI.prototype.drawNpcInfo = function(npcData) {
   var statList = $('<ul>');
   for (var i in npcData.list) {

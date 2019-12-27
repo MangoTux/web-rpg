@@ -21,6 +21,19 @@ Array.prototype.getIndexFromPattern = function(selection) {
 
 const getRandomInt = (min, max) => Math.floor(Math.random() * (max-min+1)) + min;
 const randomChoice = (list) => list[getRandomInt(0, list.length-1)];
+const randomKey = (obj) => {
+  let ret, c = 0;
+  for (let key in obj) {
+    if (Math.random() < 1/++c) {
+      ret = key;
+    }
+  }
+  return ret;
+};
+const randomProperty = (obj) => {
+  const keys = Object.keys(obj);
+  return keys[keys.length * Math.random() << 0];
+}
 
 
 //Used for generating random names
@@ -65,15 +78,4 @@ var MName = function()
 		}
 		return name.charAt(0).toUpperCase() + name.slice(1); // Capitalize name
 	}
-}
-//Given a list of key/value pairs, returns a random key from list
-function randomKey(obj) {
-    let ret;
-    let c = 0;
-    for (let key in obj) {
-      if (Math.random() < 1/++c) {
-        ret = key;
-      }
-    }
-    return ret;
 }
