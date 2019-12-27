@@ -24,6 +24,7 @@ const state = {
 	},
 };
 
+// TODO Rebuild with a phoneme focus.
 const namingTemplate =
 [
 	'Ailish',
@@ -38,16 +39,20 @@ const namingTemplate =
 	'Bannove',
 	'Batu',
 	'Berenthos',
+	'Berethor',
 	'Birgol',
 	'Bragi',
 	'Brakas',
 	'Brom',
+	'Bruz',
 	'Buddy',
 	'Chelisern',
 	'Ciel',
 	'Daenan',
 	'Daggard',
 	'Darora',
+	'Eaoden',
+	'Elegost',
 	'Ellisair',
 	'Erenthar',
 	'Faera',
@@ -62,8 +67,10 @@ const namingTemplate =
 	'Ghazeer',
 	'Goelleniar',
 	'Grinrune',
+	'Hadhod',
 	'Halberd',
 	'Hemdallr',
+	'Idrial',
 	'Ifris',
 	'Igneous',
 	'Iruzia',
@@ -82,6 +89,7 @@ const namingTemplate =
 	'Meadow',
 	'Midna',
 	'Mop',
+	'Morwen',
 	'Nallander',
 	'Orian',
 	'Paladin',

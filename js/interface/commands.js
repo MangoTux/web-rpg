@@ -272,60 +272,40 @@ Shell.commands['fight'] = function() {
 	if (player.state == state.player.dead) {
 		Terminal.print("That's what got you into this mess."); return;
 	}
-	if (player.state == state.player.fight) {
+	const npc = environment.getNpcOnTile(player.position);
+	// TODO Look to environment.active_encounter for NPC
+	if (player.state == state.player.fight || npc !== null) {
 		combat.setUpEncounter(player, npc);
-	} else if (isNpcOnTile(player.X, player.Y)) {
-    if (npcList[currentNpcIndex].npc == null) {
-      npcList[currentNpcIndex].npc = new Npc();
-      npcList[currentNpcIndex].npc.createNpc(false);
-    }
-		combat.setUpEncounter(player, npcList[currentNpcIndex].npc);
-    currentNpcIndex = null;
   }	else {
 		Terminal.print("Fight what? There's nothing else around.");
 	}
 }
 
 const inspect_npc = function(npc) {
-	let npc_damage = npc.combat_stats.damageRollQty+"d"+npc.combat_stats.damageRollMax;
-	if (npc.combat_stats.damageModifier > 0) {
-		npc_damage += "+"+npc.combat_stats.damageModifier;
-	} else if (npc.combat_stats.damageModifier < 0) {
-		npc_damage += "-"+npc.combat_stats.damageModifier;
-	}
-	if (npc.combat_stats.attackSpeed != 1) {
-		npc_damage += " x " + npc.combat_stats.attackSpeed;
-	}
 	let data = {
 		list: {
 			'Name':npc.name_mod,
 			'Level':npc.level,
-			'Health':npc.combat_stats.currentHP + "/" + npc.combat_stats.maxHP,
-			'Damage':npc_damage,
-			'Defense':npc.combat_stats.defense,
 		},
 	};
-	if (typeof allNpcs[npc.name] !== "undefined") {
+	if (typeof npc_list[npc.id] !== "undefined") {
 		data.display = {
-			'Description': allNpcs[npc.name].description,
+			'Description': npc_list[npc.id].description,
 		}
 	}
 	return data;
 }
 
 Shell.commands['inspect'] = function() {
+	const npc = environment.getNpcOnTile(player.position);
 	if (state.player == state.player.fight) {
 		ui.drawNpcInfo(inspect_npc(npc));
 		Terminal.print(randomChoice(["Hmm... Interesting.", "Cool!", "Ooh, seems tough.", "Inspect away!"]));
 		Terminal.print("What will you do? [Fight/Inspect/Run]");
-	} else if (isNpcOnTile(player.X, player.Y)) {
+	} else if (npc !== null) {
 		// If the character hasn't been cached, create it now
-    if (npcList[currentNpcIndex].npc == null) {
-      npcList[currentNpcIndex].npc = new Npc();
-      npcList[currentNpcIndex].npc.createNpc(false);
-    }
 		// Not a fan of the global npc above or currentNpcIndex here.
-		ui.drawNpcInfo(inspect_npc(npcList[currentNpcIndex]));
+		ui.drawNpcInfo(inspect_npc(npc));
     Terminal.print("What will you do? [Fight/Inspect/Talk/Leave]");
   }	else {
     Terminal.print("Nothing to inspect");
@@ -540,17 +520,16 @@ Shell.commands['unequip'] = function() {
 /* Used in quests */
 Shell.commands['talk'] = function() {
   /* If current tile has an NPC, talk to it to reveal information */
-  if (!isNpcOnTile(player.X, player.Y)) {
+	const npc = environment.getNpcOnTile(player.position);
+  if (npc === null) {
     Terminal.print("You're talking to yourself.");
 		return;
   }
-  Terminal.print("You strike up a conversation");
-  if (npcList[currentNpcIndex].npc == null) {
-    npcList[currentNpcIndex].npc = new Npc();
-    npcList[currentNpcIndex].npc.createNpc(false);
-    player.quests[currentNpcIndex] = npcList[currentNpcIndex].npc.quest;
-  }
-  $("#gameInfo").html(getQuestText());
-  updateQuest();
-  currentNpcIndex = null;
+	if (npc.quest === null) {
+		npc.quest = new Quest();
+		player.quest_handler.accept(npc.quest);
+	}
+  Terminal.print(`You strike up a conversation with ${npc.name}`);
+  $("#gameInfo").html(ui.drawNpcDialogue());
+	npc.quest.updateStatus();
 }
