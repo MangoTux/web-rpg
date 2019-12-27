@@ -71,25 +71,20 @@ UI.prototype.drawShopWindow = function() {
 
 // Print player stats
 UI.prototype.drawStatsWindow = function() {
-  var statList = $('<ul>');
-  var player_damage = player.combat_stats.damageRollQty+"d"+player.combat_stats.damageRollMax;
-  if (player.combat_stats.damageModifier > 0) {
-    player_damage += "+"+player.combat_stats.damageModifier;
-  } else if (player.combat_stats.damageModifier < 0) {
-    player_damage += "-"+player.combat_stats.damageModifier;
-  }
-  if (player.combat_stats.attackSpeed != 1) {
-    player_damage += " x " + player.combat_stats.attackSpeed;
-  }
-	statList.append($('<li>').text("Name: " + player.name));
-	statList.append($('<li>').text("Race: " + player.race.charAt(0).toUpperCase() + player.race.slice(1)));
-	statList.append($('<li>').text("Class: " + player.playerClass.charAt(0).toUpperCase() + player.playerClass.slice(1)));
-	statList.append($('<li>').text("Level: " + player.level));
-	statList.append($('<li>').text("Exp Needed: " + player.getExpNeeded()));
-	statList.append($('<li>').text("Gold: " + player.gold));
-	statList.append($('<li>').text("Health: " + player.combat_stats.currentHP + "/" + player.combat_stats.maxHP));
-	statList.append($('<li>').text("Damage: " + player_damage));
-	statList.append($('<li>').text("Defense: " + (player.combat_stats.defense)));
+  let statList = $('<ul>');
+	statList.append($('<li>').text(`Name: ${player.name}`));
+	statList.append($('<li>').text(`Race: ${player.race.name}`));
+	statList.append($('<li>').text(`Class: ${player.archetype.name}`));
+	statList.append($('<li>').text(`Level: ${player.level}`));
+	statList.append($('<li>').text(`Exp Needed: ${player.experience_needed}`));
+	statList.append($('<li>').text(`Gold: ${player.gold}`));
+	statList.append($('<li>').text(`Health: ${player.combat_stats.currentHP}/${player.combat_stats.maxHP}`));
+  statList.append($('<li>').text(`Power: ${player.combat_stats.power}`));
+  statList.append($('<li>').text(`Vitality: ${player.combat_stats.vitality}`));
+  statList.append($('<li>').text(`Resilience: ${player.combat_stats.resilience}`));
+  statList.append($('<li>').text(`Dexterity: ${player.combat_stats.dexterity}`));
+  statList.append($('<li>').text(`Spirit: ${player.combat_stats.spirit}`));
+  statList.append($('<li>').text(`Luck: ${player.combat_stats.luck}`));
 	var coord;
 	if (player.Y > 0)
 		coord = player.Y + "S";

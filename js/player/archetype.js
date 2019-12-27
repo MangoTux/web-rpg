@@ -20,6 +20,30 @@ class Archetype {
 	get name() {
 		return this.name;
 	}
+
+	get power() {
+		return this.abilities.power;
+	}
+
+	get vitality() {
+		return this.abilities.vitality;
+	}
+
+	get dexterity() {
+		return this.abilities.dexterity;
+	}
+
+	get resilience() {
+		return this.abilities.resilience;
+	}
+
+	get spirit() {
+		return this.abilities.spirit;
+	}
+
+	get luck() {
+		return this.abilities.luck;
+	}
 }
 
 class Warrior extends Archetype {
@@ -28,7 +52,6 @@ class Warrior extends Archetype {
 		'Sword',
 		'Axe',
 		'Hammer',
-		'Cutlass',
 		'Rapier',
 		'Scimitar',
 		'Spear',
@@ -48,17 +71,39 @@ class Warrior extends Archetype {
 		super();
 
 	}
+
+	getPowerFunction() {
+		return function(level){ return 0 };
+	}
+
+	getVitalityFunction() {
+		return function(level){ return 0 };
+	}
+
+	getDexterityFunction() {
+		return function(level){ return 0 };
+	}
+
+	getResilienceFunction() {
+		return function(level){ return 0 };
+	}
+
+	getSpiritFunction() {
+		return function(level){ return 0 };
+	}
+
+	getLuckFunction() {
+		return function(level){ return 0 };
+	}
 }
 
 class Ranger extends Archetype {
 	name = "Ranger";
 	weapons = [
-		'Shortbow',
-		'Longbow',
+		'Bow',
 		'Crossbow',
 		'Spear',
 		'Boomerang',
-		'Shuriken'
 	];
 	armor = [
 		'Cowl',
@@ -73,6 +118,30 @@ class Ranger extends Archetype {
 		super();
 
 	}
+
+	getPowerFunction() {
+		return function(level){ return 0 };
+	}
+
+	getVitalityFunction() {
+		return function(level){ return 0 };
+	}
+
+	getDexterityFunction() {
+		return function(level){ return 0 };
+	}
+
+	getResilienceFunction() {
+		return function(level){ return 0 };
+	}
+
+	getSpiritFunction() {
+		return function(level){ return 0 };
+	}
+
+	getLuckFunction() {
+		return function(level){ return 0 };
+	}
 }
 
 class Mage extends Archetype {
@@ -81,7 +150,6 @@ class Mage extends Archetype {
 		'Staff',
 		'Wand',
 		'Rod',
-		'Scepter',
 		'Tome',
 		'Runes'
 	];
@@ -98,16 +166,38 @@ class Mage extends Archetype {
 		super();
 
 	}
+
+	getPowerFunction() {
+		return function(level){ return 0 };
+	}
+
+	getVitalityFunction() {
+		return function(level){ return 0 };
+	}
+
+	getDexterityFunction() {
+		return function(level){ return 0 };
+	}
+
+	getResilienceFunction() {
+		return function(level){ return 0 };
+	}
+
+	getSpiritFunction() {
+		return function(level){ return 0 };
+	}
+
+	getLuckFunction() {
+		return function(level){ return 0 };
+	}
 }
 
 class Monk extends Archetype {
 	name = "Monk";
 	// These should just be lists for the key values.
 	weapons = [
-		'Chakram',
+		'Boomerang',
 		'Claw',
-		'Fist',
-		'Gloves',
 		'Talisman'
 	];
 	armor = [
@@ -123,6 +213,30 @@ class Monk extends Archetype {
 	constructor() {
 		super();
 
+	}
+
+	getPowerFunction() {
+		return function(level){ return 0 };
+	}
+
+	getVitalityFunction() {
+		return function(level){ return 0 };
+	}
+
+	getDexterityFunction() {
+		return function(level){ return 0 };
+	}
+
+	getResilienceFunction() {
+		return function(level){ return 0 };
+	}
+
+	getSpiritFunction() {
+		return function(level){ return 0 };
+	}
+
+	getLuckFunction() {
+		return function(level){ return 0 };
 	}
 }
 

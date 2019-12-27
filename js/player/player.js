@@ -19,6 +19,14 @@ class Player extends Sentient {
 		this.state = state.player.start;
 		this.gold = 250;
 		this.quest_handler = new Quest_Handler();
+		this.base_combat_stats = {
+	    power: 5,
+	    vitality: 5,
+	    dexterity: 5,
+	    resilience: 5,
+	    spirit: 5,
+	    luck: 0,
+	  };
 	}
 
 	load(json) {
@@ -76,11 +84,6 @@ class Player extends Sentient {
 		// Set combat stats equal to base combat stats
 		// For each item in equipped (ignoring health-change):
 		//  - Increase combat stats by the modifier from the item
-	}
-
-	get luck() {
-		// This needs to factor in class features and inventory items eventually
-		return this.level + this.race.luck;
 	}
 
 	hasWaterTravel() {

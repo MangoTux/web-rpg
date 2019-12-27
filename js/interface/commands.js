@@ -323,7 +323,7 @@ const run_direction = function(direction, response) {
 			Terminal.promptActive = true;
 			clearTimeout(run_timeout);
 		}
-	}, 100);
+	}, 175);
 }
 
 Shell.commands['run'] = function() {
