@@ -1,0 +1,150 @@
+:root {
+	--color-tx: white;
+	--color-bg: black;
+	--color-ui-good: limegreen;
+	--color-ui-bad: red;
+	--color-ui-neutral: white;
+}
+
+* {
+	box-sizing: border-box;
+	padding: 0;
+	margin: 0;
+}
+
+body {
+	background-color: var(--color-bg);
+	font-family:"Courier";
+	font-size:14px;
+	color:white;
+	overflow:hidden;
+}
+
+a, a:visited {
+	color: var(--color-tx);
+	cursor:pointer; font-weight:bold; text-decoration:none;
+}
+
+p {
+	margin: 0 !important;
+}
+
+#game {
+	/* Contains #cli and #hud [contains #hud_primary and #hud_combat]*/
+	width:100vw;
+	height:100vh;
+	padding:25px;
+	display:grid;
+	grid-template-rows: 1fr 1fr;
+	grid-template-columns: 3fr 4fr;
+	grid-template-areas:
+	"cli hud_main"
+	"cli hud_combat";
+  grid-column-gap: 10px;
+  grid-row-gap: 15px;
+}
+
+#cli {
+	overflow: hidden;
+	align-self: stretch;
+	grid-area: cli;
+}
+
+#hud_main {
+	grid-area: hud_main;
+	align-self: stretch;
+	justify-self: center;
+}
+
+.combat_wrapper {
+	display:grid;
+	width: 100%;
+	grid-template-columns: 2fr 1fr 2fr;
+	grid-template-rows: auto;
+	grid-template-areas: "ally neutral enemy";
+  grid-column-gap: 10px;
+  grid-row-gap: 15px;
+}
+
+#combat_ally,
+#combat_center,
+#combat_enemy {
+	justify-self: center;
+	align-self: center;
+}
+
+#combat_ally,
+#combat_enemy {
+	height:100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-evenly;
+}
+
+#combat_ally {
+	grid-area: ally;
+}
+
+#combat_center {
+	grid-area: neutral;
+}
+
+#combat_enemy {
+	grid-area: enemy;
+}
+
+.combat_name {
+	text-decoration: underline;
+	font-size: 250%;
+}
+.combat_hp {
+	font-size: 175%;
+}
+
+#hud_combat {
+	grid-area: hud_combat;
+	align-self: stretch;
+	justify-self: center;
+}
+
+#cursor {
+	font-weight: normal;
+	position: absolute;
+	text-align: center;
+	width: auto;
+  text-decoration: underline;
+	background-color: var(--color-tx);
+	color: var(--color-bg);
+  text-decoration-color: var(--color-tx);
+}
+
+#spinner {
+	margin-left:1em;
+	display:none;
+	font-weight:bold;
+	line-height:0px;
+}
+
+.combat__healing {
+	color: var(--color-ui-good);
+}
+
+.combat__damage {
+	color: var(--color-ui-bad);
+}
+
+.combat__dodge {
+	color: var(--color-ui-good);
+}
+
+.combat__miss {
+	color: var(--color-ui-neutral);
+}
+
+.error {
+	color: var(--color-ui-bad);
+}
+
+.success {
+	color: var(--color-ui-good);
+}
