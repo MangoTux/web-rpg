@@ -2,6 +2,7 @@ class Environment {
   map;
   shops;
   npcs;
+  active_encounter;
 
   constructor() {
     this.map = new Map();
@@ -34,7 +35,7 @@ class Environment {
     if (!this.map.canMove(player.position).canMove) {
       player.position = this.findNearestTraversible(player.position);
     }
-    this.populateRegion([-250, 250], [-250, 250]);
+    this.populateRegion([-1000, 1000], [-1000, 1000]);
   }
 
   findNearestTraversible(position) {
@@ -64,8 +65,34 @@ class Environment {
   }
 
   hasEncounter() {
-    // Not amazing
-    return (getRandomInt(0, 100) < 10);
+    // Allow one space between encounters
+    return player.step_count%2 && getRandomInt(0, 100) < 15;
+  }
+
+  createWildEncounter() {
+    player.state = state.player.encounter;
+    this.encounter = new Encounter();
+    this.encounter.generate();
+
+    return this.encounter;
+  }
+
+  createNpcEncounter() {
+    player.state = state.player.encounter;
+    this.encounter = new Encounter();
+    this.encounter.enemy_list = [ this.getNpcOnTile(player.position) ];
+    // When the combat ends, the NPC can no longer be of service.
+    // TODO Remove active quests belonging to this guy and alert?
+    this.encounter.on_victory.push(() => {
+      this.npcs.pop(...player.position);
+    });
+
+    return this.encounter;
+  }
+
+  cleanEncounter() {
+    // TODO Check for victory, apply on_victory (same with defeat?)
+    this.encounter = null;
   }
 
   // Returns null if no shops are on the position

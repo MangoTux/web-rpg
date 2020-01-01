@@ -23,7 +23,23 @@ Terminal = {
 	},
 
 	selector: {
-
+		cli: "#cli",
+		history: "#history",
+		input: "#input",
+		hud_main: "#hud_main",
+		hud_combat: "#hud_combat",
+		combat: { // Everything here is missing the primary component, since I'm dropping these in templates.
+			wrapper: "combat_wrapper", // Class
+			ally: "combat_ally", // ID
+			center: "combat_center", // ID
+			enemy: "combat_enemy", // ID
+			name: "combat_name", // Class
+			hp: {
+				wrapper: "combat_hp", // Class
+				now: "hp_now", // Class
+				max: "hp_max", // Class
+			},
+		},
 	},
 
 	//Initializes the terminal object
@@ -50,18 +66,18 @@ Terminal = {
 		.bind('keydown', 'tab', function(e) { e.preventDefault(); }); //No functionality, which is actually good for this.
 
 		//Handles scrolling of window to adjust where everything is placed - FIX THIS
-		$(window).resize(function(e) { $('#game').scrollTop($('#game').attr('scrollHeight')); });
+		$(window).resize(function(e) { $(Terminal.selector.cli).scrollTop($(Terminal.selector.cli).attr('scrollHeight')); });
 
 		//Disable working until everything is initialized
 		this.setWorking(false);
 		$('#prompt').html(this.config.prompt);
-		$('#game').hide().fadeIn('fast', function() { $('#game').triggerHandler('cli-load'); });
+		$(Terminal.selector.cli).hide().fadeIn('fast', function() { $(Terminal.selector.cli).triggerHandler('cli-load'); });
 	},
 
 	// Clears the terminal
 	clear: function()
 	{
-		var displayElement = document.getElementById("display"); // Get the display element
+		const displayElement = document.querySelector(Terminal.selector.history); // Get the display element
 		while (displayElement.firstChild) {
 			displayElement.removeChild(displayElement.firstChild);
 		}
@@ -150,7 +166,7 @@ Terminal = {
 
 	//Prints the given text to the terminal display
 	print: function(text) {
-		let displayElement = $('#display');
+		let displayElement = $(Terminal.selector.history);
 		if (!text)
 		{
 			displayElement.append($('<div>'));
@@ -216,13 +232,13 @@ Terminal = {
 				$('#spinner').text(this.config.spinnerCharacters[this.spinnerIndex]);
 			}, this), this.config.spinnerSpeed);
 			this.setPromptActive(false);
-			$('#game').triggerHandler('cli-busy');
+			$(Terminal.selector.cli).triggerHandler('cli-busy');
 		} else if (!working && this._spinnerTimeout) {
 			clearInterval(this._spinnerTimeout);
 			this._spinnerTimout = null;
 			$('#spinner').fadeOut();
 			this.setPromptActive(true);
-			$('#game').triggerHandler('cli-ready');
+			$(Terminal.selector.cli).triggerHandler('cli-ready');
 		}
 	},
 
@@ -230,7 +246,6 @@ Terminal = {
 	runCommand: function(text) {
 		let index = 0;
 		let mine = false;
-
 		//Disables prompt active for the time being
 		this.promptActive = false;
 		//Types the character sequence of text

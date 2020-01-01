@@ -12,7 +12,7 @@ class Sentient {
     luck: 0,
   };
   hp = {
-    current: 0,
+    now: 0,
     max: 0,
     buffer: 0,
   };
@@ -22,6 +22,7 @@ class Sentient {
 	gold = 250;
 
   constructor() {
+    this.uuid = uuid();
     this.level = 0;
     this.inventory = [];
     this.gold = 0;
@@ -32,13 +33,9 @@ class Sentient {
     // Vitality, Level, Equipped Items
   }
 
-  get name() {
-    return this.name;
-  }
-
   get combat_stats() {
     // From constructor
-    let stats = this.base_stats;
+    return this.base_combat_stats;
     // Work through racial formula (if any)
     // Work through archetype formula (if any)
     // Work through subarchetype formula (if any)

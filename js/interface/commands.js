@@ -42,12 +42,12 @@ Help         - View this page
 </p>
 `;
 	help_list = help_list.replace(/ /g, "&nbsp;");
-	$("#gameInfo").html(help_list);
+	$(Terminal.selector.hud_main).html(help_list);
   Terminal.print("Game commands can be found on the right-hand pane");
 }
 
 Shell.commands['updates'] = function() {
-	$("#gameInfo").html($("#updates").html());
+	$(Terminal.selector.hud_main).html($("#updates").html());
 	Terminal.print("Updates to the game can be found on the right-hand pane");
 }
 
@@ -63,7 +63,7 @@ and get in fights. Or not. I can't tell you<br>
 what to do, I'm just some text on a screen.
 </p>
 `;
-    $("#gameInfo").html(about);
+    $(Terminal.selector.hud_main).html(about);
     Terminal.print("Information about the game can be found on the right-hand pane");
 }
 
@@ -74,15 +74,13 @@ const advance = function(direction, response) {
 		return false;
 	}
 	response && Terminal.print(response);
-	if (false && map.hasEncounter(player.position)) {
-		encounter = new Encounter();
-		let encounter_data = encounter.getEncounter();
-		Terminal.print("Oh no! You ran into a level " + encounter_data.level + " " + encounter_data.name_mod + "!");
-		Terminal.print("What will you do? [Fight/Inspect/Run]");
-		player.state = state.player.fight;
+	ui.resumeDisplay(currentDisplay);
+	if (environment.hasEncounter()) {
+		let encounter_data = environment.createWildEncounter();
+		Terminal.print(`Oh no! You ran into ${encounter_data.toString()}!`);
+		Terminal.print(`What will you do? [Fight/Inspect/Run]`);
 		return false;
 	}
-	ui.resumeDisplay(currentDisplay);
 	return true;
 }
 
@@ -156,6 +154,10 @@ Shell.commands['go'] = function() {
 
 //Apologize after saying 'go away'
 Shell.commands['sorry'] = function() {
+	if (!Terminal.suppressed) {
+		Terminal.print("It's not your fault.");
+		return;
+	}
 	Terminal.suppressed = false;
 	Terminal.print(randomChoice(["It's okay c:", "I forgive you.", "Yay! Friends again!"]));
 }
@@ -199,17 +201,14 @@ Shell.commands['your'] = function() {
 
 //Resets player to full health
 Shell.commands['rest'] = function() {
-	$('#game').fadeOut(2000, () => {
+	$("#game").animate({opacity: "0%"}, 2000, "linear", () => {
 		Terminal.setPromptActive(false);
 		player.rest();
 		Terminal.clear();
-		$('#game').fadeIn(2000, () => {
+		$("#game").animate({opacity: "100%"}, 2000, "linear", () => {
 			Terminal.print('You feel rested.');
 			Terminal.setPromptActive(true);
 		});
-	});
-	$('#gameInfo').fadeOut(2000, () => {
-		$('#gameInfo').fadeIn(2000);
 	});
 }
 
@@ -257,7 +256,7 @@ Shell.commands['map'] = function() {
 	}
 	if ([
 		state.player.standard,
-		state.player.fight,
+		state.player.encounter,
 		state.player.shop
 	].includes(player.state)) {
 		currentDisplay = "MAP";
@@ -273,12 +272,15 @@ Shell.commands['fight'] = function() {
 		Terminal.print("That's what got you into this mess."); return;
 	}
 	const npc = environment.getNpcOnTile(player.position);
-	// TODO Look to environment.active_encounter for NPC
-	if (player.state == state.player.fight || npc !== null) {
-		combat.setUpEncounter(player, npc);
-  }	else {
-		Terminal.print("Fight what? There's nothing else around.");
+	if (player.state != state.player.encounter) {
+		if (npc === null) {
+			Terminal.print("Fight what? There's nothing else around.");
+			return;
+		}
+		environment.createNpcEncounter(npc);
 	}
+
+	environment.encounter.startCombat();
 }
 
 const inspect_npc = function(npc) {
@@ -298,7 +300,7 @@ const inspect_npc = function(npc) {
 
 Shell.commands['inspect'] = function() {
 	const npc = environment.getNpcOnTile(player.position);
-	if (state.player == state.player.fight) {
+	if (state.player == state.player.encounter) {
 		ui.drawNpcInfo(inspect_npc(npc));
 		Terminal.print(randomChoice(["Hmm... Interesting.", "Cool!", "Ooh, seems tough.", "Inspect away!"]));
 		Terminal.print("What will you do? [Fight/Inspect/Run]");
@@ -331,18 +333,18 @@ Shell.commands['run'] = function() {
 		Terminal.print("You should have done that sooner.");
 		return;
 	}
-	if (player.state == state.player.fight) {
+	if (player.state == state.player.encounter) {
 		//Set fight to over
 		player.state = state.player.standard;
-
+		let encounter = environment.encounter.toFleeString();
 		Terminal.print(randomChoice(
-			["You ran from the " + npc.name_mod + ". Coward.",
-			"You valiantly flee from the " + npc.name_mod + ", tail betwixt your legs.",
-			"The " + npc.name_mod + " is probably making fun of you to their friends by now.",
-			"You barely escape before the " + npc.name_mod + " could hurt you.",
-			"Ooh, smart move. You run from the " + npc.name_mod + ".",
-			"History will remember of the time that you almost fought the " + npc.name_mod + ".",
-			"You ran from the " + npc.name_mod + ". It just wanted to be friends."]));
+			[`You ran from the ${encounter}. Coward.`,
+			`You valiantly flee from the ${encounter}, tail betwixt your legs.`,
+			`The ${encounter} is probably making fun of you to their friends by now.`,
+			`You barely escape before the ${encounter} could hurt you.`,
+			`Ooh, smart move. You run from the ${encounter}.`,
+			`History will remember of the time that you almost fought the ${encounter}.`,
+			`You ran from the ${encounter}. It probably wanted to be friends.`]));
 
 		ui.resumeDisplay();
 		return;
@@ -530,6 +532,6 @@ Shell.commands['talk'] = function() {
 		player.quest_handler.accept(npc.quest);
 	}
   Terminal.print(`You strike up a conversation with ${npc.name}`);
-  $("#gameInfo").html(ui.drawNpcDialogue());
+  $(Terminal.selector.hud_main).html(ui.drawNpcDialogue());
 	npc.quest.updateStatus();
 }
