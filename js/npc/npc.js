@@ -6,12 +6,15 @@ class NPC extends Sentient {
   constructor(id) {
     super();
     this.id = id;
+    this.name = id;
     this.generate();
   }
 
   generate(position) {
     // Based on player details and location
     this.level = player.level;
+    this.hp.max = getRandomInt(10, 20)+this.level;
+    this.hp.now = this.hp.max;
     // Modify level based on random tweaking, area, etc
     this.position = position;
     // From the source config, apply combat stats, gold, etc
@@ -24,6 +27,13 @@ class NPC extends Sentient {
   mutate() {
     // Find a random npc modifier
     // Update name and all stats to reflect the big lug
+    this.modifier = randomChoice(
+      [giant_mod, tiny_mod, puny_mod,
+      trash_mod, colossal_mod, quick_mod,
+      slow_mod, king_mod, queen_mod
+    ]);
+    // Update stats to factor in modifier's changes?
+    this.name = this.modifier.name.replace('%', this.name);
   }
 }
 

@@ -19,6 +19,22 @@ Array.prototype.getIndexFromPattern = function(selection) {
   return selection_index;
 }
 
+Array.prototype.toCoordinateString = function() {
+  let coord = "";
+  if (this[1] > 0) {
+		coord = this[1] + "S";
+	} else {
+		coord = (-1*this[1]) + "N";
+  }
+	coord += ", "
+	if (this[0] >= 0) {
+		coord += this[0] + "E";
+	} else {
+		coord += (-1*this[0]) + "W";
+  }
+  return coord;
+}
+
 const getRandomInt = (min, max) => Math.floor(Math.random() * (max-min+1)) + min;
 const randomChoice = (list) => list[getRandomInt(0, list.length-1)];
 const randomKey = (obj) => {
@@ -87,3 +103,5 @@ class MName {
 		return name.charAt(0).toUpperCase() + name.slice(1); // Capitalize name
 	}
 }
+
+const uuid = () => "id" + Math.random().toString(16).slice(2); 

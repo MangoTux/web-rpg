@@ -41,7 +41,7 @@ UI.prototype.drawMap = function(map) {
     table.append(row);
   }
   mapInfo = "<br>";
-  $("#gameInfo").html(table.html() + mapInfo);
+  $(Terminal.selector.hud_main).html(table.html() + mapInfo);
 }
 
 // Return
@@ -58,7 +58,7 @@ UI.prototype.resumeDisplay = function() {
 UI.prototype.drawShopWindow = function() {
   let inventory = $("<ul>");
   let shop = environment.getShopOnTile(player.position);
-  if (shop == null) { $("#gameInfo").html("There's no shop here."); return; }
+  if (shop == null) { $(Terminal.selector.hud_main).html("There's no shop here."); return; }
   for (let i = 0; i<shop.max_stock; i++) {
     if (i >= shop.inventory.length) {
       inventory.append($("<li>").html("Out of stock!<br>&nbsp;&nbsp;Please visit later."));
@@ -66,7 +66,7 @@ UI.prototype.drawShopWindow = function() {
       inventory.append($("<li>").html(`${shop.inventory[i].name}<br>&nbsp;&nbsp;Price:&nbsp;${shop.inventory[i].cost} gold.`));
     }
   }
-  $("#gameInfo").html("<h3>" + shop.name + "</h3><ul>" + inventory.html() + "</ul><br><br>" + `You have: ${player.gold} gold.`);
+  $(Terminal.selector.hud_main).html("<h3>" + shop.name + "</h3><ul>" + inventory.html() + "</ul><br><br>" + `You have: ${player.gold} gold.`);
 }
 
 // Print player stats
@@ -78,29 +78,15 @@ UI.prototype.drawStatsWindow = function() {
 	statList.append($('<li>').text(`Level: ${player.level}`));
 	statList.append($('<li>').text(`Exp Needed: ${player.experience_needed}`));
 	statList.append($('<li>').text(`Gold: ${player.gold}`));
-	statList.append($('<li>').text(`Health: ${player.combat_stats.currentHP}/${player.combat_stats.maxHP}`));
+	statList.append($('<li>').text(`Health: ${player.hp.now}/${player.hp.max}`));
   statList.append($('<li>').text(`Power: ${player.combat_stats.power}`));
   statList.append($('<li>').text(`Vitality: ${player.combat_stats.vitality}`));
   statList.append($('<li>').text(`Resilience: ${player.combat_stats.resilience}`));
   statList.append($('<li>').text(`Dexterity: ${player.combat_stats.dexterity}`));
   statList.append($('<li>').text(`Spirit: ${player.combat_stats.spirit}`));
   statList.append($('<li>').text(`Luck: ${player.combat_stats.luck}`));
-	var coord;
-	if (player.Y > 0)
-		coord = player.Y + "S";
-	if (player.Y == 0)
-		coord = player.Y;
-	if (player.Y < 0)
-		coord = (-1*player.Y) + "N";
-	coord += ", "
-	if (player.X > 0)
-		coord += player.X + "E";
-	if (player.X == 0)
-		coord += player.X;
-	if (player.X < 0)
-		coord += (-1*player.X) + "W";
-	statList.append($('<li>').text("Location: " + coord));
-	$("#gameInfo").html("<h3>Player Stats<br><ul>"+statList.html()+"</ul></h3>");
+	statList.append($('<li>').text("Location: " + player.position.toCoordinateString()));
+	$(Terminal.selector.hud_main).html("<h3>Player Stats<br><ul>"+statList.html()+"</ul></h3>");
 }
 
 // Display the invPage-nth page of the Player's inventory
@@ -118,7 +104,7 @@ UI.prototype.drawInventoryWindow = function(invPage) {
     invList.append($('<li>').html(player.inventory[page_index].name + "<br>   " + toString(player.inventory[page_index])));
 	}
   display += invList[0].outerHTML;
-  $("#gameInfo").html(display);
+  $(Terminal.selector.hud_main).html(display);
 }
 
 // Display all items the user currently has equippedd
@@ -145,12 +131,12 @@ UI.prototype.drawEquippedWindow = function() {
       equipList.append($('<li>').html(i + ":" + padding.substr(0, 8-i.length).replace(/ /g, '&nbsp;') + item_name));
     }
   }
-	$("#gameInfo").html("<h3>Equipped Items</h3><ul>" + equipList.html());
+	$(Terminal.selector.hud_main).html("<h3>Equipped Items</h3><ul>" + equipList.html());
 }
 
 UI.prototype.drawNpcDialogue = function() {
   const npc = environment.getNpcOnTile(player.position);
-  $("#gameInfo").html(`<h3>${npc.name} says:</h3><br><br>${npc.quest.description}`);
+  $(Terminal.selector.hud_main).html(`<h3>${npc.name} says:</h3><br><br>${npc.quest.description}`);
 }
 
 UI.prototype.drawNpcInfo = function(npcData) {
@@ -162,17 +148,23 @@ UI.prototype.drawNpcInfo = function(npcData) {
   if (npcData.display !== undefined) {
     gameText += "<br><i>"+npcData.display['Description']+"</i>";
   }
-  $("#gameInfo").html("<h3>"+gameText+"</h3>");
+  $(Terminal.selector.hud_main).html("<h3>"+gameText+"</h3>");
 }
 
 UI.prototype.drawDefaultView = function() {
-  document.getElementById("gameInfo").innerHTML =
+  const default_logo =
 	"<h3><pre>                    _   _\n _ __ _ __   __ _  | |_| |__   ___   _ __ _ __   __ _ \n| '__| '_ \\ / _` | | __| '_ \\ / _ \\ | '__| '_ \\ / _` |\n| |  | |_) | (_| | | |_| | | |  __/ | |  | |_) | (_| |\n|_|  | .__/ \\__, |  \\__|_| |_|\\___| |_|  | .__/ \\__, |\n     |_|    |___/                        |_|    |___/ \n</pre></h3>"
-	$('#gameInfo').hide().fadeIn(2000);
+	$(Terminal.selector.hud_main).animate({opacity: "0%"}, 100, "linear", () => {
+    $(Terminal.selector.hud_main).html(default_logo);
+    $(Terminal.selector.hud_main).animate({opacity: "100%"}, 2000, "linear");
+  })
 }
 
 UI.prototype.drawTombstone = function() {
-  document.getElementById("gameInfo").innerHTML =
+  const tombstone =
   "<h3><pre>              __.....__\n            .'         ':,\n           /  __  _  __  \\\\\n           | |_)) || |_))||\n           | | \\\\ || |   ||\n           |             ||   _,\n           |             ||.-(_{}\n           |             |/    `\n           |        ,_ (\\;|/)\n         \\\\|       {}_)-,||`\n         \\\\;/,,;;;;;;;,\\\\|//,\n        .;;;;;;;;;;;;;;;;,\n       \\,;;;;;;;;;;;;;;;;,//\n      \\\\;;;;;;;;;;;;;;;;,//\n     ,\\';;;;;;;;;;;;;;;;'\n    ,;;;;;;;;;;;;;;;;''`\n</pre></h3>";
-  $('#gameInfo').hide().fadeIn(2000);
+  $(Terminal.selector.hud_main).animate({opacity: "0%"}, 100, "linear", () => {
+    $(Terminal.selector.hud_main).html(tombstone);
+    $(Terminal.selector.hud_main).animate({opacity: "100%"}, 2000, "linear");
+  })
 }
