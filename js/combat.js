@@ -2,7 +2,7 @@
 While the auto combat is neat, I'd like to consider a more turn-based approach in the future
 Actions determine movement speed?
 */
-function Combat() {
+function dep_Combat() {
   this.critValues = [1, 1.5, 2, 3];
   this.critStrings = ["", "Critical Hit!", "Double Crit!", "Triple Crit!"];
 
@@ -46,7 +46,7 @@ function Combat() {
   }
 }
 
-Combat.prototype.combatTurn = function(attacker, defender) {
+dep_Combat.prototype.combatTurn = function(attacker, defender) {
   if (attacker.combat_stats.currentHP == 0) {
     for (var i in attacker.inventory) {
       if (attacker.inventory[i].type == types.healing) {
@@ -87,7 +87,7 @@ Possibility for items to increase minimum damage
 Have base damage, factor in inventory
 Run test setup with Simpleton
 */
-Combat.prototype.fight = function() {
+dep_Combat.prototype.fight = function() {
   // The attacker shoud reliably go first.
   this.attacker.combatState = {
     turn: 0, //this.attacker.combat_stats.attackSpeed,
@@ -152,7 +152,7 @@ Combat.prototype.fight = function() {
   }, this), 1650);
 }
 
-Combat.prototype.initializeDisplay = function() {
+dep_Combat.prototype.initializeDisplay = function() {
   // Initialize the HTML layout for the fight
   document.getElementById("gameInfo").innerHTML = "<div id=\"leftSide\" class='col-xs-4'></div><div id=\"center\" class='col-xs-4'><div id='center-content' class='col-cs-12'></div></div><div id=\"rightSide\" class='col-xs-4'></div>";
   document.getElementById("leftSide").innerHTML = "<h2 style=\"font-size:250%; text-decoration:underline;\">" + ((this.attacker.name_mod===undefined)?this.attacker.name:this.attacker.name_mod) + "</h2><div id=\"leftFight\"></div>";
@@ -161,7 +161,7 @@ Combat.prototype.initializeDisplay = function() {
   document.getElementById("rightFight").innerHTML = "<h4>"+this.defender.combat_stats.currentHP+"/"+this.defender.combat_stats.maxHP+"</h4>";
 }
 
-Combat.prototype.animateAttack = function(damage, critString, character) {
+dep_Combat.prototype.animateAttack = function(damage, critString, character) {
   document.getElementById("center-content").innerHTML = "<br><br>"+critString+"<br><br><b class='combat__damage'>-" + damage + "</b><br>";
   $("#center-content").show().effect("puff", 1000, function() {
     document.getElementById(character.combatState.side + "Fight").innerHTML = "<h4>"+character.combat_stats.currentHP + "/" + character.combat_stats.maxHP + "</h4>";
@@ -169,7 +169,7 @@ Combat.prototype.animateAttack = function(damage, critString, character) {
   });
 }
 
-Combat.prototype.animateHealing = function(restored, character) {
+dep_Combat.prototype.animateHealing = function(restored, character) {
   var healingText = "<b class='combat__healing'>Healed!</b>";
   document.getElementById("center-content").innerHTML = "<br><br>"+healingText+"<br><b class='combat__healing'>+" + restored + "</b><br>";
   $("#center-content").show().effect("puff", 1000, function() {
@@ -178,14 +178,8 @@ Combat.prototype.animateHealing = function(restored, character) {
   });
 }
 
-Combat.prototype.processVictory = function(winner, loser) {
+dep_Combat.prototype.processVictory = function(winner, loser) {
   if (winner != player) {
-    Terminal.resetGameInfo();
-    ui.drawTombstone();
-    Terminal.print("You died...");
-    Terminal.promptActive = true;
-    gameState.currentCase = gameState.dead;
-    return;
   }
   Terminal.resetGameInfo();
   Terminal.print("You won!");
@@ -206,19 +200,4 @@ Combat.prototype.processVictory = function(winner, loser) {
     delete player.quests[currentNpcIndex];
     currentNpcIndex = null;
   }
-}
-
-// Eventually, will allow multiple enemies to be encountered at once.
-class Encounter {
-	npc = null;
-	constructor() {
-	}
-
-  create() {
-    this.npc = new NPC();
-  }
-
-	getEncounter() {
-		return this.npc;
-	}
 }

@@ -9,29 +9,30 @@
 		<script type="text/javascript" src="js/vendor/jqueryhotkeys.js"></script>
 		<script type="text/javascript" src="js/vendor/jquery.browser.js"></script>
 		<script type="text/javascript" src="js/vendor/noise.js"></script>
-		<!-- Bootstrap -->
-		<link rel="stylesheet" type="text/css" href="css/formatRPG.css">
-		<link rel="stylesheet" type="text/css" href="css/grids.css">
+		<link rel="stylesheet" type="text/css" href="css/style.css">
 	</head>
 	<body>
-		<div class="col-xs-6" id="game">
-			<div id="display">
-				<p class="command">
-				</p>
+		<div id="game">
+			<div id="cli">
+				<div id="history">
+					<p class="command">
+					</p>
+				</div>
+				<div id="bottomline">
+					<span id="input" style="display:inline;">
+						<span id="prompt">&gt;&nbsp;</span>
+						<span id="lcommand"></span>
+						<span id="cursor"></span>
+						<span id="rcommand"></span>
+					</span>
+					<span id="spinner"></span>
+				</div>
 			</div>
-			<div id="bottomline">
-				<span id="inputline" style="display:inline;">
-					<span id="prompt">></span>
-					<span id="lcommand"></span>
-					<span id="cursor"></span>
-					<span id="rcommand"></span>
-				</span>
-				<span id="spinner"></span>
-			</div>
-		</div>
-		<div class="col-xs-6" id="rightColContainer">
-			<!-- Displays stats/Map/Inventory-->
-			<div id="gameInfo" class="col-xs-12">
+				<!-- Displays stats/Map/Inventory-->
+				<div id="hud_main">
+				</div>
+				<div id="hud_combat">
+				</div>
 			</div>
 		</div>
 		<div style="display:none" id="updates">
@@ -44,14 +45,11 @@
 				<li>Combat rework</li>
 			</ul>
 		</div>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-
 		<script type="text/javascript" src="js/util/hash2D.js"></script>
 		<script type="text/javascript" src="js/util/util.js"></script>
 		<script type="text/javascript" src="js/util/cookie.js"></script>
 		<script type="text/javascript" src="js/util/data.js"></script>
 
-		<script type="text/javascript" src="js/npc.js" deprecated="true"></script>
     <script type="text/javascript" src="js/npc/base.js"></script>
     <script type="text/javascript" src="js/npc/modifier.js"></script>
     <script type="text/javascript" src="js/npc/npc.js"></script>
@@ -67,6 +65,9 @@
 		<script type="text/javascript" src="js/player/player.js"></script>
 		<script type="text/javascript" src="js/player/archetype.js"></script>
 		<script type="text/javascript" src="js/player/race.js"></script>
+
+		<script type="text/javascript" src="js/encounter/encounter.js"></script>
+		<script type="text/javascript" src="js/encounter/combat.js"></script>
 
     <script type="text/javascript" src="js/quest/quest.js"></script>
 		<script type="text/javascript" src="js/quest/quest_handler.js"></script>

@@ -7,6 +7,7 @@ class Player extends Sentient {
 	inventory = [];
 	wielding = [];
 	gold = 250;
+	step_count = 0;
 
 	quest_handler = null;
 
@@ -27,6 +28,8 @@ class Player extends Sentient {
 	    spirit: 5,
 	    luck: 0,
 	  };
+    this.hp.max = getRandomInt(20, 30)+this.level;
+    this.hp.now = this.hp.max;
 	}
 
 	load(json) {
@@ -36,7 +39,7 @@ class Player extends Sentient {
 	move(h, v) {
 		let moveable = environment.map.canMove([this.position[0] + h, this.position[1] + v]);
 		if (!moveable.canMove) {
-			if (moveable.reason == "W") {
+			if (moveable.reason == "W" && !this.hasWaterTravel()) {
 				return [false, "You can't swim!"];
 			} else if (moveable.reason == "L") {
 				return [false, "Lava is kind of hot, and you'll probably die if you go there."];
@@ -45,11 +48,12 @@ class Player extends Sentient {
 		this.position[0] += h;
 		this.position[1] += v;
 		this.previous_direction = [h, v];
+		this.step_count++;
 		return [true];
 	}
 
 	rest() {
-		this.base_combat_stats.currentHP = this.base_combat_stats.maxHP;
+		this.base_combat_stats.hp_now = this.base_combat_stats.hp_max;
 	}
 
 	get experience_needed() {
@@ -64,7 +68,7 @@ class Player extends Sentient {
 
 	increase_experience(exp) {
 		this.experience += exp;
-		let response = [`You gain ${experience} experience.`];
+		let response = [`You gain ${exp} experience.`];
 		while (this.experience_needed <= 0) {
 			this.increase_level();
 			response.push([`Congratulations! You're now level ${this.level}`]);
@@ -87,11 +91,10 @@ class Player extends Sentient {
 	}
 
 	hasWaterTravel() {
-		const is_water_travel = (item) => {
-			return typeof item.purpose_c !== "undefined" && item.purpose_c == "waterTravel"
-		};
-		return this.inventory.some(is_water_travel);
-	}
+    return this.inventory.some((item) => {
+      return item.base_item.tags && item.base_item.tags.includes("waterTravel");
+    })
+  }
 
 	acceptQuest() {
 		this.quest_handler.accept(environment.getNpcOnTile(player.position).quest);

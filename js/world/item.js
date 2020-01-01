@@ -11,14 +11,24 @@ class Item {
 	};
 	name;
 	cost;
-	constructor() {}
+	constructor(id) {
+		if (id == undefined) {
+			randomChoice(player.archetype.armor);
+		}
+	}
 
 	toString() { return ""; }
 }
 
 class Tool extends Item {
-	constructor() {
+	constructor(id) {
 		super();
+		if (typeof id === "undefined") {
+			id = randomChoice(tool_id_list);
+		}
+		this.base_item = tool_list[id];
+		this.cost = 100;
+		this.name = randomChoice(tool_list[id].variants);
 		this.cost = Math.floor(this.cost);
 	}
 
@@ -58,8 +68,8 @@ class Equipment extends Item {
 class Armor extends Equipment {
 	constructor(id) {
 		super();
-		if (id == undefined) {
-			randomChoice(player.archetype.armor);
+		if (typeof id === "undefined") {
+			id = randomChoice(player.archetype.armor);
 		}
 		this.id = id;
 		this.base_item = armor_list[id];
@@ -77,8 +87,8 @@ class Armor extends Equipment {
 class Weapon extends Equipment {
 	constructor(id) {
 		super();
-		if (id == undefined) {
-			randomChoice(player.archetype.weapons);
+		if (typeof id === "undefined") {
+			id = randomChoice(player.archetype.weapons);
 		}
 		this.id = id;
 		this.base_item = weapon_list[id];
@@ -116,9 +126,9 @@ class ItemFactory {
 	static getRandomEquipment() {
 		switch (getRandomInt(0, 4)) {
 			case 0:
-			case 1: return new Weapon(randomChoice(player.archetype.weapons));
+			case 1: return new Weapon();
 			case 2:
-			case 3: return new Armor(randomChoice(player.archetype.armor));
+			case 3: return new Armor();
 			case 4: return new Tool();
 		}
 	}
@@ -399,9 +409,8 @@ const consumable_list = {
 }
 const tool_list = {
 	'Boat': {
-		type: "waterTravel",
+		tags: ['waterTravel'],
+		variants: ['Boat', 'Raft', 'Canoe', 'Sailboat'],
 	},
-	'Raft': {
-		type: "waterTravel",
-	}
 };
+const tool_id_list = ["Boat"];
