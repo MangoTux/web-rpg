@@ -62,11 +62,12 @@ class Encounter {
 
   fleeCombat() {
     Terminal.print("You manage to escape!");
+    Terminal.setWorking(false);
     clearTimeout(this.combat.turn_cycle);
     this.combat = null;
     player.state = state.player.standard;
     Terminal.resetGameInfo();
-    Terminal.setWorking(false);
+    environment.cleanEncounter();
   }
 
   endCombat() {
@@ -81,6 +82,7 @@ class Encounter {
       return;
     }
     this.combat = null;
+    player.state = state.player.standard;
     // On player victory, administer rewards
     if (this.rewards.gold) {
       player.gold += this.rewards.gold;
@@ -95,5 +97,6 @@ class Encounter {
     player.increase_experience(this.rewards.experience).forEach((response) => {
       Terminal.print(response);
     });
+    environment.cleanEncounter();
   }
 }
