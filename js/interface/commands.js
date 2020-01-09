@@ -329,10 +329,9 @@ const run_direction = function(direction, response) {
 	run_timeout = setTimeout(() => {
 		can_continue = advance(direction, response);
 		if (can_continue) {
-			Terminal.promptActive = false;
 			run_direction(direction, "");
 		} else {
-			Terminal.promptActive = true;
+			Terminal.setWorking(false);
 			clearTimeout(run_timeout);
 		}
 	}, 175);
@@ -369,6 +368,7 @@ Shell.commands['run'] = function() {
 		Terminal.print("I don't know that direction.");
 		return;
 	}
+	Terminal.setWorking(true);
 	run_direction(Map.getUnitVectorFromDirection(direction), `You start running ${direction}.`);
 }
 

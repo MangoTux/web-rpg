@@ -91,8 +91,9 @@ class Environment {
   }
 
   cleanEncounter() {
-    // TODO Check for victory, apply on_victory ()
+    // TODO Check for victory, apply on_victory
     this.encounter = null;
+    document.querySelector(Terminal.selector.hud_main).classList.remove(Terminal.selector.combat.wrapper);
   }
 
   // Returns null if no shops are on the position
