@@ -10,6 +10,16 @@ Shell.commands['start'] = function() {
 	Terminal.print("Hello! Type 'new' to begin, or 'load' if you already have a profile.");
 };
 
+Shell.commands['debug'] = function() {
+	player.state = state.player.standard;
+	player.name = "Mango";
+	environment.load_map(player.name);
+	player.race = new Human();
+	player.archetype = new Warrior();
+	environment.createWildEncounter();
+	environment.encounter.startCombat();
+}
+
 //Create player data.
 Shell.commands['new'] = function() {
 	if ([state.player.start, state.player.dead].includes(player.state)) {

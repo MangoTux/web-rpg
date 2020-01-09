@@ -92,66 +92,48 @@ const Shell = class {
   }
 
   static handler_combat(selection) {
-    // Move to a combat function that [broadcasts text?] returns an array of messages on enemy defeat
-    if (environment.encounter.combat.enemy_list.length > 0) {
-      let weakest_link = environment.encounter.combat.enemy_list.pop();
-      delete environment.encounter.combat.participants[weakest_link.uuid];
-      Terminal.print(`You've defeated the ${weakest_link.name}!`);
-      environment.encounter.combat.updateDisplay();
-    }
-    if (environment.encounter.combat.ally_list.length == 0) {
-      // Death handler
-      Terminal.resetGameInfo();
-      ui.drawTombstone();
-      Terminal.print("You died...");
-      player.state = state.player.dead;
-      return;
-    }
-    if (environment.encounter.combat.enemy_list.length == 0) {
-      Terminal.resetGameInfo();
-      Terminal.print("You won!");
-      // TODO On defeated enemy, push rewards. No XP for fleeing?
-      let reward = environment.encounter.rewards;
-      if (reward.gold) {
-        player.gold += reward.gold;
-        Terminal.print(`You gained ${reward.gold} gold.`);
+    // Might be simple to implement a combat-level state machine.
+    // environment.encounter.combat.pushState({state, text});
+    // if (selection == "back") { let response = environment.encounter.combat.popState(); Terminal.print(response); }
+    if (environment.encounter.combat.state == state.combat.plan) {
+      if (selection == "attack") {
+        Terminal.print("Which attack will you use?");
+        environment.encounter.combat.state = state.combat.attack;
+      } else if (selection == "item") {
+        Terminal.print("Which item would you like to use?");
+        environment.encounter.combat.state = state.combat.item;
+      } else if (["flee", "run"].includes(selection)) {
+        environment.encounter.fleeCombat();
+        environment.cleanEncounter();
       }
-      if (reward.items.length) {
-        reward.items.forEach((item) => {
-          Terminal.print(`You found an item: ${item.name}`);
-          player.inventory.push(item);
-        });
+    } else if (environment.encounter.combat.state == state.combat.item) {
+      if (selection == "back") {
+        Terminal.print("What would you like to do? [Attack/Item/Flee]");
+        environment.encounter.combat.state = state.combat.plan;
+      } else {
+        Terminal.print("I haven't figured out how to show your items yet!");
       }
-      player.increase_experience(reward.experience).forEach((response) => {
-        Terminal.print(response);
-      });
-      environment.encounter = null;
-      player.state = state.player.standard;
-      return;
+    } else if (environment.encounter.combat.state == state.combat.attack) {
+      if (selection == "back") {
+        Terminal.print("What would you like to do? [Attack/Item/Flee]");
+        environment.encounter.combat.state = state.combat.plan;
+      } else {
+        Terminal.print("I'll pretend that you're going to punch.");
+        Terminal.print("Who are you going to punch?");
+        environment.encounter.combat.state = state.combat.target;
+      }
+    } else if (environment.encounter.combat.state == state.combat.target) {
+      if (selection == "back") {
+        Terminal.print("What would you like to do? [Attack/Item/Flee]");
+        environment.encounter.combat.state = state.combat.plan;
+      } else {
+        Terminal.print("I'll pretend that you're targeting the last guy.");
+        let weakest_link = environment.encounter.combat.enemy_list.pop();
+        delete environment.encounter.combat.participants[weakest_link.uuid];
+        Terminal.print(`You've defeated the ${weakest_link.name}!`);
+        environment.encounter.combat.setPlayerIdle();
+      }
     }
-
-    // This is a temporary solution to make sure the lifecycle is functional.
-    // 1. If an enemy exists, destroy randomly and update
-    // 2. If no enemies exist on player's turn, win!
-    // 2a. encounter.endCombat()
-    // 2b. Print reward
-    // 2c. Apply gold
-    // 2d. Apply items
-    // 2e. Apply experience and track levelling
-    //------
-    // TODO This will be a general combat choice, but allow for the following commands:
-    // stats   ?
-    // inspect ?
-
-    /*
-    Use combat lifecycle states:
-    - Numeric selection [Attack] [Item] [Power?] [Flee] <state.combat.plan>
-    - On item, display paginated consumables [Cancel] [item list] [?Previous Page] [?Next Page] <state.combat.item>
-    - On attack, display paginated options [Cancel] [attack list] [?Previous Page] [?Next Page] <state.combat.attack>
-    - After selected attack (target items?), list valid targets [Cancel] [target list]
-    - After selected target, apply (In combat details) <state.combat.idle> for NPC movement
-    Check if combat can continue, otherwise call endCombat()
-    */
   }
 };
 

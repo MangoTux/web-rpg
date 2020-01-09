@@ -91,7 +91,7 @@ class Environment {
   }
 
   cleanEncounter() {
-    // TODO Check for victory, apply on_victory (same with defeat?)
+    // TODO Check for victory, apply on_victory ()
     this.encounter = null;
   }
 

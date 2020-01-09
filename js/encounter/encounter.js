@@ -36,10 +36,12 @@ class Encounter {
   }
 
   startCombat() {
+    Terminal.setWorking(true);
     player.state = state.player.combat;
     this.combat = new Combat();
     this.combat.versus(this.enemy_list);
     this.combat.updateDisplay();
+    this.combat.turn_timer();
   }
 
   toString() {
@@ -58,7 +60,40 @@ class Encounter {
     return enemy.name;
   }
 
-  endCombat() {
+  fleeCombat() {
+    Terminal.print("You manage to escape!");
+    clearTimeout(this.combat.turn_cycle);
+    this.combat = null;
+    player.state = state.player.standard;
+    Terminal.resetGameInfo();
+    Terminal.setWorking(false);
+  }
 
+  endCombat() {
+    clearTimeout(this.combat.turn_cycle);
+    Terminal.resetGameInfo();
+    Terminal.setWorking(false);
+    if (this.combat.ally_list.length == 0) {
+      ui.drawTomstone();
+      Terminal.print("You died...");
+      player.state = state.player.dead;
+      environment.cleanEncounter();
+      return;
+    }
+    this.combat = null;
+    // On player victory, administer rewards
+    if (this.rewards.gold) {
+      player.gold += this.rewards.gold;
+      Terminal.print(`You gained ${reward.gold} gold.`);
+    }
+    if (this.rewards.items.length) {
+      this.rewards.items.forEach(item => {
+        Terminal.print(`You found an item: ${item.name}`);
+        player.inventory.push(item);
+      });
+    }
+    player.increase_experience(this.rewards.experience).forEach((response) => {
+      Terminal.print(response);
+    });
   }
 }
