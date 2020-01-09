@@ -17,7 +17,7 @@ Terminal = {
 		bg_color:'#000',
 		fg_color:'#FFF',
 		prompt:'> ',
-		spinnerCharacters:['.','..','...',' '],
+		spinnerCharacters:[' ', '.','..','...'],
 		spinnerSpeed: 250,
 		typingSpeed:50
 	},
@@ -207,16 +207,14 @@ Terminal = {
 		if (!this.output) {
 			return false;
 		}
-		this.setWorking(true);
 		let response = this.output.process(cmd.toLowerCase());
-		this.setWorking(false);
 		return response;
 	},
 
 	//Enables the input to be active
 	setPromptActive: function(active) {
 		this.promptActive = active;
-		$('#inputline').toggle(this.promptActive);
+		$('#prompt').toggle(this.promptActive);
 	},
 
 	//Sets the terminal to allow input/output
@@ -236,7 +234,7 @@ Terminal = {
 		} else if (!working && this._spinnerTimeout) {
 			clearInterval(this._spinnerTimeout);
 			this._spinnerTimout = null;
-			$('#spinner').fadeOut();
+			$('#spinner').fadeOut(400, () => {this.setPromptActive(true)});
 			this.setPromptActive(true);
 			$(Terminal.selector.cli).triggerHandler('cli-ready');
 		}
