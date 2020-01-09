@@ -129,6 +129,7 @@ const Shell = class {
       } else {
         Terminal.print("I'll pretend that you're targeting the last guy.");
         let weakest_link = environment.encounter.combat.enemy_list.pop();
+        // TODO player.updateQuestProgress("kill", weakest_link name)
         delete environment.encounter.combat.participants[weakest_link.uuid];
         Terminal.print(`You've defeated the ${weakest_link.name}!`);
         environment.encounter.combat.setPlayerIdle();
