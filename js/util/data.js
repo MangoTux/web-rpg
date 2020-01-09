@@ -13,6 +13,13 @@ const state = {
 
 		dead: 0
 	},
+	combat: {
+		plan: 0,
+		item: 1,
+		attack: 2,
+		target: 3,
+		idle: 4,
+	},
 	shell: {
 		standard: 0,
 		direction_left: 1,
