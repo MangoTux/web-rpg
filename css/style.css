@@ -87,6 +87,8 @@ p {
 
 #combat_center {
 	grid-area: neutral;
+	text-align:center;
+	font-size:200%;
 }
 
 #combat_enemy {
@@ -147,4 +149,19 @@ p {
 
 .success {
 	color: var(--color-ui-good);
+}
+
+.combat-list__inventory {
+	counter-reset: list;
+}
+.combat-list__inventory > li {
+	list-style: none;
+	position: relative;
+	padding-bottom:10px;
+}
+.combat-list__inventory > li:before {
+	content: "(" counter(list) ") ";
+	counter-increment: list;
+	position: absolute;
+	left: -2.4em;
 }

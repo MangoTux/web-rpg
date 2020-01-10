@@ -52,29 +52,35 @@ class Combat {
 </div>`;
 
     this.ally_list.forEach((ally) => {
-    document.querySelector(`#${Terminal.selector.combat.ally}`).innerHTML +=
-`
-<span class='container_ally' id='${ally.uuid}'>
-  <h2 class='${Terminal.selector.combat.name}'>${ally.name}</h2>
-  <h4 class='${Terminal.selector.combat.hp.wrapper}'>
-    <span class='${Terminal.selector.combat.hp.now}'>${ally.hp.now}</span> /
-    <span class='${Terminal.selector.combat.hp.max}'>${ally.hp.max}</span>
-  </h4>
-</span>
-`;
+      let text = `
+      <span class='container_ally' id='${ally.uuid}'>
+      <h2 class='${Terminal.selector.combat.name}'>${ally.name}</h2>
+      <h4 class='${Terminal.selector.combat.hp.wrapper}'>
+      <span class='${Terminal.selector.combat.hp.now}'>${ally.hp.now}</span> /
+      <span class='${Terminal.selector.combat.hp.max}'>${ally.hp.max}</span>`;
+      if (ally.hp.buffer > 0) {
+        text += `<span class='${Terminal.selector.combat.hp.buffer}'> (+${ally.hp.buffer})</span>`;
+      }
+      text += `
+      </h4>
+      </span>`;
+      document.querySelector(`#${Terminal.selector.combat.ally}`).innerHTML += text;
     });
 
     this.enemy_list.forEach((enemy) => {
-      document.querySelector(`#${Terminal.selector.combat.enemy}`).innerHTML +=
-`
-<span class='container_enemy' id='${enemy.uuid}'>
-  <h2 class='${Terminal.selector.combat.name}'>${enemy.name}</h2>
-  <h4 class='${Terminal.selector.combat.hp.wrapper}'>
-    <span class='${Terminal.selector.combat.hp.now}'>${enemy.hp.now}</span> /
-    <span class='${Terminal.selector.combat.hp.max}'>${enemy.hp.max}</span>
-  </h4>
-</span>
-`;
+      let text = `
+      <span class='container_enemy' id='${enemy.uuid}'>
+      <h2 class='${Terminal.selector.combat.name}'>${enemy.name}</h2>
+      <h4 class='${Terminal.selector.combat.hp.wrapper}'>
+      <span class='${Terminal.selector.combat.hp.now}'>${enemy.hp.now}</span> /
+      <span class='${Terminal.selector.combat.hp.max}'>${enemy.hp.max}</span>`;
+      if (enemy.hp.buffer > 0) {
+        text += `<span class='${Terminal.selector.combat.hp.buffer}'> (+${enemy.hp.buffer})</span>`;
+      }
+      text += `
+      </h4>
+      </span>`;
+      document.querySelector(`#${Terminal.selector.combat.enemy}`).innerHTML += text;
     });
 
     /*
@@ -115,7 +121,8 @@ class Combat {
   Process any active effects such as buffs or pre-turn data
   */
   _turn_start() {
-    console.log(`--start ${this.active_entity.name}`);
+    this.active_entity.hp.buffer = Math.max(0, --this.active_entity.hp.buffer);
+    this.updateMainHUD();
     return;
   }
 
@@ -123,7 +130,6 @@ class Combat {
   Process any effects that trigger at the end of a creature's turn
   */
   _turn_end() {
-    console.log(`--end ${this.active_entity.name}`);
     // If the NPC has any active effects (burns) that apply damage, calculate here.
     // If the NPC has any buffs/debuffs that expire, end them here.
     return;
@@ -175,8 +181,13 @@ class Combat {
 
   setPlayerIdle() {
     this._turn_end();
+    Combat_UI.setView("none");
+    Combat_UI.updateView();
     this.state = state.combat.idle;
     Terminal.setWorking(true);
-    this.turn_timer();
+    // Add in a slight delay before NPCs resume behavior
+    setTimeout(() => {
+      this.turn_timer()
+    }, 2*this.config.ai_turn_length);
   }
 }
