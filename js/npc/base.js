@@ -43,4 +43,21 @@ class Sentient {
     // Work through passive skills (if any)
     // Work through active skills (if any)
   }
+
+	consume(item) {
+    if (typeof item.base_item.hp_buffer !== "undefined") {
+      this.hp.buffer = Math.max(this.hp.buffer, item.base_item.hp_buffer);
+      return {buffer: item.base_item.hp_buffer};
+    }
+    let max_restore = this.hp.max - this.hp.now;
+    let hp_capacity = 0;
+		if (typeof item.base_item.hp_restore !== "undefined") {
+      hp_capacity = item.base_item.hp_restore.clamp(0, max_restore);
+		}
+		if (typeof item.base_item.hp_fraction !== "undefined") {
+			hp_capacity = parseInt(item.base_item.hp_fraction * this.hp.max).clamp(0, max_restore);
+		}
+    this.hp.now += hp_capacity;
+    return {restore: hp_capacity};
+	}
 }

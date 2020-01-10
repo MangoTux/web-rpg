@@ -4,6 +4,9 @@ Object.defineProperty(Array.prototype, "containsKey", {
     for (let key in this) { if (key == obj) { return true; } return false; }
   }
 });
+Number.prototype.clamp = function(min, max) {
+  return Math.max(Math.min(this, max), min);
+}
 
 Array.prototype.getIndexFromPattern = function(selection) {
   let selection_index = null;
@@ -104,4 +107,4 @@ class MName {
 	}
 }
 
-const uuid = () => "id" + Math.random().toString(16).slice(2); 
+const uuid = () => "id" + Math.random().toString(16).slice(2);

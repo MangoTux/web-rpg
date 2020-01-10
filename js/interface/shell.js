@@ -91,50 +91,83 @@ const Shell = class {
     // TODO, once subarchetypes are built in.
   }
 
-  static handler_combat(selection) {
-    // Might be simple to implement a combat-level state machine.
-    // environment.encounter.combat.pushState({state, text});
-    // if (selection == "back") { let response = environment.encounter.combat.popState(); Terminal.print(response); }
-    if (environment.encounter.combat.state == state.combat.plan) {
-      if (selection == "attack") {
-        Terminal.print("Which attack will you use?");
-        environment.encounter.combat.state = state.combat.attack;
-      } else if (selection == "item") {
-        Terminal.print("Which item would you like to use?");
-        environment.encounter.combat.state = state.combat.item;
-      } else if (["flee", "run"].includes(selection)) {
-        environment.encounter.fleeCombat();
-        environment.cleanEncounter();
-      }
-    } else if (environment.encounter.combat.state == state.combat.item) {
-      if (selection == "back") {
-        Terminal.print("What would you like to do? [Attack/Item/Flee]");
-        environment.encounter.combat.state = state.combat.plan;
-      } else {
-        Terminal.print("I haven't figured out how to show your items yet!");
-      }
-    } else if (environment.encounter.combat.state == state.combat.attack) {
-      if (selection == "back") {
-        Terminal.print("What would you like to do? [Attack/Item/Flee]");
-        environment.encounter.combat.state = state.combat.plan;
-      } else {
-        Terminal.print("I'll pretend that you're going to punch.");
-        Terminal.print("Who are you going to punch?");
-        environment.encounter.combat.state = state.combat.target;
-      }
+  static _combat_undo() {
+    if ([state.combat.attack, state.combat.item].includes(environment.encounter.combat.state)) {
+      Terminal.print("What would you like to do? [Attack/Item/Flee]");
+      environment.encounter.combat.state = state.combat.plan;
+      Combat_UI.setView("none");
     } else if (environment.encounter.combat.state == state.combat.target) {
-      if (selection == "back") {
-        Terminal.print("What would you like to do? [Attack/Item/Flee]");
-        environment.encounter.combat.state = state.combat.plan;
-      } else {
-        Terminal.print("I'll pretend that you're targeting the last guy.");
-        let weakest_link = environment.encounter.combat.enemy_list.pop();
-        // TODO player.updateQuestProgress("kill", weakest_link name)
-        delete environment.encounter.combat.participants[weakest_link.uuid];
-        Terminal.print(`You've defeated the ${weakest_link.name}!`);
-        environment.encounter.combat.setPlayerIdle();
-      }
+      Terminal.print("Which attack will you use?");
+      environment.encounter.combat.state = state.combat.attack;
+      Combat_UI.setView("attack");
     }
+    Combat_UI.updateView();
+  }
+
+  static _combat_state_plan(selection) {
+    Combat_UI.setView("none");
+    if (selection == "attack") {
+      Terminal.print("Which attack will you use?");
+      environment.encounter.combat.state = state.combat.attack;
+      Combat_UI.setView("attack");
+    } else if (selection == "item") {
+      Terminal.print("Which item would you like to use?");
+      environment.encounter.combat.state = state.combat.item;
+      Combat_UI.setView("item");
+    } else if (["flee", "run"].includes(selection)) {
+      environment.encounter.fleeCombat();
+    } else {
+      Terminal.print("What?");
+    }
+  }
+
+  static _combat_state_item(selection) {
+    if (["8", "prev", "previous"].includes(selection)) {
+      Combat_UI.can_page_previous && Combat_UI.pagePrevious();
+      return;
+    }
+    if (["9", "next", "forward"].includes(selection)) {
+      Combat_UI.can_page_advance && Combat_UI.pageForward();
+      return;
+    }
+    if (!Object.keys(Combat_UI.active_elements).includes(selection)) {
+      return;
+    }
+    let item_id = Combat_UI.active_elements[selection];
+    let index = player.inventory.findIndex(item => item.id == item_id);
+    let item = player.inventory.splice(index, 1)[0];
+    let response = player.consume(item);
+    Terminal.print(`You use the ${item.name}`);
+    console.log(response);
+    Combat_UI.drawRestore(player, response);
+    // Find first of item_id in player.inventory, remove it, and Combat_UI apply effects.
+    environment.encounter.combat.setPlayerIdle();
+  }
+
+  static _combat_state_attack(selection) {
+    Terminal.print("I'll pretend that you're going to punch.");
+    Terminal.print("Who are you going to punch?");
+    environment.encounter.combat.state = state.combat.target;
+  }
+
+  static _combat_state_target(selection) {
+    Terminal.print("I'll pretend that you're targeting the last guy.");
+    let weakest_link = environment.encounter.combat.enemy_list.pop();
+    // TODO player.updateQuestProgress("kill", weakest_link name)
+    delete environment.encounter.combat.participants[weakest_link.uuid];
+    Terminal.print(`You've defeated the ${weakest_link.name}!`);
+    environment.encounter.combat.setPlayerIdle();
+  }
+
+  static handler_combat(selection) {
+    if (selection == "back") { return this._combat_undo(); }
+    switch (environment.encounter.combat.state) {
+      case state.combat.plan: this._combat_state_plan(selection); break;
+      case state.combat.item: this._combat_state_item(selection); break;
+      case state.combat.attack: this._combat_state_attack(selection); break;
+      case state.combat.target: this._combat_state_target(selection); break;
+    }
+    Combat_UI.updateView();
   }
 };
 
