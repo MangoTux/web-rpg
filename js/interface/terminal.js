@@ -38,6 +38,7 @@ Terminal = {
 				wrapper: "combat_hp", // Class
 				now: "hp_now", // Class
 				max: "hp_max", // Class
+				buffer:"hp_buffer",
 			},
 		},
 	},
