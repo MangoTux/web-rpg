@@ -67,6 +67,9 @@ class Warrior extends Archetype {
 		'Greaves',
 		'Boots'
 	];
+	actions = [
+		'basic_punch',
+	];
 	constructor() {
 		super();
 
@@ -113,6 +116,9 @@ class Ranger extends Archetype {
 		'Vambraces',
 		'Breeches',
 		'Boots'
+	];
+	actions = [
+		'basic_stab',
 	];
 	constructor() {
 		super();
@@ -162,6 +168,9 @@ class Mage extends Archetype {
 		'Ring',
 		'Boots'
 	];
+	actions = [
+		'basic_bolt',
+	];
 	constructor() {
 		super();
 
@@ -209,6 +218,10 @@ class Monk extends Archetype {
 		'Shackle',
 		'Sandals',
 		'Boots'
+	];
+	actions = [
+		'basic_punch',
+		'basic_kick',
 	];
 	constructor() {
 		super();

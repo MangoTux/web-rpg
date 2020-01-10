@@ -24,9 +24,11 @@ class Tool extends Item {
 	constructor(id) {
 		super();
 		if (typeof id === "undefined") {
-			id = randomChoice(tool_id_list);
+			id = randomChoice(Object.keys(tool_list));
 		}
+		this.id = id;
 		this.base_item = tool_list[id];
+		this.category = "Tool";
 		this.cost = 100;
 		this.name = randomChoice(tool_list[id].variants);
 		this.cost = Math.floor(this.cost);
@@ -72,14 +74,13 @@ class Armor extends Equipment {
 			id = randomChoice(player.archetype.armor);
 		}
 		this.id = id;
+		this.category = "armor";
 		this.base_item = armor_list[id];
 		this.cost = 450;
 		this.name = id;
 		this.modify('armor');
 		this.cost = Math.floor(this.cost);
 	}
-
-	get name() { return id; }
 
 	toString() { return id; }
 }
@@ -91,6 +92,7 @@ class Weapon extends Equipment {
 			id = randomChoice(player.archetype.weapons);
 		}
 		this.id = id;
+		this.category = "weapon";
 		this.base_item = weapon_list[id];
 		this.cost = 100;
 		this.name = randomChoice(weapon_list[id].variants);
@@ -98,15 +100,17 @@ class Weapon extends Equipment {
 		this.cost = Math.floor(this.cost);
 	}
 
-	get name() { return this.id; }
-
 	toString() { return this.id; }
 }
 
 class Consumable extends Item {
 	constructor(id) {
 		super();
+		if (typeof id === "undefined") {
+			id = randomChoice(Object.keys(consumable_list));
+		}
 		this.id = id;
+		this.category = "consumable";
 		this.base_item = consumable_list[id];
 		this.cost = 75;
 		this.name = id;
@@ -116,6 +120,19 @@ class Consumable extends Item {
 	get name() { return this.id; }
 
 	toString() { return this.id; }
+
+	get description() {
+		if (typeof this.base_item.hp_restore !== "undefined") {
+			return `Restores ${this.base_item.hp_restore} HP`;
+		}
+		if (typeof this.base_item.hp_fraction !== "undefined") {
+			let percent_label = parseInt(this.base_item.hp_fraction * 100);
+			return `Restores ${percent_label}% of your HP`;
+		}
+		if (typeof this.base_item.hp_buffer !== "undefined") {
+			return `Grants a ${this.base_item.hp_buffer} HP buffer over your health`;
+		}
+	}
 }
 
 class ItemFactory {
@@ -400,6 +417,12 @@ const consumable_list = {
 	'Soup': {
 		hp_restore:40
 	},
+	'Potion of Lesser Fortitude': {
+		hp_buffer: 10
+	},
+	'Potion of Greater Fortitude': {
+		hp_buffer: 25
+	},
 	'Lesser Healing Potion':	{
 		hp_fraction: 0.25 // hp_fraction will restore that percent of user's HP.
 	},
@@ -413,4 +436,3 @@ const tool_list = {
 		variants: ['Boat', 'Raft', 'Canoe', 'Sailboat'],
 	},
 };
-const tool_id_list = ["Boat"];

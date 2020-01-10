@@ -66,8 +66,10 @@ class Encounter {
     clearTimeout(this.combat.turn_cycle);
     this.combat = null;
     player.state = state.player.standard;
-    Terminal.resetGameInfo();
-    environment.cleanEncounter();
+    $(Terminal.selector.hud_main).animate({opacity: "0%"}, 500, "linear", () => {
+      Terminal.resetGameInfo();
+      environment.cleanEncounter();
+    });
   }
 
   endCombat() {

@@ -16,6 +16,12 @@ Shell.commands['debug'] = function() {
 	environment.load_map(player.name);
 	player.race = new Human();
 	player.archetype = new Warrior();
+
+	for (let i = 0; i<10; i++) {
+		player.inventory.push(ItemFactory.getRandomEquipment());
+		player.inventory.push(ItemFactory.getRandomConsumable());
+	}
+
 	environment.createWildEncounter();
 	environment.encounter.startCombat();
 }
