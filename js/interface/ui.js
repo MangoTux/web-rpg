@@ -2,8 +2,6 @@ function UI() {
  // The object used to handle any specific gameInfo display data
 }
 
-// While this is a decent speed, any future improvement
-// would probably involve removing a border row and getting the tiles for the other side.
 /*
 Run north:
 - Remove $("tbody>tr:last")
@@ -12,9 +10,8 @@ Run south:
 - Remove $("tbody>tr:first")
 - Get new tiles for y+9, $("tbody").append();
 East and West are similar, but $("tbody>tr>td:first").forEach (and last)
-Player position needs to be updated (custom class for td, removeClass + toggle at approx. 0, 0?)
 */
-UI.prototype.drawMap = function(map) {
+UI.prototype.drawFullMap = function(map) {
   let table = $("<table>");
   table.css("line-height", "4px");
   table.css("font-size", "4px");
@@ -23,10 +20,6 @@ UI.prototype.drawMap = function(map) {
     for (let x=-20; x<20; x++) {
       // Draw player on center
       let absolute_position = [x+player.position[0], + y+player.position[1]];
-      if (x == 0 && y == 0) {
-        row.append($('<td>').text(map.custom_tiles.player.symbol).css("color", map.custom_tiles.player.style));
-        continue;
-      }
       if (environment.getShopOnTile(absolute_position)) {
         row.append($('<td>').text(map.custom_tiles.shop.symbol).css("color", map.custom_tiles.shop.style));
         continue;
@@ -42,6 +35,10 @@ UI.prototype.drawMap = function(map) {
   }
   mapInfo = "<br>";
   $(Terminal.selector.hud_main).html(table.html() + mapInfo);
+}
+
+UI.prototype.drawMap = function(map) {
+  this.drawFullMap(map);
 }
 
 // Return
