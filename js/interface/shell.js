@@ -138,24 +138,53 @@ const Shell = class {
     let item = player.inventory.splice(index, 1)[0];
     let response = player.consume(item);
     Terminal.print(`You use the ${item.name}`);
-    console.log(response);
     Combat_UI.drawRestore(player, response);
     // Find first of item_id in player.inventory, remove it, and Combat_UI apply effects.
     environment.encounter.combat.setPlayerIdle();
   }
 
   static _combat_state_attack(selection) {
-    Terminal.print("I'll pretend that you're going to punch.");
-    Terminal.print("Who are you going to punch?");
+    if (["8", "prev", "previous"].includes(selection)) {
+      Combat_UI.can_page_previous && Combat_UI.pagePrevious();
+      return;
+    }
+    if (["9", "next", "forward"].includes(selection)) {
+      Combat_UI.can_page_advance && Combat_UI.pageForward();
+      return;
+    }
+    if (!Object.keys(Combat_UI.active_elements).includes(selection)) {
+      return;
+    }
+    let action_id = Combat_UI.active_elements[selection];
+    let action = ActionCatalog.catalog[action_id];
+    environment.encounter.combat.setAction(action);
+
+    /*
+    TODO
+    If an action has multiple targets/randomly targets, skip this step.
+    */
+    Terminal.print(`Who will you target with the ${action.name}?`);
     environment.encounter.combat.state = state.combat.target;
+    Combat_UI.setView("target");
   }
 
   static _combat_state_target(selection) {
-    Terminal.print("I'll pretend that you're targeting the last guy.");
-    let weakest_link = environment.encounter.combat.enemy_list.pop();
-    // TODO player.updateQuestProgress("kill", weakest_link name)
-    delete environment.encounter.combat.participants[weakest_link.uuid];
-    Terminal.print(`You've defeated the ${weakest_link.name}!`);
+    if (["8", "prev", "previous"].includes(selection)) {
+      Combat_UI.can_page_previous && Combat_UI.pagePrevious();
+      return;
+    }
+    if (["9", "next", "forward"].includes(selection)) {
+      Combat_UI.can_page_advance && Combat_UI.pageForward();
+      return;
+    }
+    if (!Object.keys(Combat_UI.active_elements).includes(selection)) {
+      return;
+    }
+    let target_uid = Combat_UI.active_elements[selection];
+    environment.encounter.combat.setTarget(target_uid);
+    Terminal.print(`You use ${environment.encounter.combat.action.name} on the ${environment.encounter.combat.getTargetEntity().name}.`);
+    environment.encounter.combat.resolveAction();
+
     environment.encounter.combat.setPlayerIdle();
   }
 

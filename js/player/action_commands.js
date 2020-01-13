@@ -1,3 +1,11 @@
+let npc_debug_action = new Attack("Test Action", "It's something", 0);
+npc_debug_action.accuracy = 0.5;
+npc_debug_action.damage_bounds = [
+  0,
+  0
+];
+ActionCatalog.catalog['npc_debug_action'] = npc_debug_action;
+
 let basic_punch = new Attack("Basic Punch", "A basic punch", 1);
 basic_punch.accuracy = 0.9;
 basic_punch.damage_bounds = [

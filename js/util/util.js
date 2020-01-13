@@ -107,4 +107,4 @@ class MName {
 	}
 }
 
-const uuid = () => "id" + Math.random().toString(16).slice(2);
+const uid = () => "id" + Math.random().toString(16).slice(2);

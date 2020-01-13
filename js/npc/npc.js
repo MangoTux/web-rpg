@@ -194,5 +194,6 @@ const npc_list = {
 	},
 	"Simpleton": {
     description:"A test NPC",
+    actions: ["npc_debug_action"],
 	}
 };
