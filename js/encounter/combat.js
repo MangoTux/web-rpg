@@ -17,7 +17,7 @@ class Combat {
 
   constructor() {
     this.ally_list = [ player ];
-    this.participants[player.uuid] = {
+    this.participants[player.uid] = {
       side: "ally",
       entity: player,
       active_effects: [],
@@ -30,7 +30,7 @@ class Combat {
     // Building like this will allow for development on targeting, so your list of targets matches
     this.enemy_list = list;
     list.forEach((npc, element) => {
-      this.participants[npc.uuid] = {
+      this.participants[npc.uid] = {
         side: "enemy",
         entity: npc,
         active_effects: [],
@@ -53,7 +53,7 @@ class Combat {
 
     this.ally_list.forEach((ally) => {
       let text = `
-      <span class='container_ally' id='${ally.uuid}'>
+      <span class='container_ally' id='${ally.uid}'>
       <h2 class='${Terminal.selector.combat.name}'>${ally.name}</h2>
       <h4 class='${Terminal.selector.combat.hp.wrapper}'>
       <span class='${Terminal.selector.combat.hp.now}'>${ally.hp.now}</span> /
@@ -69,7 +69,7 @@ class Combat {
 
     this.enemy_list.forEach((enemy) => {
       let text = `
-      <span class='container_enemy' id='${enemy.uuid}'>
+      <span class='container_enemy' id='${enemy.uid}'>
       <h2 class='${Terminal.selector.combat.name}'>${enemy.name}</h2>
       <h4 class='${Terminal.selector.combat.hp.wrapper}'>
       <span class='${Terminal.selector.combat.hp.now}'>${enemy.hp.now}</span> /
@@ -137,7 +137,6 @@ class Combat {
 
   npc_turn() {
     this._turn_start();
-    console.log(`--mid ${this.active_entity.name}`);
     // Core logic TBD - AI behavior, given entity and combat situation:
     // Plan
     // Target
@@ -149,6 +148,71 @@ class Combat {
     ]);
     Terminal.print(`The ${this.active_entity.name} ${action_text}`);
     this._turn_end();
+  }
+
+  setAction(action) {
+    this.action = action;
+    this.source = this.active_entity;
+  }
+
+  setTarget(uid) {
+    this.action.setTarget(uid);
+  }
+
+  getTarget() {
+    return this.action.target;
+  }
+
+  getTargetEntity() {
+    return this.participants[this.action.target].entity;
+  }
+
+  removeParticipant(uid) {
+    let list = null;
+    if (this.participants[uid].side == "enemy") {
+      list = this.enemy_list;
+    } else {
+      list = this.ally_list;
+    }
+    let entity_id = list.findIndex(entity => entity.uid == uid);
+    list.splice(entity_id, 1);
+    delete this.participants[uid];
+  }
+
+  resolveAction() {
+    this.action.onStart();
+    this.action.onBeforeHit();
+    // TODO Stats impact hit rate
+    this.action.successful_hit = (Math.random() <= this.action.accuracy);
+
+    if (this.action.successful_hit) {
+      this.action.onHit();
+      // TODO Get damage from bounds
+      // TODO apply damage
+      // The below is a rough test environment
+      let bundle = {damage: 0};
+      if (this.active_entity == player) {
+        bundle.damage = this.getTargetEntity().hp.now;
+      }
+      this.getTargetEntity().applyDamage(bundle.damage);
+      this.action.onDamage();
+      Combat_UI.drawDamage(this.getTargetEntity(), bundle);
+
+      if (!this.getTargetEntity().hp.now) {
+        // If player is current entity, alert for quests
+        this.action.onKill();
+        if (this.active_entity == player) {
+          Terminal.print(`You defeated the ${this.getTargetEntity().name}!`);
+          player.updateQuestProgress("kill", this.getTargetEntity().name);
+        }
+        this.removeParticipant(this.getTarget());
+      }
+    } else {
+      this.action.onMiss();
+      Combat_UI.drawMiss();
+    }
+    this.action.onEnd();
+    this.action.cleanup();
   }
 
   // Figure out best way to divide this up.

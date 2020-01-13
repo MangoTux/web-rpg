@@ -22,16 +22,27 @@ class Encounter {
   }
 
   generate() {
-    this.enemy_list = [
-      NPC_Factory.getRandomEnvironmental(player.position)
-    ];
-    this.enemy_list.push(NPC_Factory.getRandomEnvironmental(player.position));
-    this.enemy_list.push(NPC_Factory.getRandomEnvironmental(player.position));
-    this.enemy_list.push(NPC_Factory.getRandomEnvironmental(player.position));
-    this.enemy_list.forEach((npc) => {
+    const name_map = (list) => { return list.reduce(function(prev, cur) { prev[cur.name] = (prev[cur.name] || 0) + 1; return prev; }, {}) }
+    const encounter_size = randomChoice([1, 1, 1, 2, 2, 3, 4]);
+    this.enemy_list = [];
+    for (let i = 0; i<encounter_size; i++) {
+      this.enemy_list.push(NPC_Factory.getRandomEnvironmental(player.position));
+    }
+    this.enemy_list.forEach((npc, index) => {
       this.rewards.gold += npc.gold;
-      this.rewards.experience += 10; // TODO
+      this.rewards.experience += 100; // TODO
       this.rewards.items.concat(npc.inventory);
+    });
+
+    // Rename duplicates to [name] A, [name] B
+    const unique_name_list = name_map(this.enemy_list);
+    Object.keys(unique_name_list).forEach(name => {
+      if (unique_name_list[name] == 1) { return; }
+      const char_code_base = 65;
+      for (let i = 0; i<unique_name_list[name]; i++) {
+        let entity_index = this.enemy_list.findIndex((entity) => entity.name == name);
+        this.enemy_list[entity_index].name += " " + String.fromCharCode(char_code_base + i);
+      }
     });
   }
 

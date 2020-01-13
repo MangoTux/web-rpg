@@ -22,7 +22,7 @@ class Sentient {
 	gold = 250;
 
   constructor() {
-    this.uuid = uuid();
+    this.uid = uid();
     this.level = 0;
     this.inventory = [];
     this.gold = 0;
@@ -60,4 +60,16 @@ class Sentient {
     this.hp.now += hp_capacity;
     return {restore: hp_capacity};
 	}
+
+  applyDamage(amount) {
+    // Buffer (if any) shields as much as possible, with excess rolling to damage taken
+    amount -= this.hp.buffer;
+    if (amount < 0) {
+      this.hp.buffer = -1*amount;
+    } else {
+      this.hp.buffer = 0;
+      this.hp.now -= amount;
+    }
+    this.hp.now.clamp(0, this.hp.max);
+  }
 }

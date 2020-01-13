@@ -151,17 +151,29 @@ p {
 	color: var(--color-ui-good);
 }
 
-.combat-list__inventory {
+.combat-list__selection {
 	counter-reset: list;
 }
-.combat-list__inventory > li {
+.combat-list__selection > li {
 	list-style: none;
 	position: relative;
 	padding-bottom:10px;
 }
-.combat-list__inventory > li:before {
+.combat-list__selection > li:before {
 	content: "(" counter(list) ") ";
 	counter-increment: list;
 	position: absolute;
 	left: -2.4em;
+}
+tbody>tr:nth-child(11)>td:nth-child(21) {
+	visibility:hidden;
+}
+tbody>tr:nth-child(11)>td:nth-child(21):after {
+	content: '@';
+  visibility: visible;
+  display: block;
+  position: absolute;
+  margin-top: -14px;
+  padding: 0;
+	color: rgb(255, 0, 149);
 }
