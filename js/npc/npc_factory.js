@@ -130,8 +130,10 @@ class NPC_Factory {
   // Temperature => cold_list
   // Others from easy, medium, hard list
   static getRandomEnvironmental(position) {
+    // As a development behavior.
+    return new NPC(randomChoice(this.debug_list));
     let biome_data = environment.map.getTileData(position);
-    let id = "Simpleton";
+    let id = null;
     let full_npc_list = this.humanoid_list;
     full_npc_list = full_npc_list.concat(this.easy_list, this.medium_list, this.difficult_list);
     if (biome_data.elevation < 1) {
