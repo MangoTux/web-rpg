@@ -154,6 +154,11 @@ p {
 .combat-list__selection {
 	counter-reset: list;
 }
+.combat-list__navigation {
+	counter-reset: navigation 7;
+}
+.combat-list__navigation > li,
+.combat-list__back > li,
 .combat-list__selection > li {
 	list-style: none;
 	position: relative;
@@ -164,6 +169,20 @@ p {
 	counter-increment: list;
 	position: absolute;
 	left: -2.4em;
+}
+.combat-list__navigation > li:before {
+	content: "(" counter(navigation) ") ";
+	counter-increment: navigation;
+	position: absolute;
+	left: -2.4em;
+}
+.combat-list__navigation > li.inactive {
+	visibility:hidden;
+}
+.combat-list__back > li:before {
+	content: "(back)";
+	position: absolute;
+	left: -4.2em;
 }
 tbody>tr:nth-child(11)>td:nth-child(21) {
 	visibility:hidden;

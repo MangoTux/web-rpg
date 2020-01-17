@@ -44,6 +44,10 @@ class Sentient {
     // Work through active skills (if any)
   }
 
+  get consumable_list() {
+    return this.inventory.filter(item => item.category == "consumable");
+  }
+
 	consume(item) {
     if (typeof item.base_item.hp_buffer !== "undefined") {
       this.hp.buffer = Math.max(this.hp.buffer, item.base_item.hp_buffer);
@@ -70,6 +74,6 @@ class Sentient {
       this.hp.buffer = 0;
       this.hp.now -= amount;
     }
-    this.hp.now.clamp(0, this.hp.max);
+    this.hp.now = this.hp.now.clamp(0, this.hp.max);
   }
 }

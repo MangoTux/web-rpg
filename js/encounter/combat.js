@@ -1,6 +1,6 @@
 class Combat {
   config = {
-    ai_turn_length: 1000,
+    ai_turn_length: 1300,
   };
   ally_list = [];
   enemy_list = [];
@@ -30,11 +30,11 @@ class Combat {
     // Building like this will allow for development on targeting, so your list of targets matches
     this.enemy_list = list;
     list.forEach((npc, element) => {
+      npc.ai = AI_Factory.generate(npc);
       this.participants[npc.uid] = {
         side: "enemy",
         entity: npc,
         active_effects: [],
-        ai: null, // Aggressive always attacks, Defeatist tries to run after 50%, Lucky rolls the dice
       };
     });
   }
@@ -89,17 +89,8 @@ class Combat {
     */
   }
 
-  updateCombatHUD() {
-    // If the combat state is idle, show nothing yet
-    // If the combat state is plan, show options for [Attack | Item | Flee]
-    // If the combat state is attack, show the active page for attack options
-    // If the combat state is item, show the active page for item options
-    // If the combat state is target, show the valid targets for the attack
-  }
-
   updateDisplay() {
     this.updateMainHUD();
-    this.updateCombatHUD();
   }
 
   /*
@@ -137,6 +128,10 @@ class Combat {
 
   npc_turn() {
     this._turn_start();
+    // get AI
+    // ai.self()
+    // ai.allies()
+    // ai.enemies()
     // Core logic TBD - AI behavior, given entity and combat situation:
     // Plan
     // Target
@@ -146,7 +141,34 @@ class Combat {
       'punches',
       'kicks'
     ]);
-    Terminal.print(`The ${this.active_entity.name} ${action_text}`);
+    // This enemy and ally list is from the perspective of
+    this.active_entity.ai
+      .withParticipants(this.enemy_list, this.ally_list);
+    let plan = this.active_entity.ai.getPlan();
+    if (plan.plan == 'item') {
+      this.resolveItem(plan.item_id);
+    } else if (plan.plan == 'attack') {
+      this.setAction(ActionCatalog.catalog[plan.action_id]);
+      this.setTarget(plan.target_id);
+      this.resolveAction();
+    } else if (plan.plan == 'flee') {
+      Terminal.print(`${this.active_entity.name} runs away!`);
+      this.removeParticipant(this.active_entity.uid);
+      return;
+    } else if (plan.plan == 'defect') {
+      Terminal.print(`${this.active_entity.name} betrays their teammates!`);
+      if (this.participants[this.active_entity.uid].side == "enemy") {
+        this.participants[this.active_entity.uid].side = "ally";
+        let npc_index = this.enemy_list.findIndex(npc => npc.uid == this.active_entity.uid);
+        let npc = this.enemy_list.splice(npc_index, 1)[0];
+        this.ally_list.push(npc);
+      } else {
+        this.participants[this.active_entity.uid].side = "enemy";
+        let npc_index = this.ally_list.findIndex(npc => npc.uid == this.active_entity.uid);
+        let npc = this.ally_list.splice(npc_index, 1)[0];
+        this.enemy_list.push(npc);
+      }
+    }
     this._turn_end();
   }
 
@@ -179,27 +201,39 @@ class Combat {
     delete this.participants[uid];
   }
 
+  resolveItem(item_id) {
+    let index = this.active_entity.inventory.findIndex(item => item.id == item_id);
+    let item = this.active_entity.inventory.splice(index, 1)[0];
+    let response = this.active_entity.consume(item);
+    if (this.active_entity == player) {
+      Terminal.print(`You use the ${item.name}`);
+    } else {
+      Terminal.print(`${this.active_entity.name} uses a ${item.name}`);
+    }
+    Combat_UI.drawRestore(this.active_entity, response);
+  }
+
   resolveAction() {
     this.action.onStart();
     this.action.onBeforeHit();
     // TODO Stats impact hit rate
     this.action.successful_hit = (Math.random() <= this.action.accuracy);
 
+    if (this.active_entity == player) {
+      Terminal.print(`You use ${this.action.name} on the ${this.getTargetEntity().name}.`);
+    } else {
+      Terminal.print(`${this.active_entity.name} targets ${this.getTargetEntity().name} with a ${this.action.name}.`);
+    }
     if (this.action.successful_hit) {
       this.action.onHit();
-      // TODO Get damage from bounds
-      // TODO apply damage
-      // The below is a rough test environment
       let bundle = {damage: 0};
-      if (this.active_entity == player) {
-        bundle.damage = this.getTargetEntity().hp.now;
-      }
+      bundle.damage = getRandomInt(...this.action.getDamageBounds());
       this.getTargetEntity().applyDamage(bundle.damage);
       this.action.onDamage();
+      let hp_done = !this.getTargetEntity().hp.now;
       Combat_UI.drawDamage(this.getTargetEntity(), bundle);
 
-      if (!this.getTargetEntity().hp.now) {
-        // If player is current entity, alert for quests
+      if (hp_done) {
         this.action.onKill();
         if (this.active_entity == player) {
           Terminal.print(`You defeated the ${this.getTargetEntity().name}!`);
@@ -208,6 +242,7 @@ class Combat {
         this.removeParticipant(this.getTarget());
       }
     } else {
+      Terminal.print("But it misses!");
       this.action.onMiss();
       Combat_UI.drawMiss();
     }
@@ -215,7 +250,8 @@ class Combat {
     this.action.cleanup();
   }
 
-  // Figure out best way to divide this up.
+  // Async should be used instead of strict timeouts.
+  // Await the current npc_turn, then turn_timer()
   turn_timer() {
     this.turn_cycle = setTimeout(() => {
       this._turn_setup();
@@ -239,7 +275,7 @@ class Combat {
   updateInitiative() {
     // TODO Stat reliance
     this.initiative = [];
-    Object.keys(this.participants).forEach(uid => this.initiative.push(uid) );
+    Object.keys(this.participants).forEach(uid => this.initiative.push(uid));
     this.turn_count = 0;
   }
 
