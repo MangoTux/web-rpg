@@ -25,6 +25,7 @@ class Attack extends Action {
     this.source = source;
   }
 
+  // TODO target is a uid, while source is the object. Consistency.
   setTarget(target) {
     this.target = target;
   }

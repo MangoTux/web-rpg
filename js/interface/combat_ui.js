@@ -39,19 +39,28 @@ class Combat_UI {
   }
 
   static get previous_text() {
-    if (this.current_page <= 1) {
-      return "";
-    }
-    this.can_page_previous = true;
-    return "<br>(8) <strong>Previous</strong>";
+    this.can_page_previous = this.current_page > 1;
+    return `<li class='navigation-item__previous ${this.can_page_previous ? '' : 'inactive'}'><strong>Previous</strong></li>`;
   }
 
   static get forward_text() {
-    if (this.current_page >= Math.ceil(this.active_list.length / this.page_limit)) {
-      return "";
-    }
-    this.can_page_advance = true;
-    return "<br>(9) <strong>Next</strong>";
+    this.can_page_advance = (this.current_page < Math.ceil(this.active_list.length / this.page_limit));
+    return `<li class='navigation-item__forward ${this.can_page_advance ? '' : 'inactive'}'><strong>Next</strong></li>`;
+  }
+
+  static _drawList(title, contents, navigator) {
+    $(Terminal.selector.hud_combat).html(
+      `<h2>${title}</h2>
+      <br>
+      <ol class='combat-list__selection'>
+      ${contents}
+      </ol>
+      <ol class='combat-list__navigation' start='8'>
+      ${navigator}
+      </ol>
+      <br>
+      <ol class='combat-list__back'><li><strong>Go Back</strong></li></ol>`
+    );
   }
 
   static drawItemList() {
@@ -60,9 +69,7 @@ class Combat_UI {
     // Key-based duplicate removal
     const remove_duplicates = (list) => { return list.filter((a, i, s) => i === s.findIndex(t => t.name === a.name)) }
     let ui_instance = $("<ol>");
-    this.active_list = player.inventory
-      .filter(item => item.category == "consumable")
-      .sort();
+    this.active_list = player.consumable_list.sort();
     let list_map = item_map(this.active_list);
     this.active_list = remove_duplicates(this.active_list);
 
@@ -74,13 +81,7 @@ class Combat_UI {
       this.active_elements[i+1] = this.active_list[offset].id;
     }
     let page_navigator = this.previous_text + this.forward_text;
-    $(Terminal.selector.hud_combat).html(
-      "<h2>Useable Items</h2>" +
-      "<br>" +
-      "<ol class='combat-list__selection'>"+ui_instance.html()+"</ol>" +
-      page_navigator +
-      "<br>(back) <strong>Go Back</strong>"
-    );
+    this._drawList("Useable Items", ui_instance.html(), page_navigator);
   }
 
   static drawAttackList() {
@@ -96,13 +97,7 @@ class Combat_UI {
       this.active_elements[i+1] = this.active_list[offset];
     }
     let page_navigator = this.previous_text + this.forward_text;
-    $(Terminal.selector.hud_combat).html(
-      "<h2>Actions</h2>" +
-      "<br>" +
-      "<ol class='combat-list__selection'>"+ui_instance.html()+"</ol>" +
-      page_navigator +
-      "<br>(back) <strong>Go Back</strong>"
-    );
+    this._drawList("Actions", ui_instance.html(), page_navigator);
   }
 
   // For right now, this assumes that all actions can only target enemies.
@@ -117,13 +112,7 @@ class Combat_UI {
       this.active_elements[i+1] = this.active_list[offset].uid;
     }
     let page_navigator = this.previous_text + this.forward_text;
-    $(Terminal.selector.hud_combat).html(
-      "<h2>Targets</h2>" +
-      "<br>" +
-      "<ol class='combat-list__selection'>"+ui_instance.html()+"</ol>" +
-      page_navigator +
-      "<br>(back) <strong>Go Back</strong>"
-    );
+    this._drawList("Targets", ui_instance.html(), page_navigator);
   }
 
   static drawRestore(entity, bundle) {
@@ -136,29 +125,54 @@ class Combat_UI {
     $("#combat_center")
     .html(text)
     .show()
-    .effect("puff", 1000, () => {
-      $(`#${entity.uid}>.combat_name`).effect("shake", {
-        direction: "up",
-        distance: 10,
-        times: 1
-      }, 750);
-      environment.encounter.combat.updateMainHUD();
+    .effect({
+      effect: "puff",
+      duration: 1000,
+      complete: () => {
+        $(`#${entity.uid}>.combat_hp`).effect("shake",
+          {
+            direction: "up",
+            distance: 10,
+            times: 1
+          },
+          750,
+          () => {
+            environment.encounter.combat.updateMainHUD();
+          }
+        );
+      }
     });
   }
 
-  static drawDamage(entity, bundle) {
-    let text = `<br><br><b class='combat__damage'>Hit!</b><br><b class='combat__damage'>-${bundle.damage}</b>`;
+  static drawDamage(entity, bundle, entity_removed) {
+    console.log(entity.uid);
+    const text = `<br><br><b class='combat__damage'>Hit!</b><br><b class='combat__damage'>-${bundle.damage}</b>`;
+
     $("#combat_center")
     .html(text)
     .show()
-    .effect("puff", 1000, () => {
-      $(`#${entity.uid}>.combat_name`).effect("shake", {
-        direction: "up",
-        distance: 10,
-        times: 1
-      }, 750);
-      environment.encounter.combat.updateMainHUD();
+    .effect({
+      effect: "puff",
+      duration: 1000,
+      complete: () => {
+        environment.encounter.combat.updateMainHUD();
+      }
     });
+
+    $(`#${entity.uid}>.combat_hp`)
+    .delay(250)
+    .effect(
+      "shake",
+      {
+        direction: "left",
+        distance: 20,
+        times: 2
+      },
+      500,
+      () => {
+        entity_removed && this.drawRemove(entity.uid);
+      }
+    );
   }
 
   static drawMiss() {
@@ -167,5 +181,18 @@ class Combat_UI {
     .html(text)
     .show()
     .effect("puff", 1000);
+  }
+
+  static drawRemove(uid) {
+    $(`#${uid}`).stop().effect(
+      "pulsate",
+      {
+        times: 1,
+      },
+      5000,
+      () => {
+        environment.encounter.combat.updateMainHUD();
+      }
+    );
   }
 }
