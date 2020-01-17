@@ -1,16 +1,16 @@
 let npc_debug_action = new Attack("Test Action", "It's something", 0);
 npc_debug_action.accuracy = 0.5;
 npc_debug_action.damage_bounds = [
-  0,
-  0
+  () => 1,
+  () => 1
 ];
 ActionCatalog.catalog['npc_debug_action'] = npc_debug_action;
-
+// TODO player to this.source?
 let basic_punch = new Attack("Basic Punch", "A basic punch", 1);
 basic_punch.accuracy = 0.9;
 basic_punch.damage_bounds = [
-  () => player.level,
-  () => player.level+2
+  () => player.level+10,
+  () => player.level+12
 ];
 ActionCatalog.catalog['basic_punch'] = basic_punch;
 
@@ -27,9 +27,9 @@ basic_kick.onMiss = () => {
 ActionCatalog.catalog['basic_kick'] = basic_kick;
 
 let basic_stab = new Attack("Basic Stab", "A basic stab", 1);
-basic_punch.accuracy = 0.7;
-basic_kick.critical_modifier = +4;
-basic_punch.damage_bounds = [
+basic_stab.accuracy = 0.7;
+basic_stab.critical_modifier = +4;
+basic_stab.damage_bounds = [
   () => player.level,
   () => player.level+2
 ];
@@ -37,7 +37,7 @@ ActionCatalog.catalog['basic_stab'] = basic_stab;
 
 let basic_bolt = new Attack("Basic Bolt", "A basic magical bolt", 1);
 basic_bolt.accuracy = 999;
-basic_kick.damage_bounds = [
+basic_bolt.damage_bounds = [
   () => player.level,
   () => player.level,
 ];
