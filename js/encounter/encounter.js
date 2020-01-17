@@ -27,7 +27,17 @@ class Encounter {
     this.enemy_list = [];
     for (let i = 0; i<encounter_size; i++) {
       this.enemy_list.push(NPC_Factory.getRandomEnvironmental(player.position));
+      // TODO Replace this with NPC's item mechanics?
+      if (getRandomInt(0, 100) > 15) {
+        continue;
+      }
+      let item_count = getRandomInt(1, 2, 3);
+      for (let j = 0; j<item_count; j++) {
+        this.enemy_list[i].inventory.push(ItemFactory.getRandomConsumable());
+      }
     }
+    // Move this to the combat's list of enemies.
+    // An item may be used in combat, but still be applied here.
     this.enemy_list.forEach((npc, index) => {
       this.rewards.gold += npc.gold;
       this.rewards.experience += 100; // TODO
