@@ -36,13 +36,6 @@ class Encounter {
         this.enemy_list[i].inventory.push(ItemFactory.getRandomConsumable());
       }
     }
-    // Move this to the combat's list of enemies.
-    // An item may be used in combat, but still be applied here.
-    this.enemy_list.forEach((npc, index) => {
-      this.rewards.gold += npc.gold;
-      this.rewards.experience += 100; // TODO
-      this.rewards.items.concat(npc.inventory);
-    });
 
     // Rename duplicates to [name] A, [name] B
     const unique_name_list = name_map(this.enemy_list);
@@ -56,10 +49,16 @@ class Encounter {
     });
   }
 
+  addRewards(npc) {
+    this.rewards.gold += npc.gold;
+    this.rewards.experience += 100; // Based on npc stats, etc
+    this.rewards.items.concat(npc.inventory);
+  }
+
   startCombat() {
     Terminal.setWorking(true);
     player.state = state.player.combat;
-    this.combat = new Combat();
+    this.combat = new Combat(this);
     this.combat.versus(this.enemy_list);
     this.combat.updateDisplay();
     this.combat.turn_timer();
@@ -94,12 +93,11 @@ class Encounter {
   }
 
   endCombat() {
-    clearTimeout(this.combat.turn_cycle);
     Terminal.resetGameInfo();
     Terminal.setWorking(false);
     if (this.combat.ally_list.length == 0) {
-      ui.drawTomstone();
-      Terminal.print("You died...");
+      ui.drawTombstone();
+      Terminal.type("You died...");
       player.state = state.player.dead;
       environment.cleanEncounter();
       return;

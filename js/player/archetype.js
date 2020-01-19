@@ -170,6 +170,7 @@ class Mage extends Archetype {
 	];
 	actions = [
 		'basic_bolt',
+		'fireball',
 	];
 	constructor() {
 		super();
@@ -222,6 +223,7 @@ class Monk extends Archetype {
 	actions = [
 		'basic_punch',
 		'basic_kick',
+		'flurry_of_blows',
 	];
 	constructor() {
 		super();

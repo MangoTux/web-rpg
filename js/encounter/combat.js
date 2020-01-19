@@ -1,6 +1,8 @@
 class Combat {
+  // Encounter
+  scope;
   config = {
-    ai_turn_length: 1300,
+    turn_delay: 1500,
   };
   ally_list = [];
   enemy_list = [];
@@ -15,7 +17,8 @@ class Combat {
 
   active_entity;
 
-  constructor() {
+  constructor(scope) {
+    this.scope = scope;
     this.ally_list = [ player ];
     this.participants[player.uid] = {
       side: "ally",
@@ -39,58 +42,8 @@ class Combat {
     });
   }
 
-  updateMainHUD() {
-    // Main HUD will show player and enemy(s) name/HP
-    document.querySelector(Terminal.selector.hud_main).classList.add(Terminal.selector.combat.wrapper);
-
-    document.querySelector(Terminal.selector.hud_main).innerHTML =
-`<div id="${Terminal.selector.combat.ally}">
-</div>
-<div id="${Terminal.selector.combat.center}">
-</div>
-<div id="${Terminal.selector.combat.enemy}">
-</div>`;
-
-    this.ally_list.forEach((ally) => {
-      let text = `
-      <span class='container_ally' id='${ally.uid}'>
-      <h2 class='${Terminal.selector.combat.name}'>${ally.name}</h2>
-      <h4 class='${Terminal.selector.combat.hp.wrapper}'>
-      <span class='${Terminal.selector.combat.hp.now}'>${ally.hp.now}</span> /
-      <span class='${Terminal.selector.combat.hp.max}'>${ally.hp.max}</span>`;
-      if (ally.hp.buffer > 0) {
-        text += `<span class='${Terminal.selector.combat.hp.buffer}'> (+${ally.hp.buffer})</span>`;
-      }
-      text += `
-      </h4>
-      </span>`;
-      document.querySelector(`#${Terminal.selector.combat.ally}`).innerHTML += text;
-    });
-
-    this.enemy_list.forEach((enemy) => {
-      let text = `
-      <span class='container_enemy' id='${enemy.uid}'>
-      <h2 class='${Terminal.selector.combat.name}'>${enemy.name}</h2>
-      <h4 class='${Terminal.selector.combat.hp.wrapper}'>
-      <span class='${Terminal.selector.combat.hp.now}'>${enemy.hp.now}</span> /
-      <span class='${Terminal.selector.combat.hp.max}'>${enemy.hp.max}</span>`;
-      if (enemy.hp.buffer > 0) {
-        text += `<span class='${Terminal.selector.combat.hp.buffer}'> (+${enemy.hp.buffer})</span>`;
-      }
-      text += `
-      </h4>
-      </span>`;
-      document.querySelector(`#${Terminal.selector.combat.enemy}`).innerHTML += text;
-    });
-
-    /*
-    hud_main will show player status, enemy status, (initiative?)
-    hud_combat will show move and targeting selection options (when available)
-    */
-  }
-
   updateDisplay() {
-    this.updateMainHUD();
+    Combat_UI.drawMainHUD(this.ally_list, this.enemy_list);
   }
 
   /*
@@ -113,7 +66,7 @@ class Combat {
   */
   _turn_start() {
     this.active_entity.hp.buffer = Math.max(0, --this.active_entity.hp.buffer);
-    this.updateMainHUD();
+    this.updateDisplay();
     return;
   }
 
@@ -126,21 +79,8 @@ class Combat {
     return;
   }
 
-  npc_turn() {
+  async npc_turn() {
     this._turn_start();
-    // get AI
-    // ai.self()
-    // ai.allies()
-    // ai.enemies()
-    // Core logic TBD - AI behavior, given entity and combat situation:
-    // Plan
-    // Target
-    let action_text = randomChoice([
-      'does something',
-      'bites down',
-      'punches',
-      'kicks'
-    ]);
     // This enemy and ally list is from the perspective of
     this.active_entity.ai
       .withParticipants(this.enemy_list, this.ally_list);
@@ -149,10 +89,11 @@ class Combat {
       this.resolveItem(plan.item_id);
     } else if (plan.plan == 'attack') {
       this.setAction(ActionCatalog.catalog[plan.action_id]);
-      this.setTarget(plan.target_id);
+      this.addTarget(plan.target_id);
       this.resolveAction();
     } else if (plan.plan == 'flee') {
       Terminal.print(`${this.active_entity.name} runs away!`);
+      Combat_UI.drawFlee(this.active_entity.uid);
       this.removeParticipant(this.active_entity.uid);
       return;
     } else if (plan.plan == 'defect') {
@@ -174,11 +115,11 @@ class Combat {
 
   setAction(action) {
     this.action = action;
-    this.source = this.active_entity;
+    this.action.setSource(this.active_entity);
   }
 
-  setTarget(uid) {
-    this.action.setTarget(uid);
+  addTarget(uid) {
+    this.action.addTarget(uid);
   }
 
   getTarget() {
@@ -214,62 +155,73 @@ class Combat {
   }
 
   resolveAction() {
-    this.action.onStart();
-    this.action.onBeforeHit();
-    // TODO Stats impact hit rate
-    this.action.successful_hit = (Math.random() <= this.action.accuracy);
-
+    this.action.hook("onStart");
     if (this.active_entity == player) {
       Terminal.print(`You use ${this.action.name} on the ${this.getTargetEntity().name}.`);
     } else {
       Terminal.print(`${this.active_entity.name} targets ${this.getTargetEntity().name} with a ${this.action.name}.`);
     }
-    if (this.action.successful_hit) {
-      this.action.onHit();
-      let bundle = {damage: 0};
-      bundle.damage = getRandomInt(...this.action.getDamageBounds());
-      this.getTargetEntity().applyDamage(bundle.damage);
-      this.action.onDamage();
-      let hp_done = !this.getTargetEntity().hp.now;
-      Combat_UI.drawDamage(this.getTargetEntity(), bundle);
-
-      if (hp_done) {
-        this.action.onKill();
-        if (this.active_entity == player) {
-          Terminal.print(`You defeated the ${this.getTargetEntity().name}!`);
-          player.updateQuestProgress("kill", this.getTargetEntity().name);
-        }
-        this.removeParticipant(this.getTarget());
+    // Most attacks will target a single creature
+    let bundle = {
+      damage: [],
+      recovery: [],
+    };
+    for (let hit_attempt = 0; hit_attempt < this.action.hit_count; hit_attempt++) {
+      this.action.hook("onBeforeHit");
+      if (this.action.doesHit()) {
+        this.action.hook("onHit");
+        bundle.damage.push(getRandomInt(...this.action.getDamageBounds()));
+        this.getTargetEntity().applyDamage(bundle.damage.reduce((t, c) => t + c, 0));
+        this.action.hook("onDamage");
+      } else {
+        this.action.hook("onMiss");
       }
-    } else {
-      Terminal.print("But it misses!");
-      this.action.onMiss();
-      Combat_UI.drawMiss();
     }
-    this.action.onEnd();
+    if (bundle.damage.length == 0) {
+      Combat_UI.drawMiss();
+    } else {
+      Combat_UI.drawDamage(this.getTargetEntity(), bundle);
+    }
+    if (!this.getTargetEntity().hp.now) {
+      this.resolveDeath();
+    }
+    this.action.hook("onEnd");
     this.action.cleanup();
+  }
+
+  resolveDeath() {
+    Combat_UI.drawRemove(this.getTarget());
+    this.action.hook("onKill");
+    if (this.active_entity == player) {
+      Terminal.print(`You defeated the ${this.getTargetEntity().name}!`);
+      player.updateQuestProgress("kill", this.getTargetEntity().name);
+    }
+    this.scope.addRewards(this.getTargetEntity());
+    this.removeParticipant(this.getTarget());
   }
 
   // Async should be used instead of strict timeouts.
   // Await the current npc_turn, then turn_timer()
   turn_timer() {
-    this.turn_cycle = setTimeout(() => {
-      this._turn_setup();
-      if (this.enemy_list.length == 0 || this.ally_list.length == 0) {
-        environment.encounter.endCombat();
-        return;
-      }
-      if (this.active_entity == player) {
-        this._turn_start();
-        Terminal.setWorking(false);
-        Terminal.print("What would you like to do? [Attack/Item/Flee]");
-        this.state = state.combat.plan;
-        clearTimeout(this.turn_cycle);
-        return;
-      }
-      this.npc_turn();
+    this._turn_setup();
+    if (this.enemy_list.length == 0 || this.ally_list.length == 0) {
+      // Weird display jump happens.
+      setTimeout(() => {
+        this.scope.endCombat();
+      }, this.config.turn_delay);
+      return;
+    }
+    if (this.active_entity == player) {
+      this._turn_start();
+      Terminal.setWorking(false);
+      Terminal.print("What would you like to do? [Attack/Item/Flee]");
+      this.state = state.combat.plan;
+      return;
+    }
+    this.npc_turn();
+    setTimeout(() => {
       this.turn_timer();
-    }, this.config.ai_turn_length);
+    }, this.config.turn_delay);
   }
 
   updateInitiative() {
@@ -280,14 +232,14 @@ class Combat {
   }
 
   setPlayerIdle() {
-    this._turn_end();
-    Combat_UI.setView("none");
-    Combat_UI.updateView();
-    this.state = state.combat.idle;
-    Terminal.setWorking(true);
-    // Add in a slight delay before NPCs resume behavior
+    let self = this;
     setTimeout(() => {
+      self._turn_end();
+      Combat_UI.setView("none");
+      Combat_UI.updateView();
+      this.state = state.combat.idle;
+      Terminal.setWorking(true);
       this.turn_timer()
-    }, 2*this.config.ai_turn_length);
+    }, this.config.turn_delay);
   }
 }

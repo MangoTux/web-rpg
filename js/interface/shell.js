@@ -37,7 +37,7 @@ const Shell = class {
     player.name = name.charAt(0).toUpperCase() + name.slice(1);
     environment.load_map(player.name);
     player.state = state.player.race;
-    Terminal.print(`Okay, ${player.name}, what is your race? [Human/Elf/Dwarf/Goblin]`);
+    Terminal.type(`Okay, ${player.name}, what is your race? [Human/Elf/Dwarf/Goblin]`);
   }
 
   static handler_race(race) {
@@ -57,9 +57,9 @@ const Shell = class {
   			player.state = state.player.race;
   	}
   	if (player.state == state.player.race) {
-  		Terminal.print("What is your race? [Human/Elf/Dwarf/Goblin]");
+  		Terminal.type("What is your race? [Human/Elf/Dwarf/Goblin]");
   	} else {
-  		Terminal.print("Final question: What is your class? [Warrior/Ranger/Mage/Monk]");
+  		Terminal.type("Final question: What is your class? [Warrior/Ranger/Mage/Monk]");
   	}
   }
 
@@ -80,7 +80,7 @@ const Shell = class {
   			player.state = state.player.archetype;
   	}
   	if (player.state == state.player.archetype) {
-  		Terminal.print("What is your class? [Warrior/Ranger/Mage/Monk]");
+  		Terminal.type("What is your class? [Warrior/Ranger/Mage/Monk]");
   	} else {
   		Terminal.print(`Welcome to the world, ${player.name} the ${player.race.name} ${player.archetype.name}!`);
   		Terminal.print(`Type 'help' to view a list of commands.`);

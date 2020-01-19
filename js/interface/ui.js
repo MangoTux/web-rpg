@@ -13,11 +13,13 @@ East and West are similar, but $("tbody>tr>td:first").forEach (and last)
 */
 UI.prototype.drawFullMap = function(map) {
   let table = $("<table>");
+  let height_radius = 10;
+  let width_radius = 20;
   table.css("line-height", "4px");
   table.css("font-size", "4px");
-  for (let y=-10; y<10; y++) {
+  for (let y=-height_radius; y<height_radius; y++) {
     let row = $("<tr>");
-    for (let x=-20; x<20; x++) {
+    for (let x=-width_radius; x<width_radius; x++) {
       // Draw player on center
       let absolute_position = [x+player.position[0], + y+player.position[1]];
       if (environment.getShopOnTile(absolute_position)) {
@@ -34,7 +36,7 @@ UI.prototype.drawFullMap = function(map) {
     table.append(row);
   }
   mapInfo = "<br>";
-  $(Terminal.selector.hud_main).html(table.html() + mapInfo);
+  $(Terminal.selector.hud_main).html(`<table>${table.html()}</table>${mapInfo}`);
 }
 
 UI.prototype.drawMap = function(map) {
@@ -136,16 +138,17 @@ UI.prototype.drawNpcDialogue = function() {
   $(Terminal.selector.hud_main).html(`<h3>${npc.name} says:</h3><br><br>${npc.quest.description}`);
 }
 
-UI.prototype.drawNpcInfo = function(npcData) {
-  var statList = $('<ul>');
-  for (var i in npcData.list) {
-    statList.append($('<li>').text(i + ": " + npcData.list[i]));
-  }
-  var gameText = "Stats<br><ul>"+statList.html()+"</ul>";
-  if (npcData.display !== undefined) {
-    gameText += "<br><i>"+npcData.display['Description']+"</i>";
-  }
-  $(Terminal.selector.hud_main).html("<h3>"+gameText+"</h3>");
+UI.prototype.drawNpcInfo = function(npc_list) {
+  let full_text = "<strong>Inspect</strong><br>";
+  npc_list.forEach((npc) => {
+    full_text += `<br>${npc.name}`;
+    let $stats = $('<ul>');
+    Object.keys(npc.listable).forEach(key => {
+      $stats.append($('<li>').text(npc.listable[key]));
+    });
+    full_text += `<br><ul>${$stats.html()}</ul>`
+  });
+  $(Terminal.selector.hud_main).html("<h3>"+full_text+"</h3>");
 }
 
 UI.prototype.drawDefaultView = function() {
