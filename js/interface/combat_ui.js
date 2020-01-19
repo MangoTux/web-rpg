@@ -7,6 +7,8 @@ class Combat_UI {
   // this.page_limit elements that can be selected
   static active_elements = {};
 
+  static promises = [];
+
   static setView(view) {
     this.active_view = view;
   }
@@ -21,6 +23,61 @@ class Combat_UI {
       case "target": this.drawTargetList(); break;
       default: $(Terminal.selector.hud_combat).html('');
     }
+  }
+
+  static drawMainHUD(ally_list, enemy_list) {
+    let active_uid = null;
+    if (environment.encounter.combat.active_entity) {
+       active_uid = environment.encounter.combat.active_entity.uid;
+    }
+    if (typeof ally_list === "undefined") {
+      ally_list = environment.encounter.combat.ally_list;
+    }
+    if (typeof enemy_list === "undefined") {
+      enemy_list = environment.encounter.combat.enemy_list;
+    }
+    // Main HUD will show player and enemy(s) name/HP
+    document.querySelector(Terminal.selector.hud_main).classList.add(Terminal.selector.combat.wrapper);
+
+    document.querySelector(Terminal.selector.hud_main).innerHTML =
+`<div id="${Terminal.selector.combat.ally}">
+</div>
+<div id="${Terminal.selector.combat.center}">
+</div>
+<div id="${Terminal.selector.combat.enemy}">
+</div>`;
+
+    ally_list.forEach((ally) => {
+      let text = `
+      <span class='container_ally' id='${ally.uid}'>
+      <h2 class='${Terminal.selector.combat.name} ${ally.uid === active_uid ? 'active_entity':''}'>${ally.name}</h2>
+      <h4 class='${Terminal.selector.combat.hp.wrapper}'>
+      <span class='${Terminal.selector.combat.hp.now}'>${ally.hp.now}</span> /
+      <span class='${Terminal.selector.combat.hp.max}'>${ally.hp.max}</span>`;
+      if (ally.hp.buffer > 0) {
+        text += `<span class='${Terminal.selector.combat.hp.buffer}'> (+${ally.hp.buffer})</span>`;
+      }
+      text += `
+      </h4>
+      </span>`;
+      document.querySelector(`#${Terminal.selector.combat.ally}`).innerHTML += text;
+    });
+
+    enemy_list.forEach((enemy) => {
+      let text = `
+      <span class='container_enemy' id='${enemy.uid}'>
+      <h2 class='${Terminal.selector.combat.name} ${enemy.uid === active_uid ? 'active_entity':''}'>${enemy.name}</h2>
+      <h4 class='${Terminal.selector.combat.hp.wrapper}'>
+      <span class='${Terminal.selector.combat.hp.now}'>${enemy.hp.now}</span> /
+      <span class='${Terminal.selector.combat.hp.max}'>${enemy.hp.max}</span>`;
+      if (enemy.hp.buffer > 0) {
+        text += `<span class='${Terminal.selector.combat.hp.buffer}'> (+${enemy.hp.buffer})</span>`;
+      }
+      text += `
+      </h4>
+      </span>`;
+      document.querySelector(`#${Terminal.selector.combat.enemy}`).innerHTML += text;
+    });
   }
 
   // Converts the current page + index to the "true" inventory offset
@@ -115,52 +172,66 @@ class Combat_UI {
     this._drawList("Targets", ui_instance.html(), page_navigator);
   }
 
-  static drawRestore(entity, bundle) {
+  static async drawRestore(entity, bundle) {
     let text = "";
     if (bundle.buffer) {
       text = `<br><br><b class='combat__healing'>Buffer!</b><br><b class='combat__healing'>${bundle.buffer}</b>`;
     } else {
       text = `<br><br><b class='combat__healing'>Healed!</b><br><b class='combat__healing'>+${bundle.restore}</b>`;
     }
+    let restore_time = 1000;
+    let hp_shake_delay = 250;
+    let hp_shake_time = 500;
     $("#combat_center")
     .html(text)
     .show()
-    .effect({
-      effect: "puff",
-      duration: 1000,
-      complete: () => {
-        $(`#${entity.uid}>.combat_hp`).effect("shake",
-          {
-            direction: "up",
-            distance: 10,
-            times: 1
-          },
-          750,
-          () => {
-            environment.encounter.combat.updateMainHUD();
-          }
-        );
-      }
-    });
+    .effect(
+      "puff",
+      {},
+      restore_time,
+    );
+    $(`#${entity.uid}>.combat_hp`)
+    .delay(hp_shake_delay)
+    .effect(
+      "shake",
+      {
+        direction: "up",
+        distance: 10,
+        times: 1
+      },
+      hp_shake_time
+    );
+    await new Promise(resolve => setTimeout(resolve, restore_time));
   }
 
-  static drawDamage(entity, bundle, entity_removed) {
-    console.log(entity.uid);
-    const text = `<br><br><b class='combat__damage'>Hit!</b><br><b class='combat__damage'>-${bundle.damage}</b>`;
-
+  /*
+  Start to consider:
+  - Single Attack, Single Damage (e.g. basic punch)
+  - Multi Attack, Single Target (e.g. f_o_b)
+  - Multi Attack (some miss), Single Target
+  - Single Attack, Multi Damage (e.g. fireball)
+  */
+  static async drawDamage(entity, bundle) {
+    // Bundle now has a few options -
+    // Delay between each? wait for everything to resolve?
+    // Maybe instead, draw center and on certain response yield side animations?
+    // [{damage: 5}, {miss: true}, {damage: 2}, {recover: 15}]?
+    const damage_time = 1000;
+    const hp_shake_time = 500;
+    let text = `<br><br><b class='combat__damage'>Hit!</b>`;
+    bundle.damage.forEach(value => {
+      text += `<br><b class='combat__damage'>-${value}</b>`;
+    });
+    this.drawMainHUD();
     $("#combat_center")
     .html(text)
     .show()
-    .effect({
-      effect: "puff",
-      duration: 1000,
-      complete: () => {
-        environment.encounter.combat.updateMainHUD();
-      }
-    });
-
+    .effect(
+      "puff",
+      {},
+      damage_time,
+    );
     $(`#${entity.uid}>.combat_hp`)
-    .delay(250)
     .effect(
       "shake",
       {
@@ -168,31 +239,48 @@ class Combat_UI {
         distance: 20,
         times: 2
       },
-      500,
-      () => {
-        entity_removed && this.drawRemove(entity.uid);
-      }
+      hp_shake_time
     );
+    await new Promise(resolve => setTimeout(resolve, damage_time));
   }
 
-  static drawMiss() {
+  static async drawMiss() {
     let text = `<br><br><b class='combat_miss'>Miss!</b>`;
+    let miss_time = 1000;
     $("#combat_center")
     .html(text)
     .show()
-    .effect("puff", 1000);
+    .effect("puff", miss_time);
+    await new Promise(resolve => setTimeout(resolve, miss_time));
   }
 
-  static drawRemove(uid) {
-    $(`#${uid}`).stop().effect(
+  static async drawFlee(uid) {
+    let flee_time = 1000;
+    $(`#${uid}`).effect(
       "pulsate",
       {
-        times: 1,
+        times: 3,
       },
-      5000,
+      flee_time,
       () => {
-        environment.encounter.combat.updateMainHUD();
+        this.drawMainHUD();
       }
     );
+    await new Promise(resolve => setTimeout(resolve, flee_time));
+  }
+
+  static async drawRemove(uid) {
+    let remove_time = 1000;
+    $(`#${uid}`).effect(
+      "pulsate",
+      {
+        times: 3,
+      },
+      remove_time,
+      () => {
+        this.drawMainHUD();
+      }
+    );
+    await new Promise(resolve => setTimeout(resolve, remove_time));
   }
 }

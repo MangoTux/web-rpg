@@ -19,7 +19,7 @@ Terminal = {
 		prompt:'> ',
 		spinnerCharacters:[' ', '.','..','...'],
 		spinnerSpeed: 250,
-		typingSpeed:50
+		typingSpeed:25
 	},
 
 	selector: {
@@ -241,10 +241,29 @@ Terminal = {
 		}
 	},
 
+	type: function(text) {
+		let index = 0;
+		//Disables prompt active for the time being
+		this.promptActive = false;
+		let displayElement = $(Terminal.selector.history);
+		let current_command = uid();
+		displayElement.append($('<p>').attr('id', current_command));
+		//Types the character sequence of text
+		let interval = window.setInterval($.proxy(() => {
+			if (index < text.length) {
+				$(`#${current_command}`).text(text.substr(0, ++index));
+				return;
+			}
+			clearInterval(interval);
+			this.promptActive = true;
+			this.removeLines(displayElement);
+			this.jumpToBottom();
+		}, this), this.config.typingSpeed);
+	},
+
 	//Manually enters the command and executes it as if the user had typed it
 	runCommand: function(text) {
 		let index = 0;
-		let mine = false;
 		//Disables prompt active for the time being
 		this.promptActive = false;
 		//Types the character sequence of text

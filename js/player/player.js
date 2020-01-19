@@ -28,6 +28,7 @@ class Player extends Sentient {
 	    spirit: 5,
 	    luck: 0,
 	  };
+		// TODO Archetype, Race basis
     this.hp.max = getRandomInt(20, 30)+this.level;
     this.hp.now = this.hp.max;
 	}
@@ -53,7 +54,9 @@ class Player extends Sentient {
 	}
 
 	rest() {
-		this.base_combat_stats.hp_now = this.base_combat_stats.hp_max;
+		// Effects that grant a buffer for the first combat?
+		this.hp.buffer = 0;
+		this.hp.now = this.hp.max;
 	}
 
 	get experience_needed() {
@@ -78,6 +81,7 @@ class Player extends Sentient {
 
 	increase_level() {
 		this.level++;
+		// TODO
 		// Use class's features and apply to base combat stats
 		// Update player's stats to include equipped items
 		// Gain gold equal to 50 * level
@@ -85,6 +89,7 @@ class Player extends Sentient {
 	}
 
 	apply_equipment() {
+		// TODO
 		// Set combat stats equal to base combat stats
 		// For each item in equipped (ignoring health-change):
 		//  - Increase combat stats by the modifier from the item
@@ -105,6 +110,7 @@ class Player extends Sentient {
 	}
 
 	receiveQuestReward(reward_object) {
+		// TODO
 		// Increase gold
 		// Gain items (if any)
 	}
