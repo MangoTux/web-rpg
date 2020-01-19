@@ -96,8 +96,10 @@ p {
 }
 
 .combat_name {
-	text-decoration: underline;
 	font-size: 250%;
+}
+.combat_name.active_entity {
+	text-decoration: underline;
 }
 .combat_hp {
 	font-size: 175%;

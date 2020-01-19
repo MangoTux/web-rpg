@@ -2,60 +2,107 @@ class Action { // lawsuit
   id;
   name;
   description;
+  hooks = {};
   constructor(name, description, minimum_level) {
     this.name = name;
     this.description = description;
     this.minimum_level = minimum_level;
   }
+
+  registerHook(hook, callback) {
+    this.hooks[hook] = callback;
+  }
+
+  hook(target) {
+    if (typeof this.hooks[target] !== "function") { return; }
+    this.hooks[target](this);
+  }
 }
 
 class Attack extends Action {
-  damage_bounds;
+  damage;
+  partial_damage = false;
   accuracy;
-  total_hits; // Eh.
+  hit_count;
   source;
   target;
-  successful_kill;
 
   constructor(name, description, minimum_level) {
     super(name, description, minimum_level);
+
+    this.hit_count = 1;
+    this.target = {
+      count: 1,
+      list: [],
+    };
   }
 
   setSource(source) {
     this.source = source;
+    this.target = null;
+  }
+
+  setTargetCount(count) {
+    this.target.count = count;
   }
 
   // TODO target is a uid, while source is the object. Consistency.
-  setTarget(target) {
-    this.target = target;
+  addTarget(target_uid) {
+    this.target.list.push(target_uid);
   }
 
-  // Events that will fire and are optionally built
-  onStart() {}
-
-  onBeforeHit() {}
-
-  onHit() {}
-
-  // TODO: Effects like "After scoring a critical, accuracy increases 10% for 5 turns"? Entity-centric
-  onCritical() {}
-
-  // TODO: Animations for "Heal 30% of the inflicted damage". Some sort of broadcast?
-  onDamage() {}
-
-  onMiss() {}
-
-  onKill() {}
-
-  onEnd() {}
-
-  cleanup() {
-    this.target = null;
-    this.successful_kill = true;
+  setDamageBounds(thresh_low, thresh_high) {
+    this.damage = {
+      type: "bounds",
+      partial: false,
+      range: [thresh_low, thresh_high]
+    };
   }
 
-  getDamageBounds() {
-    return this.damage_bounds.map(i => typeof i === "function" ? i():i);
+  setDamageRoll(calc) {
+    this.damage = {
+      type: "roll",
+      partial: false,
+      roll: calc
+    };
+  }
+
+  // On a miss/failed save, returns a partial damage calculation for a target
+  allowPartialDamage(fraction) {
+    this.damage.partial = fraction;
+  }
+
+  setAccuracy(accuracy) {
+    this.accuracy = {
+      base: accuracy,
+      current: accuracy
+    };
+  }
+
+  setCriticalModifier(mod) {
+    this.critical_modifier = {
+      base: mod,
+      current: mod
+    };
+  }
+
+  setHitCount(count) {
+    this.hit_count = count;
+  }
+
+  doesHit() {
+    return Math.random() <= this.accuracy.current;
+  }
+
+  cleanup() {}
+
+  getDamage() {
+    if (this.damage.type == "bounds") {
+      let bounds = this.damage.range.map(i => typeof i === "function" ? i(this):i);
+      return getRandomInt(...bounds);
+    } else if (this.damage.type === "roll") {
+      return this.damage.roll(this);
+    }
   }
 }
 

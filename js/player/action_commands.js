@@ -1,57 +1,62 @@
-let npc_debug_action = new Attack("Test Action", "It's something", 0);
-npc_debug_action.accuracy = 0.5;
-npc_debug_action.damage_bounds = [
-  () => 1,
-  () => 1
-];
-ActionCatalog.catalog['npc_debug_action'] = npc_debug_action;
-// TODO player to this.source?
-let basic_punch = new Attack("Basic Punch", "A basic punch", 1);
-basic_punch.accuracy = 0.9;
-basic_punch.damage_bounds = [
-  () => player.level+10,
-  () => player.level+12
-];
-ActionCatalog.catalog['basic_punch'] = basic_punch;
+ActionCatalog.catalog['npc_debug_action'] = new Attack("Test Action", "It's something", 0);
+ActionCatalog.catalog['npc_debug_action'].setAccuracy(0.5);
+ActionCatalog.catalog['npc_debug_action'].setDamageBounds(1, 1);
 
-let basic_kick = new Attack("Basic Kick", "A basic kick", 1);
-basic_kick.accuracy = 0.8;
-basic_kick.damage_bounds = [
+ActionCatalog.catalog['basic_punch'] = new Attack("Basic Punch", "A basic punch", 1);
+ActionCatalog.catalog['basic_punch'].setAccuracy(0.9);
+ActionCatalog.catalog['basic_punch'].setDamageBounds(
+  (scope) => scope.source.level+10,
+  (scope) => scope.source.level+12
+);
+
+ActionCatalog.catalog['basic_kick'] = new Attack("Basic Kick", "A basic kick", 1);
+ActionCatalog.catalog['basic_kick'].setAccuracy(0.8);
+ActionCatalog.catalog['basic_kick'].setDamageBounds(
   2,
-  () => player.level+2
-];
-basic_kick.critical_modifier = +2;
-basic_kick.onMiss = () => {
-  console.log("kick and a miss");
-}
-ActionCatalog.catalog['basic_kick'] = basic_kick;
+  (scope) => scope.source.level
+);
+ActionCatalog.catalog['basic_kick'].setCriticalModifier(+2);
+ActionCatalog.catalog['basic_kick'].registerHook("onMiss", (scope) => { console.log("Ha! You missed."); })
 
-let basic_stab = new Attack("Basic Stab", "A basic stab", 1);
-basic_stab.accuracy = 0.7;
-basic_stab.critical_modifier = +4;
-basic_stab.damage_bounds = [
-  () => player.level,
-  () => player.level+2
-];
-ActionCatalog.catalog['basic_stab'] = basic_stab;
+ActionCatalog.catalog['basic_stab'] = new Attack("Basic Stab", "A basic stab", 1);
+ActionCatalog.catalog['basic_stab'].setAccuracy(0.7);
+ActionCatalog.catalog['basic_stab'].setCriticalModifier(+4);
+ActionCatalog.catalog['basic_stab'].setDamageBounds(
+  (scope) => scope.source.level,
+  (scope) => scope.source.level+2
+);
 
-let basic_bolt = new Attack("Basic Bolt", "A basic magical bolt", 1);
-basic_bolt.accuracy = 999;
-basic_bolt.damage_bounds = [
-  () => player.level,
-  () => player.level,
-];
-ActionCatalog.catalog['basic_bolt'] = basic_bolt;
+ActionCatalog.catalog['basic_bolt'] = new Attack("Basic Bolt", "A basic magical bolt", 1);
+ActionCatalog.catalog['basic_bolt'].setAccuracy(999);
+ActionCatalog.catalog['basic_bolt'].setDamageBounds(
+  (scope) => scope.source.level,
+  (scope) => scope.source.level
+);
 
+ActionCatalog.catalog['flurry_of_blows'] = new Attack("Flurry of Blows", "Three quick attacks", 1);
+ActionCatalog.catalog['flurry_of_blows'].setAccuracy(0.75);
+ActionCatalog.catalog['flurry_of_blows'].setHitCount(3);
+ActionCatalog.catalog['flurry_of_blows'].setDamageBounds(
+  (scope) => Math.ceil(scope.source.level / 2),
+  (scope) => Math.ceil(scope.source.level / 2),
+);
+ActionCatalog.catalog['flurry_of_blows'].registerHook(
+  "onStart",
+  (scope) => { scope.hit_counter = 0; }
+);
+ActionCatalog.catalog['flurry_of_blows'].registerHook(
+  "onHit",
+  (scope) => { scope.hit_counter++; }
+);
+ActionCatalog.catalog['flurry_of_blows'].registerHook(
+  "onEnd",
+  (scope) => { if (scope.hit_counter == scope.hit_count) { console.log("Knock the target prone"); }}
+);
 
-let flurry_of_blows = new Attack("Flurry of Blows", "Three quick attacks", 5);
-flurry_of_blows.accuracy = 0.5;
-flurry_of_blows.hit_count = 3;
-flurry_of_blows.damage_bounds = [
-  () => player.level,
-  () => player.level
-];
-flurry_of_blows.onBeforeHit = () => { this.hit_counter = 0; }
-flurry_of_blows.onHit = () => { this.hit_counter++; }
-flurry_of_blows.onEnd = () => { if (this.hit_counter == this.hit_count) console.log("Knock the target prone"); }
-ActionCatalog.catalog['flurry_of_blows'] = flurry_of_blows;
+ActionCatalog.catalog['fireball'] = new Attack("Fireball", "A large ball of fire", 1);
+ActionCatalog.catalog['fireball'].setAccuracy(0.7);
+ActionCatalog.catalog['fireball'].allowPartialDamage(0.5);
+ActionCatalog.catalog['fireball'].setTargetCount(5);
+ActionCatalog.catalog['fireball'].setDamageRoll(
+  (scope) => { let total = 0; for (let i=0; i<8; i++) { total += getRandomInt(1, 6); }}
+);

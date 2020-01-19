@@ -7,7 +7,7 @@ Shell.commands['clear'] = function() {
 
 Shell.commands['start'] = function() {
 	player.state = state.player.start;
-	Terminal.print("Hello! Type 'new' to begin, or 'load' if you already have a profile.");
+	Terminal.type("Hello! Type 'new' to begin, or 'load' if you already have a profile.");
 };
 
 Shell.commands['debug'] = function() {
@@ -15,7 +15,7 @@ Shell.commands['debug'] = function() {
 	player.name = "Mango";
 	environment.load_map(player.name);
 	player.race = new Human();
-	player.archetype = new Warrior();
+	player.archetype = new Monk();
 
 	for (let i = 0; i<10; i++) {
 		player.inventory.push(ItemFactory.getRandomEquipment());
@@ -30,10 +30,10 @@ Shell.commands['debug'] = function() {
 Shell.commands['new'] = function() {
 	if ([state.player.start, state.player.dead].includes(player.state)) {
 		player.state = state.player.name;
-		Terminal.print("What is your name?");
+		Terminal.type("What is your name?");
 		return;
 	}
-	Terminal.print("You can't quit now!");
+	Terminal.type("You can't quit now!");
 }
 
 Shell.commands['help'] = function() {
@@ -222,7 +222,7 @@ Shell.commands['rest'] = function() {
 		player.rest();
 		Terminal.clear();
 		$("#game").animate({opacity: "100%"}, 2000, "linear", () => {
-			Terminal.print('You feel rested.');
+			Terminal.type('You feel rested.');
 			Terminal.setPromptActive(true);
 		});
 	});
@@ -299,31 +299,33 @@ Shell.commands['fight'] = function() {
 	environment.encounter.startCombat();
 }
 
-const inspect_npc = function(npc) {
-	let data = {
-		list: {
-			'Name':npc.name_mod,
-			'Level':npc.level,
-		},
-	};
-	if (typeof npc_list[npc.id] !== "undefined") {
-		data.display = {
-			'Description': npc_list[npc.id].description,
+const inspect_npc = function(npc_list) {
+	let list = [];
+	npc_list.forEach(npc => {
+		let data = {
+			name: npc.name,
+			listable: {
+				level: `Level ${npc.level}`
+			},
+		};
+		if (typeof npc_list[npc.id] !== "undefined") {
+			data.listable.description = npc_list[npc.id].description;
 		}
-	}
-	return data;
+		list.push(data);
+	});
+	return list;
 }
 
 Shell.commands['inspect'] = function() {
 	const npc = environment.getNpcOnTile(player.position);
-	if (state.player == state.player.encounter) {
-		ui.drawNpcInfo(inspect_npc(npc));
+	if (player.state == state.player.encounter) {
+		ui.drawNpcInfo(inspect_npc(environment.encounter.enemy_list));
 		Terminal.print(randomChoice(["Hmm... Interesting.", "Cool!", "Ooh, seems tough.", "Inspect away!"]));
 		Terminal.print("What will you do? [Fight/Inspect/Run]");
 	} else if (npc !== null) {
 		// If the character hasn't been cached, create it now
 		// Not a fan of the global npc above or currentNpcIndex here.
-		ui.drawNpcInfo(inspect_npc(npc));
+		ui.drawNpcInfo(inspect_npc([npc]));
     Terminal.print("What will you do? [Fight/Inspect/Talk/Leave]");
   }	else {
     Terminal.print("Nothing to inspect");
