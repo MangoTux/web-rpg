@@ -7,7 +7,7 @@ Shell.commands['clear'] = function() {
 
 Shell.commands['start'] = function() {
 	player.state = state.player.start;
-	Terminal.type("Hello! Type 'new' to begin, or 'load' if you already have a profile.");
+	Terminal.print("Hello! Type 'new' to begin, or 'load' if you already have a profile.");
 };
 
 Shell.commands['debug'] = function() {
@@ -15,7 +15,7 @@ Shell.commands['debug'] = function() {
 	player.name = "Mango";
 	environment.load_map(player.name);
 	player.race = new Human();
-	player.archetype = new Monk();
+	player.archetype = new Mage();
 
 	for (let i = 0; i<10; i++) {
 		player.inventory.push(ItemFactory.getRandomEquipment());

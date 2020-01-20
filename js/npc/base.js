@@ -65,8 +65,10 @@ class Sentient {
     return {restore: hp_capacity};
 	}
 
+  // Applies damage to the entity and returns the total amount taken
   applyDamage(amount) {
     // Buffer (if any) shields as much as possible, with excess rolling to damage taken
+    let start_hp = this.hp.buffer + this.hp.now;
     amount -= this.hp.buffer;
     if (amount < 0) {
       this.hp.buffer = -1*amount;
@@ -75,5 +77,6 @@ class Sentient {
       this.hp.now -= amount;
     }
     this.hp.now = this.hp.now.clamp(0, this.hp.max);
+    return start_hp - (this.hp.buffer + this.hp.buffer);
   }
 }
