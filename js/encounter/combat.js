@@ -79,6 +79,30 @@ class Combat {
     return;
   }
 
+  get _target_string() {
+
+    let action = `${this.action.name}`;
+    if (['a', 'e', 'i', 'o', 'u'].includes(action.charAt(0).toLowerCase())) {
+      action = `an ${action}`;
+    } else {
+      action = `a ${action}`;
+    }
+
+    let target_list = this.action.target.list;
+    let target = "";
+    if (target_list.length == 1) {
+      target = `the ${this.participants[target_list[0]].name}`;
+    } else {
+      target = `multiple creatures`;
+    }
+
+    if (this.active_entity == player) {
+      Terminal.print(`You use ${action} on ${target}.`);
+    } else {
+      Terminal.print(`${this.active_entity.name} targets ${target_list} with ${action}.`);
+    }
+  }
+
   async npc_turn() {
     this._turn_start();
     // This enemy and ally list is from the perspective of
@@ -122,14 +146,6 @@ class Combat {
     this.action.addTarget(uid);
   }
 
-  getTarget() {
-    return this.action.target;
-  }
-
-  getTargetEntity() {
-    return this.participants[this.action.target].entity;
-  }
-
   removeParticipant(uid) {
     let list = null;
     if (this.participants[uid].side == "enemy") {
@@ -156,48 +172,54 @@ class Combat {
 
   resolveAction() {
     this.action.hook("onStart");
-    if (this.active_entity == player) {
-      Terminal.print(`You use ${this.action.name} on the ${this.getTargetEntity().name}.`);
-    } else {
-      Terminal.print(`${this.active_entity.name} targets ${this.getTargetEntity().name} with a ${this.action.name}.`);
-    }
+    Terminal.print(this._target_string);
     // Most attacks will target a single creature
-    let bundle = {
-      damage: [],
-      recovery: [],
-    };
+    let bundle = {};
     for (let hit_attempt = 0; hit_attempt < this.action.hit_count; hit_attempt++) {
       this.action.hook("onBeforeHit");
-      if (this.action.doesHit()) {
-        this.action.hook("onHit");
-        bundle.damage.push(getRandomInt(...this.action.getDamageBounds()));
-        this.getTargetEntity().applyDamage(bundle.damage.reduce((t, c) => t + c, 0));
+      let hit_base_damage = this.action.getDamage();
+      let received_damage = 0;
+      this.action.target.list.forEach(uid => {
+        if (typeof bundle[uid] === "undefined") {
+          bundle[uid] = [];
+        }
+        let applied_damage = 0;
+        if (this.action.doesHit()) {
+          this.action.hook("onHit");
+          applied_damage = hit_base_damage;
+        } else {
+          this.action.hook("onMiss");
+          if (this.action.damage.partial) {
+            applied_damage = Math.floor(hit_base_damage * this.action.damage.partial);
+          }
+        }
+        // Some bundle build.
+        // This would get modified with armor, types => resistance?
+        received_damage = this.participants[uid].entity.applyDamage(applied_damage);
         this.action.hook("onDamage");
-      } else {
-        this.action.hook("onMiss");
-      }
+        bundle[uid].push({damage: received_damage});
+      });
     }
-    if (bundle.damage.length == 0) {
-      Combat_UI.drawMiss();
-    } else {
-      Combat_UI.drawDamage(this.getTargetEntity(), bundle);
-    }
-    if (!this.getTargetEntity().hp.now) {
-      this.resolveDeath();
-    }
+    Combat_UI.drawEffects(bundle);
+    let death_list = this.action.target.list.filter(uid => !this.participants[uid].entity.hp.now);
+    death_list.length && this.resolveDeath(death_list);
+
     this.action.hook("onEnd");
     this.action.cleanup();
   }
 
-  resolveDeath() {
-    Combat_UI.drawRemove(this.getTarget());
-    this.action.hook("onKill");
-    if (this.active_entity == player) {
-      Terminal.print(`You defeated the ${this.getTargetEntity().name}!`);
-      player.updateQuestProgress("kill", this.getTargetEntity().name);
-    }
-    this.scope.addRewards(this.getTargetEntity());
-    this.removeParticipant(this.getTarget());
+  resolveDeath(uid_list) {
+    Combat_UI.drawRemove(uid_list);
+    // Should this be a hook for each?
+    uid_list.forEach(uid => {
+      this.action.hook("onKill", uid);
+      Terminal.print(`${this.participants[uid].entity.name} has been defeated.`);
+      if (this.active_entity == player) {
+        player.updateQuestProgress("kill", this.participants[uid].entity.id);
+      }
+      this.scope.addRewards(this.participants[uid].entity);
+      this.removeParticipant(uid);
+    });
   }
 
   // Async should be used instead of strict timeouts.
