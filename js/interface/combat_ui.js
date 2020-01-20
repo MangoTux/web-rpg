@@ -283,4 +283,12 @@ class Combat_UI {
     );
     await new Promise(resolve => setTimeout(resolve, remove_time));
   }
+
+  static async drawEffects(bundle) {
+    console.log(bundle);
+    Object.keys(bundle).forEach(uid => {
+      // bundle[uid] has a list of events that should be animated
+      console.log(bundle[uid]);
+    });
+  }
 }
