@@ -20,7 +20,7 @@ class Action { // lawsuit
 }
 
 class Attack extends Action {
-  damage;
+  damage = {};
   partial_damage = false;
   accuracy;
   hit_count;
@@ -39,7 +39,7 @@ class Attack extends Action {
 
   setSource(source) {
     this.source = source;
-    this.target = null;
+    this.target.list = [];
   }
 
   setTargetCount(count) {
@@ -52,19 +52,13 @@ class Attack extends Action {
   }
 
   setDamageBounds(thresh_low, thresh_high) {
-    this.damage = {
-      type: "bounds",
-      partial: false,
-      range: [thresh_low, thresh_high]
-    };
+    this.damage.type = "bounds";
+    this.damage.range = [thresh_low, thresh_high];
   }
 
   setDamageRoll(calc) {
-    this.damage = {
-      type: "roll",
-      partial: false,
-      roll: calc
-    };
+    this.damage.type = "roll";
+    this.damage.roll = calc;
   }
 
   // On a miss/failed save, returns a partial damage calculation for a target
