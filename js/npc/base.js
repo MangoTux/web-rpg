@@ -77,6 +77,6 @@ class Sentient {
       this.hp.now -= amount;
     }
     this.hp.now = this.hp.now.clamp(0, this.hp.max);
-    return start_hp - (this.hp.buffer + this.hp.buffer);
+    return start_hp - (this.hp.buffer + this.hp.now);
   }
 }

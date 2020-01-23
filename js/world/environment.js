@@ -69,9 +69,9 @@ class Environment {
     return player.step_count%2 && getRandomInt(0, 100) < 15;
   }
 
-  createWildEncounter() {
+  createWildEncounter(encounter_count) {
     player.state = state.player.encounter;
-    this.encounter = new Encounter();
+    this.encounter = new Encounter(encounter_count);
     this.encounter.generate();
 
     return this.encounter;
