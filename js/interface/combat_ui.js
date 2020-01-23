@@ -9,6 +9,14 @@ class Combat_UI {
 
   static promises = [];
 
+  static animation_delay(ms) {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        resolve();
+      }, ms);
+    });
+  }
+
   static setView(view) {
     this.active_view = view;
   }
@@ -49,7 +57,8 @@ class Combat_UI {
 
     ally_list.forEach((ally) => {
       let text = `
-      <span class='container_ally' id='${ally.uid}'>
+      <span class='participant_container container_ally' id='${ally.uid}'>
+      <span class='participant_info'>
       <h2 class='${Terminal.selector.combat.name} ${ally.uid === active_uid ? 'active_entity':''}'>${ally.name}</h2>
       <h4 class='${Terminal.selector.combat.hp.wrapper}'>
       <span class='${Terminal.selector.combat.hp.now}'>${ally.hp.now}</span> /
@@ -59,13 +68,17 @@ class Combat_UI {
       }
       text += `
       </h4>
+      </span>
+      <span class='wrapper_delta'><span class='participant_delta'></span></span>
       </span>`;
       document.querySelector(`#${Terminal.selector.combat.ally}`).innerHTML += text;
     });
 
     enemy_list.forEach((enemy) => {
       let text = `
-      <span class='container_enemy' id='${enemy.uid}'>
+      <span class='participant_container container_enemy' id='${enemy.uid}'>
+      <span class='wrapper_delta'><span class='participant_delta'></span></span>
+      <span class='participant_info'>
       <h2 class='${Terminal.selector.combat.name} ${enemy.uid === active_uid ? 'active_entity':''}'>${enemy.name}</h2>
       <h4 class='${Terminal.selector.combat.hp.wrapper}'>
       <span class='${Terminal.selector.combat.hp.now}'>${enemy.hp.now}</span> /
@@ -75,6 +88,7 @@ class Combat_UI {
       }
       text += `
       </h4>
+      </span>
       </span>`;
       document.querySelector(`#${Terminal.selector.combat.enemy}`).innerHTML += text;
     });
@@ -158,9 +172,11 @@ class Combat_UI {
   }
 
   // For right now, this assumes that all actions can only target enemies.
-  static drawTargetList() {let ui_instance = $("<ul>");
+  static drawTargetList() {
+    let ui_instance = $("<ul>");
     this.active_list = environment.encounter.combat.enemy_list
-      .slice();
+      .slice()
+      .filter(entity => !environment.encounter.combat.action.target.list.includes(entity.uid));
     this.current_page = this.current_page.clamp(1, Math.ceil(this.active_list.length / this.page_limit));
     for (let i=0; i<this.page_limit && this._pageOffset(i) < this.active_list.length; i++) {
       const offset = this._pageOffset(i);
@@ -172,17 +188,17 @@ class Combat_UI {
     this._drawList("Targets", ui_instance.html(), page_navigator);
   }
 
-  static async drawRestore(entity, bundle) {
+  static drawRestore(uid, bundle) {
     let text = "";
     if (bundle.buffer) {
-      text = `<br><br><b class='combat__healing'>Buffer!</b><br><b class='combat__healing'>${bundle.buffer}</b>`;
+      text = `<br><b class='combat__healing'>${bundle.buffer}</b>`;
     } else {
-      text = `<br><br><b class='combat__healing'>Healed!</b><br><b class='combat__healing'>+${bundle.restore}</b>`;
+      text = `<br><b class='combat__healing'>+${bundle.restore}</b>`;
     }
-    let restore_time = 1000;
-    let hp_shake_delay = 250;
-    let hp_shake_time = 500;
-    $("#combat_center")
+    const restore_time = getRandomInt(850, 1150);
+    const hp_shake_delay = getRandomInt(225, 275);
+    const hp_shake_time = getRandomInt(450, 550);
+    $(`#${uid} .participant_delta`)
     .html(text)
     .show()
     .effect(
@@ -190,7 +206,7 @@ class Combat_UI {
       {},
       restore_time,
     );
-    $(`#${entity.uid}>.combat_hp`)
+    $(`#${uid} .combat_hp`)
     .delay(hp_shake_delay)
     .effect(
       "shake",
@@ -201,29 +217,15 @@ class Combat_UI {
       },
       hp_shake_time
     );
-    await new Promise(resolve => setTimeout(resolve, restore_time));
+    return restore_time;
   }
 
-  /*
-  Start to consider:
-  - Single Attack, Single Damage (e.g. basic punch)
-  - Multi Attack, Single Target (e.g. f_o_b)
-  - Multi Attack (some miss), Single Target
-  - Single Attack, Multi Damage (e.g. fireball)
-  */
-  static async drawDamage(entity, bundle) {
-    // Bundle now has a few options -
-    // Delay between each? wait for everything to resolve?
-    // Maybe instead, draw center and on certain response yield side animations?
-    // [{damage: 5}, {miss: true}, {damage: 2}, {recover: 15}]?
-    const damage_time = 1000;
-    const hp_shake_time = 500;
-    let text = `<br><br><b class='combat__damage'>Hit!</b>`;
-    bundle.damage.forEach(value => {
-      text += `<br><b class='combat__damage'>-${value}</b>`;
-    });
+  static drawDamage(uid, bundle) {
+    const damage_time = getRandomInt(800, 1200);
+    const hp_shake_time = getRandomInt(450, 550);
+    const text = `<br><b class='combat__damage'>-${bundle.damage}</b>`;
     this.drawMainHUD();
-    $("#combat_center")
+    $(`#${uid} .participant_delta`)
     .html(text)
     .show()
     .effect(
@@ -231,27 +233,28 @@ class Combat_UI {
       {},
       damage_time,
     );
-    $(`#${entity.uid}>.combat_hp`)
+    $(`#${uid} .combat_hp`)
     .effect(
       "shake",
       {
         direction: "left",
-        distance: 20,
+        distance: 15,
         times: 2
       },
       hp_shake_time
     );
-    await new Promise(resolve => setTimeout(resolve, damage_time));
+
+    return damage_time;
   }
 
-  static async drawMiss() {
-    let text = `<br><br><b class='combat_miss'>Miss!</b>`;
+  static drawMiss(uid) {
+    let text = `<br><b class='combat_miss'>Miss!</b>`;
     let miss_time = 1000;
-    $("#combat_center")
+    $(`#${uid} .participant_delta`)
     .html(text)
     .show()
     .effect("puff", miss_time);
-    await new Promise(resolve => setTimeout(resolve, miss_time));
+    return miss_time;
   }
 
   static async drawFlee(uid) {
@@ -266,29 +269,40 @@ class Combat_UI {
         this.drawMainHUD();
       }
     );
-    await new Promise(resolve => setTimeout(resolve, flee_time));
+    await this.animation_delay(flee_time);
   }
 
-  static async drawRemove(uid) {
-    let remove_time = 1000;
-    $(`#${uid}`).effect(
-      "pulsate",
-      {
-        times: 3,
-      },
-      remove_time,
-      () => {
-        this.drawMainHUD();
-      }
-    );
-    await new Promise(resolve => setTimeout(resolve, remove_time));
+  static async drawRemove(uid_list) {
+    const remove_time = getRandomInt(800, 1200);
+    uid_list.forEach(uid => {
+      $(`#${uid}`).effect(
+        "pulsate",
+        {
+          times: 3,
+        },
+        remove_time
+      );
+    });
+    return this.animation_delay(remove_time);
   }
 
   static async drawEffects(bundle) {
-    console.log(bundle);
+    let wait_times = [];
     Object.keys(bundle).forEach(uid => {
-      // bundle[uid] has a list of events that should be animated
-      console.log(bundle[uid]);
+      bundle[uid].forEach(event => {
+        if (typeof event.damage !== "undefined") {
+          wait_times.push(this.drawDamage(uid, event));
+        }
+        if (typeof event.restore !== "undefined" || typeof event.buffer !== "undefined") {
+          wait_times.push(this.drawRestore(uid, event));
+        }
+        if (typeof event.miss !== "undefined") {
+          wait_times.push(this.drawMiss(uid, event));
+        }
+      })
     });
+    if (wait_times.length == 0) { return; }
+
+    return this.animation_delay(Math.max(...wait_times));
   }
 }

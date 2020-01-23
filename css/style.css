@@ -76,6 +76,7 @@ p {
 #combat_ally,
 #combat_enemy {
 	height:100%;
+	width:100%;
 	display: flex;
 	flex-direction: column;
 	justify-content: space-evenly;
@@ -95,6 +96,27 @@ p {
 	grid-area: enemy;
 }
 
+.participant_container {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	justify-content: space-evenly;
+}
+
+.participant_info {
+	width:80%;
+}
+
+.wrapper_delta {
+	width: 20%;
+	text-align:center;
+}
+.participant_delta {
+	width: 100%;
+}
+.container_ally>.participant_info {
+	text-align:right;
+}
 .combat_name {
 	font-size: 250%;
 }
