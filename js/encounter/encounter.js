@@ -13,7 +13,9 @@ class Encounter {
   on_victory = [];
   on_defeat = [];
 
-  constructor() {
+  constructor(enemy_count) {
+    // debug
+    this.enemy_count = enemy_count;
     this.rewards = {
       gold: 0,
       experience: 0,
@@ -23,7 +25,7 @@ class Encounter {
 
   generate() {
     const name_map = (list) => { return list.reduce(function(prev, cur) { prev[cur.name] = (prev[cur.name] || 0) + 1; return prev; }, {}) }
-    const encounter_size = randomChoice([1, 1, 1, 2, 2, 3, 4]);
+    const encounter_size = this.enemy_count || randomChoice([1, 1, 1, 2, 2, 3, 4]);
     this.enemy_list = [];
     for (let i = 0; i<encounter_size; i++) {
       this.enemy_list.push(NPC_Factory.getRandomEnvironmental(player.position));
