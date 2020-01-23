@@ -98,6 +98,7 @@ const Shell = class {
       Combat_UI.setView("none");
     } else if (environment.encounter.combat.state == state.combat.target) {
       Terminal.print("Which attack will you use?");
+      environment.encounter.combat.action.clearTargets();
       environment.encounter.combat.state = state.combat.attack;
       Combat_UI.setView("attack");
     }
@@ -184,9 +185,17 @@ const Shell = class {
       return;
     }
     let target_uid = Combat_UI.active_elements[selection];
-    environment.encounter.combat.setTarget(target_uid);
-    environment.encounter.combat.resolveAction();
-    environment.encounter.combat.setPlayerIdle();
+    environment.encounter.combat.addTarget(target_uid);
+    // Target selection is done, finish turn.
+    if (!environment.encounter.combat.action.hasMoreTargets()) {
+      environment.encounter.combat.resolveAction();
+      environment.encounter.combat.setPlayerIdle();
+      return;
+    }
+
+    Terminal.print(`Who else will you target with the ${environment.encounter.combat.action.name}?`);
+    environment.encounter.combat.state = state.combat.target;
+    Combat_UI.setView("target");
   }
 
   static handler_combat(selection) {

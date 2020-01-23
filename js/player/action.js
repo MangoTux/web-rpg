@@ -51,6 +51,14 @@ class Attack extends Action {
     this.target.list.push(target_uid);
   }
 
+  hasMoreTargets() {
+    return (this.target.list.length < this.target.count);
+  }
+
+  clearTargets() {
+    this.target.list = [];
+  }
+
   setDamageBounds(thresh_low, thresh_high) {
     this.damage.type = "bounds";
     this.damage.range = [thresh_low, thresh_high];

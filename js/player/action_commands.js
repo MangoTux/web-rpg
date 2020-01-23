@@ -58,5 +58,5 @@ ActionCatalog.catalog['fireball'].setAccuracy(0.7);
 ActionCatalog.catalog['fireball'].allowPartialDamage(0.5);
 ActionCatalog.catalog['fireball'].setTargetCount(5);
 ActionCatalog.catalog['fireball'].setDamageRoll(
-  (scope) => { let total = 0; for (let i=0; i<8; i++) { total += getRandomInt(1, 6); }}
+  (scope) => { let total = 0; for (let i=0; i<8; i++) { total += getRandomInt(1, 6); } return total; }
 );

@@ -2,7 +2,7 @@ class Combat {
   // Encounter
   scope;
   config = {
-    turn_delay: 1500,
+    turn_delay: 1700,
   };
   ally_list = [];
   enemy_list = [];
@@ -52,6 +52,7 @@ class Combat {
   If no more creatures are available in the initiative list, reroll
   */
   _turn_setup() {
+    this.has_death = false;
     this.initiative = this.initiative.filter(uid => typeof this.participants[uid] !== "undefined");
     this.initiative.length || this.updateInitiative();
     // TODO Check here for win condition
@@ -91,7 +92,7 @@ class Combat {
     let target_list = this.action.target.list;
     let target = "";
     if (target_list.length == 1) {
-      target = `the ${this.participants[target_list[0]].name}`;
+      target = `${this.participants[target_list[0]].entity.name}`;
     } else {
       target = `multiple creatures`;
     }
@@ -99,11 +100,14 @@ class Combat {
     if (this.active_entity == player) {
       Terminal.print(`You use ${action} on ${target}.`);
     } else {
-      Terminal.print(`${this.active_entity.name} targets ${target_list} with ${action}.`);
+      Terminal.print(`${this.active_entity.name} targets ${target} with ${action}.`);
     }
   }
 
   async npc_turn() {
+    if (!this.active_entity.hp.now) {
+      return;
+    }
     this._turn_start();
     // This enemy and ally list is from the perspective of
     this.active_entity.ai
@@ -156,6 +160,7 @@ class Combat {
     let entity_id = list.findIndex(entity => entity.uid == uid);
     list.splice(entity_id, 1);
     delete this.participants[uid];
+    this.updateDisplay();
   }
 
   resolveItem(item_id) {
@@ -167,10 +172,12 @@ class Combat {
     } else {
       Terminal.print(`${this.active_entity.name} uses a ${item.name}`);
     }
-    Combat_UI.drawRestore(this.active_entity, response);
+    let bundle = {};
+    bundle[this.active_entity] = [ response ];
+    Combat_UI.drawEffects(bundle);
   }
 
-  resolveAction() {
+  async resolveAction() {
     this.action.hook("onStart");
     Terminal.print(this._target_string);
     // Most attacks will target a single creature
@@ -193,24 +200,22 @@ class Combat {
             applied_damage = Math.floor(hit_base_damage * this.action.damage.partial);
           }
         }
-        // Some bundle build.
-        // This would get modified with armor, types => resistance?
         received_damage = this.participants[uid].entity.applyDamage(applied_damage);
         this.action.hook("onDamage");
         bundle[uid].push({damage: received_damage});
       });
     }
-    Combat_UI.drawEffects(bundle);
+    await Combat_UI.drawEffects(bundle);
+    this.updateDisplay();
     let death_list = this.action.target.list.filter(uid => !this.participants[uid].entity.hp.now);
     death_list.length && this.resolveDeath(death_list);
-
     this.action.hook("onEnd");
     this.action.cleanup();
   }
 
-  resolveDeath(uid_list) {
-    Combat_UI.drawRemove(uid_list);
-    // Should this be a hook for each?
+  async resolveDeath(uid_list) {
+    this.has_death = true;
+    await Combat_UI.drawRemove(uid_list);
     uid_list.forEach(uid => {
       this.action.hook("onKill", uid);
       Terminal.print(`${this.participants[uid].entity.name} has been defeated.`);
@@ -255,6 +260,7 @@ class Combat {
 
   setPlayerIdle() {
     let self = this;
+    let delay = this.config.turn_delay * (this.has_death ? 2 : 1);
     setTimeout(() => {
       self._turn_end();
       Combat_UI.setView("none");
@@ -262,6 +268,6 @@ class Combat {
       this.state = state.combat.idle;
       Terminal.setWorking(true);
       this.turn_timer()
-    }, this.config.turn_delay);
+    }, delay);
   }
 }
