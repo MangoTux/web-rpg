@@ -78,12 +78,11 @@ UI.prototype.drawStatsWindow = function() {
 	statList.append($('<li>').text(`Exp Needed: ${player.experience_needed}`));
 	statList.append($('<li>').text(`Gold: ${player.gold}`));
 	statList.append($('<li>').text(`Health: ${player.hp.now}/${player.hp.max}`));
-  statList.append($('<li>').text(`Power: ${player.combat_stats.power}`));
-  statList.append($('<li>').text(`Vitality: ${player.combat_stats.vitality}`));
-  statList.append($('<li>').text(`Resilience: ${player.combat_stats.resilience}`));
-  statList.append($('<li>').text(`Dexterity: ${player.combat_stats.dexterity}`));
-  statList.append($('<li>').text(`Spirit: ${player.combat_stats.spirit}`));
-  statList.append($('<li>').text(`Luck: ${player.combat_stats.luck}`));
+  statList.append($('<li>').text(`Power: ${player.get_stat("power")}`));
+  statList.append($('<li>').text(`Resilience: ${player.get_stat("resilience")}`));
+  statList.append($('<li>').text(`Dexterity: ${player.get_stat("dexterity")}`));
+  statList.append($('<li>').text(`Spirit: ${player.get_stat("spirit")}`));
+  statList.append($('<li>').text(`Luck: ${player.get_stat("luck")}`));
 	statList.append($('<li>').text("Location: " + player.position.toCoordinateString()));
 	$(Terminal.selector.hud_main).html("<h3>Player Stats<br><ul>"+statList.html()+"</ul></h3>");
 }
@@ -100,7 +99,7 @@ UI.prototype.drawInventoryWindow = function(invPage) {
   let page_offset = (invPage-1)*5;
 	for (let i = 0; page_offset+i<player.inventory.length && i<6; i++) {
 		let page_index = page_offset+i;
-    invList.append($('<li>').html(player.inventory[page_index].name + "<br>   " + toString(player.inventory[page_index])));
+    invList.append($('<li>').html(player.inventory[page_index].name + "<br>   " + player.inventory[page_index].toString()));
 	}
   display += invList[0].outerHTML;
   $(Terminal.selector.hud_main).html(display);

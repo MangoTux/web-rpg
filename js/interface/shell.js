@@ -46,13 +46,13 @@ const Shell = class {
   	player.state = state.player.archetype;
   	switch (race) {
   		case Human.name:
-  			player.race = new Human(); break;
+  			player.assign_race(Human); break;
   		case Elf.name:
-  			player.race = new Elf(); break;
+  			player.assign_race(Elf); break;
   		case Dwarf.name:
-  			player.race = new Dwarf(); break;
+  			player.assign_race(Dwarf); break;
   		case Goblin.name:
-  			player.race = new Goblin(); break;
+  			player.assign_race(Goblin); break;
   		default:
   			player.state = state.player.race;
   	}
@@ -69,26 +69,28 @@ const Shell = class {
   	player.state = state.player.standard;
   	switch (archetype) {
   		case Warrior.name:
-  			player.archetype = new Warrior(); break;
+  			player.assign_archetype(Warrior); break;
   		case Ranger.name:
-  			player.archetype = new Ranger(); break;
+  			player.assign_archetype(Ranger); break;
   		case Mage.name:
-  			player.archetype = new Mage(); break;
+  			player.assign_archetype(Mage); break;
   		case Monk.name:
-  			player.archetype = new Monk(); break;
+  			player.assign_archetype(Monk); break;
   		default:
   			player.state = state.player.archetype;
   	}
   	if (player.state == state.player.archetype) {
   		Terminal.type("What is your class? [Warrior/Ranger/Mage/Monk]");
   	} else {
+      player.finish_setup();
   		Terminal.print(`Welcome to the world, ${player.name} the ${player.race.name} ${player.archetype.name}!`);
   		Terminal.print(`Type 'help' to view a list of commands.`);
   	}
   }
 
-  static handler_profession(profession) {
+  static handler_paragon(paragon) {
     // TODO, once subarchetypes are built in.
+    player.finish_setup();
   }
 
   static _combat_undo() {
@@ -151,7 +153,7 @@ const Shell = class {
     if (!Object.keys(Combat_UI.active_elements).includes(selection)) {
       return;
     }
-    let action_id = Combat_UI.active_elements[selection];
+    let action_id = Combat_UI.active_elements[selection].id;
     let action = ActionCatalog.catalog[action_id];
     environment.encounter.combat.setAction(action);
 

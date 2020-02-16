@@ -14,8 +14,9 @@ Shell.commands['debug'] = function() {
 	player.state = state.player.standard;
 	player.name = "Mango";
 	environment.load_map(player.name);
-	player.race = new Human();
-	player.archetype = new Mage();
+	player.assign_race(Dwarf);
+	player.assign_archetype(Warrior);
+	player.finish_setup();
 	let encounter_count = Terminal.processArgs(arguments);
 
 	for (let i = 0; i<10; i++) {
@@ -516,7 +517,6 @@ Shell.commands['equip'] = function() {
 	}
 	player.wielding.push(player.inventory[selection_index]);
 	Terminal.print("You equip the " + player.inventory[selection_index].name + ".");
-	player.applyWielding();
 	// Update the player stat window when appropriate
 	ui.resumeDisplay();
 }
@@ -534,7 +534,6 @@ Shell.commands['unequip'] = function() {
 	}
 	let item = player.wielding.splice(selection_index, 1).shift();
 	Terminal.print("You unequip the " + item.name + ".");// Update the player stat window when appropriate
-	player.applyWielding();
 	ui.resumeDisplay();
 }
 
