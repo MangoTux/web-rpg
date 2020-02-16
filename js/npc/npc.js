@@ -2,6 +2,14 @@ class NPC extends Sentient {
   id;
   modifier = null;
   quest = null;
+  fallback_stats = {
+    power: 30,
+    vitality: 30,
+    resilience: 30,
+    dexterity: 30,
+    spirit: 30,
+    luck: 0,
+  };
 
   constructor(id) {
     super();
@@ -14,7 +22,8 @@ class NPC extends Sentient {
     // Based on player details and location
     this.level = player.level;
     this.actions = npc_list[this.id].actions || ["npc_debug_action"];
-    this.hp.max = getRandomInt(10, 20)+this.level;
+    this.base_combat_stats = npc_list[this.id].stats || this.fallback_stats;
+    this.hp.max = this.get_stat("vitality");
     this.hp.now = this.hp.max;
     // Modify level based on random tweaking, area, etc
     this.position = position;
@@ -198,5 +207,13 @@ const npc_list = {
 	"Simpleton": {
     description:"A test NPC",
     actions: ["npc_debug_action"],
+    stats: {
+      power: 30,
+      vitality: 30,
+      resilience: 30,
+      dexterity: 30,
+      spirit: 30,
+      luck: 0,
+    }
 	}
 };

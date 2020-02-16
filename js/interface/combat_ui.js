@@ -157,12 +157,12 @@ class Combat_UI {
 
   static drawAttackList() {
     let ui_instance = $("<ul>");
-    this.active_list = player.archetype.actions
-      .filter(id => player.level >= ActionCatalog.catalog[id].minimum_level);
+    // Get available actions based on usages available, required properties, and player level
+    this.active_list = player.available_actions;
     this.current_page = this.current_page.clamp(1, Math.ceil(this.active_list.length / this.page_limit));
     for (let i=0; i<this.page_limit && this._pageOffset(i) < this.active_list.length; i++) {
       const offset = this._pageOffset(i);
-      const action = ActionCatalog.catalog[this.active_list[offset]];
+      const action = ActionCatalog.catalog[this.active_list[offset].id];
       const text = `<strong>${action.name}</strong>`;
       ui_instance.append($("<li>").html(text));
       this.active_elements[i+1] = this.active_list[offset];
@@ -224,7 +224,6 @@ class Combat_UI {
     const damage_time = getRandomInt(800, 1200);
     const hp_shake_time = getRandomInt(450, 550);
     const text = `<br><b class='combat__damage'>-${bundle.damage}</b>`;
-    this.drawMainHUD();
     $(`#${uid} .participant_delta`)
     .html(text)
     .show()
@@ -288,10 +287,12 @@ class Combat_UI {
 
   static async drawEffects(bundle) {
     let wait_times = [];
+    this.drawMainHUD();
     Object.keys(bundle).forEach(uid => {
       bundle[uid].forEach(event => {
         if (typeof event.damage !== "undefined") {
-          wait_times.push(this.drawDamage(uid, event));
+          let time = this.drawDamage(uid, event);
+          wait_times.push(time);
         }
         if (typeof event.restore !== "undefined" || typeof event.buffer !== "undefined") {
           wait_times.push(this.drawRestore(uid, event));
