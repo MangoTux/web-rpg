@@ -2,11 +2,19 @@ rpg the rpg Stat Design
 =============
 
 Overview
---------
+========
 
 Following many other RPG systems, each type of character (see: Archetypes)
 will have a distribution of stats that are best-suited to their effectiveness
 in combat.
+
+Racial Modifier (RM)
+--------
+Each race offers a unique spread that slightly impacts final values.
+
+Item Modifier (IM)
+--------
+In addition to unique effects, equipped items will have a slight impact on stats
 
 Power
 --------
@@ -30,10 +38,22 @@ How effective spells and divine powers are (Items that require a focus)
 
 Luck
 ----
-Essentially, how lucky the character is. Higher luck influences crit rate (and crit count), dodge chance.
+Essentially, how lucky the character is. Higher luck influences crit rate and dodge chance.
 
 Calculations (WIP)
-------------------
+==================
+
+Vitality
+--------
+(((base + rm) * 2 + floor(sqrt(im)/4) * level) / level_cap) + (level+10)
+
+Luck
+--------
+(base + sqrt(rm + im)/2) + level
+
+Power, Resilience, Dexterity, Spirit
+--------
+(((base + rm) * 2 + floor(sqrt(im)/4) * level) / level_cap) + 5
 
 A Source hitting a Target is a function of the following:
 Source:

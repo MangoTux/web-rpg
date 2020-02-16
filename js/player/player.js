@@ -4,9 +4,6 @@ class Player extends Sentient {
 	level = 1;
 	experience = 0;
 	previous_direction = [0, -1];
-	inventory = [];
-	wielding = [];
-	gold = 250;
 	step_count = 0;
 
 	quest_handler = null;
@@ -20,21 +17,38 @@ class Player extends Sentient {
 		this.state = state.player.start;
 		this.gold = 250;
 		this.quest_handler = new Quest_Handler();
-		this.base_combat_stats = {
-	    power: 5,
-	    vitality: 5,
-	    dexterity: 5,
-	    resilience: 5,
-	    spirit: 5,
-	    luck: 0,
-	  };
-		// TODO Archetype, Race basis
-    this.hp.max = getRandomInt(20, 30)+this.level;
-    this.hp.now = this.hp.max;
+	}
+
+	assign_race(race_instance) {
+		this.race = new race_instance();
+	}
+
+	assign_archetype(arch_instance) {
+		this.archetype = new arch_instance();
+		this.base_combat_stats = this.archetype.stat_base.base;
+	}
+
+	assign_paragon(paragon_instance) {
+		this.paragon = new paragon_instance();
+		this.base_combat_stats = this.paragon.stat_base;
+	}
+
+	finish_setup() {
+		this.hp.max = this.get_stat("vitality");
+		this.hp.now = this.hp.max;
 	}
 
 	load(json) {
 		throw new Exception("Loading hasn't been fully built.");
+	}
+
+	get available_actions() {
+		let action_list = this.archetype.actions
+			.filter(action => this.level >= action.level)
+			.filter(action => ActionCatalog.catalog[action.id].required_properties.every(prop =>
+				this.wielding.some(item => item.base_item.tags.includes(prop))
+		));
+		return action_list;
 	}
 
 	move(h, v) {
@@ -56,7 +70,15 @@ class Player extends Sentient {
 	rest() {
 		// Effects that grant a buffer for the first combat?
 		this.hp.buffer = 0;
+		this.hp.max = this.get_stat("vitality");
 		this.hp.now = this.hp.max;
+	}
+
+	get_racial_mod(stat) {
+		if (this.race === null) {
+			return 0;
+		}
+		return this.race.stat_modifier[stat];
 	}
 
 	get experience_needed() {
@@ -75,24 +97,22 @@ class Player extends Sentient {
 		while (this.experience_needed <= 0) {
 			this.increase_level();
 			response.push([`Congratulations! You're now level ${this.level}`]);
+			if (this.level == 16) {
+				this.state = state.player.paragon;
+				response.push([`You have mastered the basic skills of your archetype`]);
+				response.push([`Choose one of the following archetypes: <paragon_a> <paragon_b>`]);
+			}
 		}
 		return response;
 	}
 
 	increase_level() {
 		this.level++;
+		this.hp.max = this.get_stat("vitality");
+		this.hp.now = this.hp.max;
+		this.gold += this.level * 25;
 		// TODO
-		// Use class's features and apply to base combat stats
-		// Update player's stats to include equipped items
 		// Gain gold equal to 50 * level
-		// Increase luck by one
-	}
-
-	apply_equipment() {
-		// TODO
-		// Set combat stats equal to base combat stats
-		// For each item in equipped (ignoring health-change):
-		//  - Increase combat stats by the modifier from the item
 	}
 
 	hasWaterTravel() {

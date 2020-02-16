@@ -1,30 +1,31 @@
-ActionCatalog.catalog['npc_debug_action'] = new Attack("Test Action", "It's something", 0);
-ActionCatalog.catalog['npc_debug_action'].setAccuracy(0.5);
-ActionCatalog.catalog['npc_debug_action'].setDamageBounds(1, 1);
-
-ActionCatalog.catalog['basic_punch'] = new Attack("Basic Punch", "A basic punch", 1);
+ActionCatalog.catalog['basic_punch'] = new Attack("Basic Punch", "A basic punch");
 ActionCatalog.catalog['basic_punch'].setAccuracy(0.9);
-ActionCatalog.catalog['basic_punch'].setDamageBounds(
-  (scope) => scope.source.level+10,
-  (scope) => scope.source.level+12
-);
+ActionCatalog.catalog['basic_punch'].setDamageBounds(20, 22);
 
-ActionCatalog.catalog['basic_kick'] = new Attack("Basic Kick", "A basic kick", 1);
+ActionCatalog.catalog['basic_slash'] = new Attack("Basic Slash", "A basic slash");
+ActionCatalog.catalog['basic_slash'].requireItemProperty("slash");
+ActionCatalog.catalog['basic_slash'].setAccuracy(0.95);
+ActionCatalog.catalog['basic_slash'].setDamageBounds(19, 20);
+
+ActionCatalog.catalog['basic_kick'] = new Attack("Basic Kick", "A basic kick");
 ActionCatalog.catalog['basic_kick'].setAccuracy(0.8);
-ActionCatalog.catalog['basic_kick'].setDamageBounds(
-  2,
-  (scope) => scope.source.level
-);
+ActionCatalog.catalog['basic_kick'].setDamageBounds(15, 20);
 ActionCatalog.catalog['basic_kick'].setCriticalModifier(+2);
 ActionCatalog.catalog['basic_kick'].registerHook("onMiss", (scope) => { console.log("Ha! You missed."); })
 
 ActionCatalog.catalog['basic_stab'] = new Attack("Basic Stab", "A basic stab", 1);
+ActionCatalog.catalog['basic_stab'].requireItemProperty("pierce");
 ActionCatalog.catalog['basic_stab'].setAccuracy(0.7);
 ActionCatalog.catalog['basic_stab'].setCriticalModifier(+4);
 ActionCatalog.catalog['basic_stab'].setDamageBounds(
   (scope) => scope.source.level,
   (scope) => scope.source.level+2
 );
+
+ActionCatalog.catalog['basic_crush'] = new Attack("Basic Crush", "A basic blow of a bludgeon");
+ActionCatalog.catalog['basic_crush'].requireItemProperty("bludgeon");
+ActionCatalog.catalog['basic_crush'].setAccuracy(0.7);
+ActionCatalog.catalog['basic_crush'].setDamageBounds(35, 40);
 
 ActionCatalog.catalog['basic_bolt'] = new Attack("Basic Bolt", "A basic magical bolt", 1);
 ActionCatalog.catalog['basic_bolt'].setAccuracy(999);
