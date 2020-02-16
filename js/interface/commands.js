@@ -24,8 +24,8 @@ Shell.commands['debug'] = function() {
 		player.inventory.push(ItemFactory.getRandomConsumable());
 	}
 
-	environment.createWildEncounter(encounter_count);
-	environment.encounter.startCombat();
+	// environment.createWildEncounter(encounter_count);
+	// environment.encounter.startCombat();
 }
 
 //Create player data.
@@ -385,6 +385,7 @@ Shell.commands['run'] = function() {
 //Displays the user's inventory
 Shell.commands['inv'] = Shell.commands['inventory'] = function() {
 	let args = Terminal.processArgs(arguments);
+	currentDisplay = "INVENTORY";
 	let invPage = parseInt(args);
 	if (isNaN(invPage) || invPage < 1) {
 		invPage = 1;
@@ -443,7 +444,7 @@ Shell.commands['purchase'] = Shell.commands['buy'] = function() {
 		Terminal.print("There's nothing here by that name.");
 		return;
 	}
-	let item = active_shop.inventory[i];
+	let item = active_shop.inventory[selection_index];
 	if (player.gold < item.cost) {
 		Terminal.print("You can't afford that!");
 		return;
@@ -452,7 +453,7 @@ Shell.commands['purchase'] = Shell.commands['buy'] = function() {
 	active_shop.inventory.splice(selection_index, 1);
 	player.inventory.push(item);
 	Terminal.print("You purchased the " + item.name + " for " + item.cost + " gold.");
-	displayShopInfo();
+	ui.drawShopWindow();
 }
 
 // Sells any obtained items back to the shop for 1/2 gold
@@ -480,7 +481,7 @@ Shell.commands['sell'] = function() {
 	active_shop.inventory.push(item);
 	player.gold += cost;
 	Terminal.print("You sell the " + item.name + " for " + cost + " gold.");
-	displayShopInfo();
+	ui.drawShopWindow();
 }
 
 Shell.commands['leave'] = Shell.commands['exit'] = function() {
@@ -507,14 +508,17 @@ Shell.commands['equip'] = function() {
 		return;
 	}
 	// Each body part can only have one equipped item; unattach current items before wielding
-	for (let i in player.wielding) {
-		if (player.wielding[i].type == player.inventory[selection_index].type) {
-			continue;
+	let new_item = player.inventory[selection_index];
+	player.wielding.forEach((item, index) => {
+		if (
+			(new_item.category == "weapon" && item.category == "weapon") ||
+			(new_item.base_item.region == item.base_item.region)
+		) {
+			let old_item = player.wielding.splice(index, 1).shift();
+			Terminal.print("You unequip the " + old_item.name + ".");
+			return;
 		}
-		let old_item = player.wielding.splice(i, 1).shift();
-		Terminal.print("You unequip the " + old_item.name + ".");
-		break;
-	}
+	});
 	player.wielding.push(player.inventory[selection_index]);
 	Terminal.print("You equip the " + player.inventory[selection_index].name + ".");
 	// Update the player stat window when appropriate
