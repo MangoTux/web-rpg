@@ -3,6 +3,7 @@ class Action { // lawsuit
   name;
   description;
   hooks = {};
+  required_properties = [];
   constructor(name, description, minimum_level) {
     this.name = name;
     this.description = description;
@@ -20,6 +21,7 @@ class Action { // lawsuit
 }
 
 class Attack extends Action {
+  attack_type = "power";
   damage = {};
   partial_damage = false;
   accuracy;
@@ -51,12 +53,23 @@ class Attack extends Action {
     this.target.list.push(target_uid);
   }
 
+  setAttackType(type) {
+    this.attack_type = type;
+  }
+
   hasMoreTargets() {
     return (this.target.list.length < this.target.count);
   }
 
   clearTargets() {
     this.target.list = [];
+  }
+
+  requireItemProperty(prop) {
+    if (!(prop instanceof Array)) {
+      prop = [ prop ];
+    }
+    this.required_properties = prop;
   }
 
   setDamageBounds(thresh_low, thresh_high) {
@@ -98,13 +111,26 @@ class Attack extends Action {
 
   cleanup() {}
 
-  getDamage() {
+  establishBasePower() {
+    let base_power;
     if (this.damage.type == "bounds") {
       let bounds = this.damage.range.map(i => typeof i === "function" ? i(this):i);
-      return getRandomInt(...bounds);
+      base_power = getRandomInt(...bounds);
     } else if (this.damage.type === "roll") {
-      return this.damage.roll(this);
+      base_power = this.damage.roll(this);
     }
+    this.base_power = base_power;
+  }
+
+  getDamage(resilience) {
+    let comp_src = (2*this.source.level + 10) / 250;
+    let attack_stat = this.source.get_stat(this.attack_type);
+    let comp_stat = attack_stat / resilience;
+
+    let modifier = 1.0;
+
+    let damage = (comp_src * comp_stat * this.base_power + 2) * modifier;
+    return Math.floor(damage.clamp(1, damage));
   }
 }
 

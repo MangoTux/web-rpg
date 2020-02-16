@@ -184,21 +184,22 @@ class Combat {
     let bundle = {};
     for (let hit_attempt = 0; hit_attempt < this.action.hit_count; hit_attempt++) {
       this.action.hook("onBeforeHit");
-      let hit_base_damage = this.action.getDamage();
+      this.action.establishBasePower();
       let received_damage = 0;
       this.action.target.list.forEach(uid => {
         if (typeof bundle[uid] === "undefined") {
           bundle[uid] = [];
         }
-        let applied_damage = 0;
+        let resilience = this.participants[uid].entity.get_stat("resilience");
+        let applied_damage = this.action.getDamage(resilience);
         if (this.action.doesHit()) {
           this.action.hook("onHit");
-          applied_damage = hit_base_damage;
+        } else if (this.action.damage.partial) {
+          this.action.hook("onPartial");
+          applied_damage = Math.floor(applied_damage * this.action.damage.partial);
         } else {
           this.action.hook("onMiss");
-          if (this.action.damage.partial) {
-            applied_damage = Math.floor(hit_base_damage * this.action.damage.partial);
-          }
+          return;
         }
         received_damage = this.participants[uid].entity.applyDamage(applied_damage);
         this.action.hook("onDamage");
@@ -245,6 +246,7 @@ class Combat {
       this.state = state.combat.plan;
       return;
     }
+
     this.npc_turn();
     setTimeout(() => {
       this.turn_timer();
