@@ -88,48 +88,53 @@ UI.prototype.drawStatsWindow = function() {
 }
 
 // Display the invPage-nth page of the Player's inventory
-UI.prototype.drawInventoryWindow = function(invPage) {
-  if (typeof invPage === "undefined") { invPage = 1; }
-  let display = "<h3>Player Inventory</h3>";
-  let invList = $('<ul>');
+UI.prototype.drawInventoryWindow = function(inv_page) {
+  if (typeof inv_page === "undefined") { inv_page = 1; }
+  let max_page = Math.ceil(player.inventory.length / 6);
+  if (inv_page >= max_page) { inv_page = max_page }
+  let display = "<h3>Player Inventory</h3><br>";
+  let inv_list = $('<ul>');
   if (player.inventory.length == 0) {
-    invList.append($("<li>").html("You've got nothing!"));
+    inv_list.append($("<li>").html("You've got nothing!"));
   }
   // Display 6 items per inventory page
-  let page_offset = (invPage-1)*5;
+  let page_offset = (inv_page-1)*5;
 	for (let i = 0; page_offset+i<player.inventory.length && i<6; i++) {
 		let page_index = page_offset+i;
-    invList.append($('<li>').html(player.inventory[page_index].name + "<br>   " + player.inventory[page_index].toString()));
+    inv_list.append($('<li>').html("<strong>"+player.inventory[page_index].name + "</strong><br>&nbsp;&nbsp;" + player.inventory[page_index].toString()));
 	}
-  display += invList[0].outerHTML;
+  display += inv_list[0].outerHTML;
+  display += `<br>Page ${inv_page} of ${max_page}`;
   $(Terminal.selector.hud_main).html(display);
 }
 
 // Display all items the user currently has equippedd
 UI.prototype.drawEquippedWindow = function() {
-  var equipList = $('<ul>');
-  var padding = "        ";
-  for (var i = 0; i<player.inventory.length; i++)
-  {
-    var equip_slots = {'Head':0, 'Neck':0, 'Chest':0, 'Arms':0, 'Legs':0, 'Feet':0, 'Weapon':0}
-    for (var i in equip_slots)
-    {
-      for (var j=0; j<player.wielding.length; j++)
-      {
-        if (player.wielding[j].type == i || player.wielding[j].type == 'Wield' && i == "Weapon")
-        {
-          equip_slots[i] = player.wielding[j];
-          continue;
-        }
-      }
-      let item_name = "<i>None</i>";
-      if (equip_slots[i]) {
-        item_name = equip_slots[i].name
-      }
-      equipList.append($('<li>').html(i + ":" + padding.substr(0, 8-i.length).replace(/ /g, '&nbsp;') + item_name));
+  let equip_list = $('<ul>');
+  let padding = "        ";
+  let equip_slots = {'Head': null, 'Neck': null, 'Chest': null, 'Arms': null, 'Legs': null, 'Feet': null, 'Weapon': null};
+  player.wielding.forEach(item => {
+    if (item.category == "weapon") {
+      equip_slots['Weapon'] = item;
+      return;
     }
-  }
-	$(Terminal.selector.hud_main).html("<h3>Equipped Items</h3><ul>" + equipList.html());
+    let region = "";
+    switch (item.base_item.region) {
+      case Item.region.head: region = 'Head'; break;
+      case Item.region.neck: region = 'Neck'; break;
+      case Item.region.chest: region = 'Chest'; break;
+      case Item.region.arms: region = 'Arms'; break;
+      case Item.region.legs: region = 'Legs'; break;
+      case Item.region.feet: region = 'Feet'; break;
+    }
+    equip_slots[region] = item;
+  });
+  Object.keys(equip_slots).forEach(key => {
+    let item_name = (equip_slots[key] === null) ? "<i>None</i>" : equip_slots[key].name;
+    let listing = key + ":" + padding.substr(0, 8-key.length).replace(/ /g, '&nbsp;') + item_name;
+    equip_list.append($('<li>').html(listing));
+  })
+	$(Terminal.selector.hud_main).html("<h3>Equipped Items</h3><ul>" + equip_list.html() + "</ul>");
 }
 
 UI.prototype.drawNpcDialogue = function() {
