@@ -21,7 +21,7 @@ class Action { // lawsuit
 }
 
 class Attack extends Action {
-  attack_type = "power";
+  attack_type = "power"; // The stat keying power
   damage = {};
   partial_damage = false;
   accuracy;
@@ -72,11 +72,18 @@ class Attack extends Action {
     this.required_properties = prop;
   }
 
+  setPowerFunction(func) {
+    this.damage.type = "function";
+    this.damage.function = func;
+  }
+
+  // Deprecated
   setDamageBounds(thresh_low, thresh_high) {
     this.damage.type = "bounds";
     this.damage.range = [thresh_low, thresh_high];
   }
 
+  // Deprecated
   setDamageRoll(calc) {
     this.damage.type = "roll";
     this.damage.roll = calc;
@@ -118,6 +125,8 @@ class Attack extends Action {
       base_power = getRandomInt(...bounds);
     } else if (this.damage.type === "roll") {
       base_power = this.damage.roll(this);
+    } else if (this.damage.type == "function") {
+      base_power = this.damage.function(this);
     }
     this.base_power = base_power;
   }

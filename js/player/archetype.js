@@ -8,6 +8,7 @@ class Archetype {
 	actions = [,
 		{ id: 'basic_punch', level: 1 }, // Accessible with ActionCatalog.catalog[id]
 	];
+	features = [];
 	// These are modifiers based on archetype, such as increasing number of attacks, damage reduction, passives, etc.
 	stat_base = {};
 
@@ -22,6 +23,7 @@ class Archetype {
 
 class Warrior extends Archetype {
 	name = "Warrior";
+	paragon_options = ["Champion", "Thief"];
 	weapons = [
 		'Sword',
 		'Axe',
@@ -42,11 +44,15 @@ class Warrior extends Archetype {
 		'Boots'
 	];
 	actions = [
-		{ id: 'basic_punch', level: 1 },
-		{ id: 'basic_stab', level: 1 },
-		{ id: 'basic_slash', level: 1 },
-		{ id: 'basic_crush', level: 1 }
+		{ id: 'basic_punch', level_min: 1 },
+		{ id: 'basic_stab', level_min: 1 },
+		{ id: 'basic_slash', level_min: 1 },
+		{ id: 'basic_crush', level_min: 1 },
 	];
+	features = [
+		{ id: 'minor_improved_weaponry', level_min: 6 },
+		{ id: 'major_improved_weaponry', level_min: 10 },
+	]
 	constructor() {
 		super();
 		this.stat_base = {
@@ -72,6 +78,7 @@ class Warrior extends Archetype {
 
 class Ranger extends Archetype {
 	name = "Ranger";
+	paragon_options = ["Hunter", "Druid"];
 	weapons = [
 		'Bow',
 		'Crossbow',
@@ -88,8 +95,14 @@ class Ranger extends Archetype {
 		'Boots'
 	];
 	actions = [
-		'basic_stab',
+		{ id: 'basic_punch', level_min: 1 },
+		{ id: 'basic_stab', level_min: 1 },
+		{ id: 'basic_slash', level_min: 1 },
+		{ id: 'basic_crush', level_min: 1 },
 	];
+	features = [
+		{ id: 'minor_improved_weaponry', level_min: 10 },
+	]
 	constructor() {
 		super();
 		this.stat_base = {
@@ -115,6 +128,7 @@ class Ranger extends Archetype {
 
 class Mage extends Archetype {
 	name = "Mage";
+	paragon_options = ["Elementalist", "Necromancer"];
 	weapons = [
 		'Staff',
 		'Wand',
@@ -132,8 +146,9 @@ class Mage extends Archetype {
 		'Boots'
 	];
 	actions = [
-		'basic_bolt',
-		'fireball',
+		{ id: 'basic_punch', level_min: 1 },
+		{ id: 'basic_bolt', level_min: 1 },
+		{ id: 'fireball', level: 5 },
 	];
 	constructor() {
 		super();
@@ -160,7 +175,7 @@ class Mage extends Archetype {
 
 class Monk extends Archetype {
 	name = "Monk";
-	// These should just be lists for the key values.
+	paragon_options = ["Priest", "Sage"];
 	weapons = [
 		'Boomerang',
 		'Claw',
@@ -177,9 +192,9 @@ class Monk extends Archetype {
 		'Boots'
 	];
 	actions = [
-		'basic_punch',
-		'basic_kick',
-		'flurry_of_blows',
+		{ id: 'basic_punch', level_min: 1 },
+		{ id: 'basic_kick', level_min: 1 },
+		{ id: 'flurry_of_blows', level: 5 },
 	];
 	constructor() {
 		super();

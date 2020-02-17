@@ -12,6 +12,7 @@ const Shell = class {
         case state.player.name: this.handler_name(cmd); return;
         case state.player.race: this.handler_race(cmd); return;
         case state.player.archetype: this.handler_archetype(cmd); return;
+        case state.player.paragon: this.handler_paragon(cmd); return;
         case state.player.combat: this.handler_combat(cmd); return;
       }
 
@@ -90,6 +91,22 @@ const Shell = class {
 
   static handler_paragon(paragon) {
     // TODO, once subarchetypes are built in.
+    paragon = paragon.charAt(0).toUpperCase() + paragon.slice(1);
+    if (!player.archetype.paragon_options.includes(paragon)) {
+      Terminal.print(`Choose one of the following paragons: [${player.archetype.paragon_options.join('/')}]`);
+      return;
+    }
+    switch (paragon) {
+      case Champion.name: player.assign_paragon(Champion); break;
+      case Thief.name: player.assign_paragon(Thief); break;
+      case Hunter.name: player.assign_paragon(Hunter); break;
+      case Druid.name: player.assign_paragon(Druid); break;
+      case Elementalist.name: player.assign_paragon(Elementalist); break;
+      case Necromancer.name: player.assign_paragon(Necromancer); break;
+      case Priest.name: player.assign_paragon(Priest); break;
+      case Sage.name: player.assign_paragon(Sage); break;
+    }
+    player.state = state.player.standard;
     player.finish_setup();
   }
 

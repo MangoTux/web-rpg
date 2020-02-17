@@ -8,6 +8,12 @@ class Player extends Sentient {
 
 	quest_handler = null;
 
+	level_map = {
+		stat_change: 7,
+		paragon: 12,
+		cap: 20,
+	};
+
 	constructor(name) {
 		super();
 		this.level = 1;
@@ -44,7 +50,9 @@ class Player extends Sentient {
 
 	get available_actions() {
 		let action_list = this.archetype.actions
-			.filter(action => this.level >= action.level)
+			.filter(action =>
+				this.level >= action.level_min && (typeof action.level_max === "undefined" || this.level <= action.level_max)
+			)
 			.filter(action => ActionCatalog.catalog[action.id].required_properties.every(prop =>
 				this.wielding.some(item => item.base_item.tags.includes(prop))
 		));
@@ -97,10 +105,10 @@ class Player extends Sentient {
 		while (this.experience_needed <= 0) {
 			this.increase_level();
 			response.push([`Congratulations! You're now level ${this.level}`]);
-			if (this.level == 16) {
+			if (this.level == this.level_map.paragon) {
 				this.state = state.player.paragon;
 				response.push([`You have mastered the basic skills of your archetype`]);
-				response.push([`Choose one of the following archetypes: <paragon_a> <paragon_b>`]);
+				response.push([`Choose one of the following paragons: [${player.archetype.paragon_options.join('/')}]`]);
 			}
 		}
 		return response;
@@ -108,11 +116,13 @@ class Player extends Sentient {
 
 	increase_level() {
 		this.level++;
+		if (this.level == this.level_map.stat_change) {
+			this.base_combat_stats = this.archetype.stat_base.mid;
+		}
 		this.hp.max = this.get_stat("vitality");
 		this.hp.now = this.hp.max;
 		this.gold += this.level * 25;
-		// TODO
-		// Gain gold equal to 50 * level
+
 	}
 
 	hasWaterTravel() {
