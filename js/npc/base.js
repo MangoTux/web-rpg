@@ -105,4 +105,28 @@ class Sentient {
     this.hp.now = this.hp.now.clamp(0, this.hp.max);
     return start_hp - (this.hp.buffer + this.hp.now);
   }
+
+  // Aggregate features from all sources
+  getFeatures() {
+    let features = [];
+    if (typeof this.features !== "undefined" && this.features !== null) {
+      features = features.concat(this.features)
+    }
+    for (let key of ["race", "archetype", "paragon"]) {
+      if (typeof this[key] !== "undefined" && this[key] !== null
+      && typeof this[key].features !== "undefined" && this[key].features !== null) {
+        features = features.concat(this[key].features);
+      }
+    }
+    return features;
+  }
+
+  hasFeatureActive(feat) {
+    let candidates = this.getFeatures()
+      .filter(f => this.level >= f.level_min)
+      .filter(f => (typeof f.level_max === "undefined" || this.level <= f.level_max))
+      .filter(f => f.id == feat)
+
+    return candidates.length > 0;
+  }
 }

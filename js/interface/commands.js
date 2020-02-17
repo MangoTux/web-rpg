@@ -14,10 +14,11 @@ Shell.commands['debug'] = function() {
 	player.state = state.player.standard;
 	player.name = "Mango";
 	environment.load_map(player.name);
-	player.assign_race(Dwarf);
-	player.assign_archetype(Warrior);
+	player.assign_race(Elf);
+	player.assign_archetype(Ranger);
+	player.increase_experience(41667).forEach(resp => { Terminal.print(resp) });
 	player.finish_setup();
-	let encounter_count = Terminal.processArgs(arguments);
+	//let encounter_count = Terminal.processArgs(arguments);
 
 	for (let i = 0; i<10; i++) {
 		player.inventory.push(ItemFactory.getRandomEquipment());
