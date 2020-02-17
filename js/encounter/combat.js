@@ -254,9 +254,20 @@ class Combat {
   }
 
   updateInitiative() {
-    // TODO Stat reliance
     this.initiative = [];
-    Object.keys(this.participants).forEach(uid => this.initiative.push(uid));
+    let init_template = [];
+    Object.keys(this.participants).forEach(uid => {
+      let dexterity = this.participants[uid].entity.get_stat("dexterity");
+      // Creatures with thresholds of AC get more actions each round.
+      do {
+        init_template.push({ uid: uid, value: getRandomInt(0, 100) / Math.min(dexterity, 100) });
+        dexterity -= 100;
+      } while (dexterity >= 0);
+    });
+    init_template.sort((a, b) => a.value - b.value);
+    init_template.forEach(record => {
+      this.initiative.push(record.uid);
+    });
     this.turn_count = 0;
   }
 
