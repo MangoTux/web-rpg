@@ -34,7 +34,7 @@ class Tool extends Item {
 		this.cost = Math.floor(this.cost);
 	}
 
-	toString() { super.toString(); }
+	toString() { return this.base_item.description; }
 }
 
 class Equipment extends Item {
@@ -89,7 +89,21 @@ class Equipment extends Item {
 	}
 
 	// Each stat change
-	toString() { super.toString(); }
+	toString() {
+		let string = `${this.id};&nbsp;`;
+		let change_list = [];
+		Object.keys(this.stat_changes).forEach(key => {
+			if (this.stat_changes[key] == 0) { return; }
+			let change = `${key}: `;
+			if (this.stat_changes[key] > 0) {
+				change += `+${this.stat_changes[key]}`;
+			} else {
+				change += `${this.stat_changes[key]}`;
+			}
+			change_list.push(change);
+		});
+		return string + change_list.join(';&nbsp;');
+	}
 }
 
 class Armor extends Equipment {
@@ -108,7 +122,9 @@ class Armor extends Equipment {
 		this.cost = Math.floor(this.cost);
 	}
 
-	toString() { return this.id; }
+	toString() {
+		return super.toString();
+	}
 }
 
 class Weapon extends Equipment {
@@ -127,7 +143,7 @@ class Weapon extends Equipment {
 		this.cost = Math.floor(this.cost);
 	}
 
-	toString() { return this.id; }
+	toString() { return super.toString(); }
 }
 
 class Consumable extends Item {
@@ -314,6 +330,7 @@ const weapon_list = {
 	},
 	'Crossbow': {
 		tags: ['ranged', '1h'],
+		variants: ['Crossbow'],
 		stats: {
 			boost: [
 				{stat: 'dexterity', chance: 90, value: () => getRandomInt(10, 20)},
@@ -797,6 +814,7 @@ const consumable_list = {
 }
 const tool_list = {
 	'Boat': {
+		description: "Used for travelling on water",
 		tags: ['waterTravel'],
 		variants: ['Boat', 'Raft', 'Canoe', 'Sailboat'],
 	},
