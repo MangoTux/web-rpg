@@ -48,6 +48,7 @@ class Warrior extends Archetype {
 		{ id: 'basic_stab', level_min: 1 },
 		{ id: 'basic_slash', level_min: 1 },
 		{ id: 'basic_crush', level_min: 1 },
+		{ id: 'frenzy', level_min: 1 },
 	];
 	features = [
 		{ id: 'minor_improved_weaponry', level_min: 6 },
@@ -103,7 +104,6 @@ class Ranger extends Archetype {
 	];
 	features = [
 		{ id: 'minor_improved_weaponry', level_min: 10 },
-		{ id: 'improved_companion', level_min: 9 }, // This will probably need some reshuffling - Maybe Druid has this?
 	]
 	constructor() {
 		super();
@@ -150,7 +150,7 @@ class Mage extends Archetype {
 	actions = [
 		{ id: 'basic_punch', level_min: 1 },
 		{ id: 'basic_bolt', level_min: 1 },
-		{ id: 'fireball', level_min: 5 },
+		{ id: 'cinder_sweep', level_min: 5 },
 	];
 	constructor() {
 		super();

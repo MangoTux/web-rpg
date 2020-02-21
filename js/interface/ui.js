@@ -99,10 +99,11 @@ UI.prototype.drawInventoryWindow = function(inv_page) {
   }
   // Display 6 items per inventory page
   let page_offset = (inv_page-1)*5;
-	for (let i = 0; page_offset+i<player.inventory.length && i<6; i++) {
-		let page_index = page_offset+i;
+  player.inventory.forEach((item, index) => {
+    if (index < page_offset || index >= page_offset + 6) { return; }
+    let page_index = page_offset+i;
     inv_list.append($('<li>').html("<strong>"+player.inventory[page_index].name + "</strong><br>&nbsp;&nbsp;" + player.inventory[page_index].toString()));
-	}
+  });
   display += inv_list[0].outerHTML;
   display += `<br>Page ${inv_page} of ${max_page}`;
   $(Terminal.selector.hud_main).html(display);

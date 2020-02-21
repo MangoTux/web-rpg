@@ -6,13 +6,25 @@ class Action { // lawsuit
   required_properties = [];
   source;
   text;
+  combat_quota;
+
   constructor(name, description) {
     this.name = name;
     this.description = description;
+    this.combat_quota = null;
   }
 
   setSource(source) {
     this.source = source;
+  }
+
+  setUseCount(count) {
+    this.combat_quota = count;
+  }
+
+  get use_count() {
+    if (typeof this.combat_quota === "function") { return this.combat_quota(this); }
+    return this.combat_quota;
   }
 
   registerHook(hook, callback) {
@@ -174,12 +186,6 @@ class Attack extends Action {
 class Ability extends Action {
   constructor(name, description) {
     super(name, description);
-  }
-
-  combat_quota;
-
-  setUseCount(count) {
-    this.combat_quota = count;
   }
 
   setBehavior(callback) {
