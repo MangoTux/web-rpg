@@ -174,6 +174,12 @@ const Shell = class {
     let action = ActionCatalog.catalog[action_id];
     environment.encounter.combat.setAction(action);
 
+    if (action.constructor.name !== "Attack") {
+      environment.encounter.combat.resolveAction();
+      environment.encounter.combat.setPlayerIdle();
+      return;
+    }
+    
     if (environment.encounter.combat.enemy_list.length <= environment.encounter.combat.action.target.count) {
       environment.encounter.combat.enemy_list.forEach(npc => {
         environment.encounter.combat.addTarget(npc.uid);
