@@ -148,7 +148,7 @@ class Mage extends Archetype {
 	actions = [
 		{ id: 'basic_punch', level_min: 1 },
 		{ id: 'basic_bolt', level_min: 1 },
-		{ id: 'fireball', level: 5 },
+		{ id: 'fireball', level_min: 5 },
 	];
 	constructor() {
 		super();
