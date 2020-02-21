@@ -86,11 +86,11 @@ ActionCatalog.catalog['flurry_of_blows'].registerHook(
   (scope) => { if (scope.hit_counter == scope.hit_count) { console.log("Knock the target prone"); }}
 );
 
-ActionCatalog.catalog['fireball'] = new Attack("Fireball", "A large ball of fire");
-ActionCatalog.catalog['fireball'].setAccuracy(0.7);
-ActionCatalog.catalog['fireball'].allowPartialDamage(0.5);
-ActionCatalog.catalog['fireball'].setTargetCount(5);
-ActionCatalog.catalog['fireball'].setDamageRoll(
+ActionCatalog.catalog['cinder_sweep'] = new Attack("Fireball", "A large ball of fire");
+ActionCatalog.catalog['cinder_sweep'].setAccuracy(0.7);
+ActionCatalog.catalog['cinder_sweep'].allowPartialDamage(0.5);
+ActionCatalog.catalog['cinder_sweep'].setTargetCount(5);
+ActionCatalog.catalog['cinder_sweep'].setDamageRoll(
   (scope) => { let total = 0; for (let i=0; i<8; i++) { total += getRandomInt(1, 6); } return total; }
 );
 
@@ -130,10 +130,25 @@ ActionCatalog.catalog['summon_companion'].setBehavior((scope) => {
     side: side,
     entity: companion,
     active_effects: [],
+    move_quota: {},
   };
   if (side == "ally") {
     environment.encounter.combat.ally_list.push(companion);
   } else {
     environment.encounter.combat.enemy_list.push(companion);
+  }
+});
+
+ActionCatalog.catalog['arcane_ward'] = new Ability("Arcane Ward", "Create a shield that absorbs damage");
+ActionCatalog.catalog['arcane_ward'].setUseCount((scope) => Math.ceil(scope.source.level/10));
+ActionCatalog.catalog['arcane_ward'].setBehavior((scope) => {
+  let buffer = 20; // Grants a 20-hp buffer
+  // Future notes: Elementalist may have a damage return - something about an active effect later on?
+  if (scope.source.hp.buffer > 0) {
+    scope.text = "You revitalize your buffer!";
+    scope.source.buffer += 10;
+  } else {
+    scope.text = "You summon a defensive aura!";
+    scope.source.buffer = buffer;
   }
 });

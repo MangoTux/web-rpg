@@ -16,6 +16,9 @@ class Paragon {
 class Champion extends Paragon {
   name = "Champion";
   archetype_source = "Warrior";
+  features = [
+    { id: 'master_improved_weaponry', level_min: 13 },
+  ];
   stat_base = {
     power: 155,
     vitality: 100,
@@ -28,6 +31,7 @@ class Champion extends Paragon {
 class Thief extends Paragon {
   name = "Thief";
   archetype_source = "Warrior";
+  features = [];
   stat_base = {
     power: 100,
     vitality: 55,
@@ -41,6 +45,7 @@ class Thief extends Paragon {
 class Hunter extends Paragon {
   name = "Champion";
   archetype_source = "Ranger";
+  features = [];
   stat_base = {
     power: 85,
     vitality: 45,
@@ -53,6 +58,9 @@ class Hunter extends Paragon {
 class Druid extends Paragon {
   name = "Champion";
   archetype_source = "Ranger";
+  features = [
+		{ id: 'improved_companion', level_min: 13 },
+  ];
   stat_base = {
     power: 80,
     vitality: 50,

@@ -24,6 +24,7 @@ class Combat {
       side: "ally",
       entity: player,
       active_effects: [],
+      move_quota: {},
     };
     // The combat-specific player state. Idle until it reaches their turn.
     this.state = state.combat.idle;
@@ -38,6 +39,7 @@ class Combat {
         side: "enemy",
         entity: npc,
         active_effects: [],
+        move_quota: {},
       };
     });
   }
@@ -236,6 +238,8 @@ class Combat {
       case "Ability": await this.resolveAbility(); break;
       default: throw new Exception(`Unknown action ${this.action.constructor.name}!`);
     }
+    // Increase move quota
+    this.participants[this.active_entity.uid].move_quota[this.action.name] = ++this.participants[this.active_entity.uid].move_quota[this.action.name] || 1;
     this.action.hook("onEnd");
     this.action.cleanup();
   }
