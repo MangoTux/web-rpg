@@ -109,9 +109,13 @@ class Combat {
       return;
     }
     this._turn_start();
-    // This enemy and ally list is from the perspective of
+    let side_lists = [this.enemy_list, this.ally_list];
+    if (this.participants[this.active_entity.uid].side == "ally") {
+      side_lists.reverse();
+    }
+
     this.active_entity.ai
-      .withParticipants(this.enemy_list, this.ally_list);
+      .withParticipants(...side_lists);
     let plan = this.active_entity.ai.getPlan();
     if (plan.plan == 'item') {
       this.resolveItem(plan.item_id);
@@ -220,14 +224,16 @@ class Combat {
   }
 
   async resolveAbility() {
-
+    this.action.resolve();
+    Terminal.print(this.action.text);
+    this.updateDisplay();
   }
 
   async resolveAction() {
     this.action.hook("onStart");
     switch (this.action.constructor.name) {
       case "Attack": await this.resolveAttack(); break;
-      case "Ability": await this.resolveAttack(); break;
+      case "Ability": await this.resolveAbility(); break;
       default: throw new Exception(`Unknown action ${this.action.constructor.name}!`);
     }
     this.action.hook("onEnd");

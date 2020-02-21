@@ -112,6 +112,22 @@ class DefectAI extends AI {
   }
 }
 
+class LoyalAI extends AI {
+  constructor(scope) {
+    super(scope);
+  }
+
+  getPlan() {
+    // Ideally, the goal would be to have an 'interpose' plan,
+    // and assign this AI as a follower, doing what they do usually.
+    return {
+      plan: 'attack',
+      target_id: randomChoice(this.enemies).uid,
+      action_id: randomChoice(this.scope.actions)
+    };
+  }
+}
+
 class AI_Factory {
   static generate(npc) {
     // Should really implement weightedRandom

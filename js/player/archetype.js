@@ -99,9 +99,11 @@ class Ranger extends Archetype {
 		{ id: 'basic_stab', level_min: 1 },
 		{ id: 'basic_slash', level_min: 1 },
 		{ id: 'basic_crush', level_min: 1 },
+		{ id: 'summon_companion', level_min: 5},
 	];
 	features = [
 		{ id: 'minor_improved_weaponry', level_min: 10 },
+		{ id: 'improved_companion', level_min: 9 }, // This will probably need some reshuffling - Maybe Druid has this?
 	]
 	constructor() {
 		super();
