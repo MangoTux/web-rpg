@@ -7,7 +7,7 @@ class AI {
   }
 
   withParticipants(allies, enemies) {
-    this.allies = allies;
+    this.allies = allies.filter(npc => npc.uid != this.scope.uid);
     this.enemies = enemies;
     return this;
   }
@@ -100,8 +100,9 @@ class DefectAI extends AI {
   }
 
   getPlan() {
-    // The higher the sabotage level, the more likely to defect
-    if (Math.random() < this.sabotage_level) {
+    // The higher the sabotage level, the more likely to defect.
+    // Doesn't defect if it's the only one left.
+    if (this.allies.length && Math.random() < this.sabotage_level) {
       this.current_sabotage = this.sabotage_level;
       return { plan: 'defect' };
     }
