@@ -15,8 +15,8 @@ Shell.commands['debug'] = function() {
 	player.name = "Mango";
 	environment.load_map(player.name);
 	player.assign_race(Dwarf);
-	player.assign_archetype(Ranger);
-	player.increase_experience(5000).forEach(resp => { Terminal.print(resp) });
+	player.assign_archetype(Warrior);
+	//player.increase_experience(5000).forEach(resp => { Terminal.print(resp) });
 	player.finish_setup();
 	let encounter_count = Terminal.processArgs(arguments);
 

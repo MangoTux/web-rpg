@@ -55,7 +55,14 @@ class Player extends Sentient {
 			)
 			.filter(action => ActionCatalog.catalog[action.id].required_properties.every(prop =>
 				this.wielding.some(item => item.base_item.tags.includes(prop))
-		));
+			))
+			.filter(action => {
+				let name = ActionCatalog.catalog[action.id].name;
+				if (!(environment.encounter && environment.encounter.combat && environment.encounter.combat.participants[this.uid].move_quota)) { return true; }
+				if (typeof environment.encounter.combat.participants[this.uid].move_quota[name] === "undefined") { return true; }
+				if (ActionCatalog.catalog[action.id].use_count == null) { return true; }
+				return environment.encounter.combat.participants[this.uid].move_quota[name] < ActionCatalog.catalog[action.id].use_count;
+			});
 		return action_list;
 	}
 
