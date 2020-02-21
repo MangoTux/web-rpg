@@ -4,9 +4,15 @@ class Action { // lawsuit
   description;
   hooks = {};
   required_properties = [];
+  source;
+  text;
   constructor(name, description) {
     this.name = name;
     this.description = description;
+  }
+
+  setSource(source) {
+    this.source = source;
   }
 
   registerHook(hook, callback) {
@@ -17,6 +23,8 @@ class Action { // lawsuit
     if (typeof this.hooks[target] !== "function") { return; }
     this.hooks[target](this);
   }
+
+  cleanup() {}
 }
 
 class Attack extends Action {
@@ -25,7 +33,6 @@ class Attack extends Action {
   partial_damage = false;
   accuracy;
   hit_count;
-  source;
   target;
 
   constructor(name, description) {
@@ -43,7 +50,7 @@ class Attack extends Action {
   }
 
   setSource(source) {
-    this.source = source;
+    super.setSource(source);
     this.target.list = [];
   }
 
@@ -119,8 +126,6 @@ class Attack extends Action {
     return Math.random() <= this.accuracy.current;
   }
 
-  cleanup() {}
-
   establishBasePower() {
     let base_power;
     if (this.damage.type == "bounds") {
@@ -171,7 +176,19 @@ class Ability extends Action {
     super(name, description);
   }
 
-  // Not sure what accessory functions should be used; this is a general-purpose.
+  combat_quota;
+
+  setUseCount(count) {
+    this.combat_quota = count;
+  }
+
+  setBehavior(callback) {
+    this.resolve_function = callback;
+  }
+
+  resolve() {
+    this.resolve_function(this);
+  }
 }
 
 class ActionCatalog {

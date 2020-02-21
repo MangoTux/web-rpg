@@ -34,6 +34,14 @@ class NPC extends Sentient {
     }
   }
 
+  generateFromSummon(source) {
+    this.level = source.level;
+    this.actions = npc_list[this.id].actions;
+    this.base_combat_stats = npc_list[this.id].stats;
+    this.hp.max = this.get_stat("vitality");
+    this.hp.now = this.hp.max;
+  }
+
   mutate() {
     // Find a random npc modifier
     // Update name and all stats to reflect the big lug
@@ -215,5 +223,17 @@ const npc_list = {
       spirit: 30,
       luck: 0,
     }
-	}
+	},
+  "Familiar": {
+    description:"A natural spirit in beast form",
+    actions: ["bite"],
+    stats: {
+      power: 60,
+      vitality: 20,
+      resilience: 30,
+      dexterity: 50,
+      spirit: 5,
+      luck: 0
+    },
+  }
 };

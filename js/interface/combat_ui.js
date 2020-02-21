@@ -223,7 +223,10 @@ class Combat_UI {
   static drawDamage(uid, bundle) {
     const damage_time = getRandomInt(800, 1200);
     const hp_shake_time = getRandomInt(450, 550);
-    const text = `<br><b class='combat__damage'>-${bundle.damage}</b>`;
+    let text = `<br><b class='combat__damage'>-${bundle.damage}</b>`;
+    if (typeof bundle.critical !== "undefined") {
+      text = `<br><b class='combat__damage'>${bundle.critical}</b>` + text;
+    }
     $(`#${uid} .participant_delta`)
     .html(text)
     .show()
