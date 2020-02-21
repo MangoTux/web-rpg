@@ -93,3 +93,47 @@ ActionCatalog.catalog['fireball'].setTargetCount(5);
 ActionCatalog.catalog['fireball'].setDamageRoll(
   (scope) => { let total = 0; for (let i=0; i<8; i++) { total += getRandomInt(1, 6); } return total; }
 );
+
+ActionCatalog.catalog['frenzy'] = new Ability("Frenzy", "Take two actions");
+ActionCatalog.catalog['frenzy'].setUseCount((scope) => { return Math.ceil(scope.source.level / 10) });
+ActionCatalog.catalog['frenzy'].setBehavior((scope) => {
+  // Push self uid twice at the front of initiative.
+  scope.text = "You summon up a reserve of energy to take additional actions!";
+  environment.encounter.combat.initiative.unshift(scope.source.uid);
+  environment.encounter.combat.initiative.unshift(scope.source.uid);
+});
+
+ActionCatalog.catalog['summon_companion'] = new Ability("Summon Companion", "Summon a familiar to aid you");
+ActionCatalog.catalog['summon_companion'].setUseCount((scope) => Math.ceil(scope.source.level / 10));
+ActionCatalog.catalog['summon_companion'].setBehavior((scope) => {
+  let side = environment.encounter.combat.participants[scope.source.uid].side;
+  let companion = new NPC("Familiar");
+  companion.name = `${scope.source.name}\'s Familiar`;
+  companion.uid = `${scope.source.uid}_companion`;
+  companion.ai = new LoyalAI(companion);
+
+  companion.base_combat_stats.power = Math.floor(2 * scope.source.get_stat("power") / 3);
+  companion.base_combat_stats.dexterity = Math.floor(2 * scope.source.get_stat("dexterity") / 3);
+  if (scope.source.hasFeatureActive('improved_companion')) {
+    companion.hp.buffer = 20;
+    companion.base_combat_stats.power = scope.source.get_stat("power");
+    companion.base_combat_stats.dexterity = scope.source.get_stat("dexterity");
+  }
+  // Restore the familiar if it already exists
+  if (typeof environment.encounter.combat.participants[companion.uid] !== "undefined") {
+    environment.encounter.combat.participants[companion.uid].entity = companion;
+    scope.text = "You revitalize your familiar!";
+    return;
+  }
+  scope.text = "You call a familiar to your aid!";
+  environment.encounter.combat.participants[companion.uid] = {
+    side: side,
+    entity: companion,
+    active_effects: [],
+  };
+  if (side == "ally") {
+    environment.encounter.combat.ally_list.push(companion);
+  } else {
+    environment.encounter.combat.enemy_list.push(companion);
+  }
+});
