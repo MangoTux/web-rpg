@@ -15,18 +15,18 @@ Shell.commands['debug'] = function() {
 	player.name = "Mango";
 	environment.load_map(player.name);
 	player.assign_race(Elf);
-	player.assign_archetype(Ranger);
-	player.increase_experience(41667).forEach(resp => { Terminal.print(resp) });
+	player.assign_archetype(Mage);
+	player.increase_experience(5000).forEach(resp => { Terminal.print(resp) });
 	player.finish_setup();
-	//let encounter_count = Terminal.processArgs(arguments);
+	let encounter_count = Terminal.processArgs(arguments);
 
 	for (let i = 0; i<10; i++) {
 		player.inventory.push(ItemFactory.getRandomEquipment());
 		player.inventory.push(ItemFactory.getRandomConsumable());
 	}
 
-	// environment.createWildEncounter(encounter_count);
-	// environment.encounter.startCombat();
+	environment.createWildEncounter(encounter_count);
+	environment.encounter.startCombat();
 }
 
 //Create player data.
@@ -106,7 +106,7 @@ const advance = function(direction, response) {
 //Used for movement around map.
 //Occasionally on move, an npc should be created.
 Shell.commands['go'] = function() {
-	if (player.state != state.player.standard) {
+	if (!([state.player.standard, state.player.underground].includes(player.state))) {
 		Terminal.print("You can't go anywhere right now!");
 		return;
 	}
@@ -126,7 +126,7 @@ Shell.commands['go'] = function() {
 	if (direction === 'down') {
 		if (player.state == state.player.underground) {
 			Terminal.print(randomChoice(["Sorry, it's all up from here.", "Wow, bedrock already? Guess you're gonna have to turn around.", "Careful! You'll anger the mole people!", "No."]));
-		} else if (map.getTile(...player.position).type == "W") {
+		} else if (environment.map.getTile(player.position).type == "W") {
 			Terminal.print("You can't swim!");
 		} else {
 			Terminal.print("You start digging down. It is dark down here.");
@@ -144,7 +144,7 @@ Shell.commands['go'] = function() {
 	}
 	if (['right', 'left'].includes(direction)) {
 		Terminal.print(`My ${direction} or your ${direction}?`);
-		this.state = (direction === 'right' ? state.terminal.direction_right : state.terminal.direction_left);
+		this.state = (direction === 'right' ? state.shell.direction_right : state.shell.direction_left);
 		return;
 	}
 
@@ -187,13 +187,13 @@ Shell.commands['my'] = function() {
 
 	if (
 		!['left', 'right'].includes(direction) ||
-		![state.terminal.direction_left, state.terminal.direction_right].includes(this.state)
+		![state.shell.direction_left, state.shell.direction_right].includes(this.state)
 	) {
 		Terminal.print("What?");
 		return;
 	}
-	if ((this.state == state.terminal.direction_right && direction == "left") ||
-		(this.state == state.terminal.direction_left && direction == "right")) {
+	if ((this.state == state.shell.direction_right && direction == "left") ||
+		(this.state == state.shell.direction_left && direction == "right")) {
 		Terminal.print("That's not what you said before.");
 		return;
 	}
@@ -201,7 +201,7 @@ Shell.commands['my'] = function() {
 		.map(v => v*((direction==="left" && player.previous_direction[1]) ? -1 : 1))
 		.map(v => v*((direction==="right" && player.previous_direction[0]) ? -1 : 1));
 	// Fun has been had, back to serious business
-	this.state = state.terminal.standard;
+	this.state = state.shell.standard;
 	advance(delta, `You head to your ${direction}.`);
 }
 
@@ -209,13 +209,13 @@ Shell.commands['my'] = function() {
 Shell.commands['your'] = function() {
 	let direction = Terminal.processArgs(arguments);
 	if (
-		(direction == 'left' && this.state == state.terminal.direction_left) ||
-		(direction == 'right' && this.state == state.terminal.direction_right)) {
+		(direction == 'left' && this.state == state.shell.direction_left) ||
+		(direction == 'right' && this.state == state.shell.direction_right)) {
 		Terminal.print('I\'m a computer. I have no sense of direction.');
 	}	else {
 		Terminal.print('What?');
 	}
-	this.state = state.terminal.standard;
+	this.state = state.shell.standard;
 }
 
 //Resets player to full health

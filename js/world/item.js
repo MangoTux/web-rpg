@@ -611,7 +611,7 @@ const armor_list = {
 			],
 			lower: [ // Cursed Rings as a trope
 				{stat: 'resilience', chance: 15, value: () => getRandomInt(15, 30)},
-				{stat: 'power', chance: 15, value: () => getRandomint(15, 30)},
+				{stat: 'power', chance: 15, value: () => getRandomInt(15, 30)},
 				{stat: 'dexterity', chance: 15, value: () => getRandomInt(15, 30)},
 				{stat: 'vitality', chance: 10, value: () => getRandomInt(15, 30)},
 				{stat: 'spirit', chance: 15, value: () => getRandomInt(15, 30)},
