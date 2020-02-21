@@ -177,8 +177,7 @@ class Combat {
     Combat_UI.drawEffects(bundle);
   }
 
-  async resolveAction() {
-    this.action.hook("onStart");
+  async resolveAttack() {
     Terminal.print(this._target_string);
     // Most attacks will target a single creature
     let bundle = {};
@@ -196,20 +195,41 @@ class Combat {
           this.action.hook("onHit");
         } else if (this.action.damage.partial) {
           this.action.hook("onPartial");
-          applied_damage = Math.floor(applied_damage * this.action.damage.partial);
+          applied_damage = applied_damage * this.action.damage.partial;
         } else {
           this.action.hook("onMiss");
           return;
         }
-        received_damage = this.participants[uid].entity.applyDamage(applied_damage);
+        let critical = this.action.getCritical();
+        let target_payload = { damage: 0 };
+        if (critical) {
+          this.action.hook("onCrit");
+          applied_damage *= critical.multiplier;
+          target_payload.critical = critical.text;
+        }
+        applied_damage = Math.floor(applied_damage);
+        target_payload.damage = this.participants[uid].entity.applyDamage(applied_damage);
         this.action.hook("onDamage");
-        bundle[uid].push({damage: received_damage});
+        bundle[uid].push(target_payload);
       });
     }
     await Combat_UI.drawEffects(bundle);
     this.updateDisplay();
     let death_list = this.action.target.list.filter(uid => !this.participants[uid].entity.hp.now);
     death_list.length && this.resolveDeath(death_list);
+  }
+
+  async resolveAbility() {
+
+  }
+
+  async resolveAction() {
+    this.action.hook("onStart");
+    switch (this.action.constructor.name) {
+      case "Attack": await this.resolveAttack(); break;
+      case "Ability": await this.resolveAttack(); break;
+      default: throw new Exception(`Unknown action ${this.action.constructor.name}!`);
+    }
     this.action.hook("onEnd");
     this.action.cleanup();
   }

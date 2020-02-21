@@ -4,10 +4,9 @@ class Action { // lawsuit
   description;
   hooks = {};
   required_properties = [];
-  constructor(name, description, minimum_level) {
+  constructor(name, description) {
     this.name = name;
     this.description = description;
-    this.minimum_level = minimum_level;
   }
 
   registerHook(hook, callback) {
@@ -29,13 +28,17 @@ class Attack extends Action {
   source;
   target;
 
-  constructor(name, description, minimum_level) {
-    super(name, description, minimum_level);
+  constructor(name, description) {
+    super(name, description);
 
     this.hit_count = 1;
     this.target = {
       count: 1,
       list: [],
+    };
+    this.critical_modifier = {
+      base: 0,
+      current: 0,
     };
   }
 
@@ -131,7 +134,26 @@ class Attack extends Action {
     this.base_power = base_power;
   }
 
+  getCritical() {
+    /*
+    // Roll 3d100 and accumulate for each value under this.source.getStat("luck").
+    */
+    let accumulator = 0;
+    for (let i=0; i<3; i++) {
+      if (getRandomInt(1, 100) < (this.source.get_stat("luck") + this.critical_modifier.current)) {
+        accumulator++;
+      }
+    }
+    switch (accumulator) {
+      case 1: return {text: "Critical!", multiplier: 1.5};
+      case 2: return {text: "Double Crit!", multiplier: 2};
+      case 3: return {text: "Triple Crit!", multiplier: 3};
+    }
+    return false;
+  }
+
   getDamage(resilience) {
+    // TODO Crit details
     let comp_src = (2*this.source.level + 10) / 250;
     let attack_stat = this.source.get_stat(this.attack_type);
     let comp_stat = attack_stat / resilience;
@@ -144,10 +166,12 @@ class Attack extends Action {
 }
 
 // One-per-encounter actions
-class Power extends Action {
+class Ability extends Action {
   constructor(name, description) {
     super(name, description);
   }
+
+  // Not sure what accessory functions should be used; this is a general-purpose.
 }
 
 class ActionCatalog {
