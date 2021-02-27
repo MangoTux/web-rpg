@@ -1,6 +1,6 @@
 const basic_attack_multiplier = (scope) => {
-  if (scope.source.hasFeatureActive('master_improved_weaponry')) { return 6; }
-  if (scope.source.hasFeatureActive('major_improved_weaponry')) { return 4; }
+  if (scope.source.hasFeatureActive('master_improved_weaponry')) { return 4; }
+  if (scope.source.hasFeatureActive('major_improved_weaponry')) { return 3; }
   if (scope.source.hasFeatureActive('minor_improved_weaponry')) { return 2; }
   return 1;
 }
